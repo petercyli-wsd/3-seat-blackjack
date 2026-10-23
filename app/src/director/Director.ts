@@ -11,6 +11,8 @@ import type { Mode, RoundRecord, SeatStatus, Store } from "./store";
 
 export const DECISION_SECONDS: Record<Mode, number> = { speed: 7, regular: 14 };
 const DEFAULT_BET = 10;
+/** Frames after the last pickup of a discard before the table counts as clear (the scene's plate fade-out). */
+const CLEARED_FRAMES = 6;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 type Decision = "hit" | "stand";
@@ -340,7 +342,10 @@ export class Director {
     await this.cutTo(discard, { patience: 2.5 });
     this.guard(epoch);
     void this.follow(clipName.idle(this.mask), true);
-    await this.player.whenEnded(discard);
+    // Betting reopens once the last card is in the tray (and its plate has faded), not at the
+    // clip's end: the 2-5 s after that are her squaring the tray, and a Deal can cut them short.
+    const dc = this.m.clips[discard];
+    await this.player.whenFrame(discard, Math.min(dc.frames - 1, Math.max(0, ...dc.cards.map((c) => c.out)) + CLEARED_FRAMES));
     this.guard(epoch);
     this.view.seats = { seat1: [], seat2: [], seat3: [] };
     this.view.dealer = [];
