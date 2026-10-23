@@ -78,6 +78,8 @@ export async function bootTable(canvas: HTMLCanvasElement, host: HTMLElement, st
     }
   };
   raf = requestAnimationFrame(loop);
+  // browser checks (scripts/probe.mjs) read the live table through this
+  if (import.meta.env.DEV) Object.assign(window, { __table: { store, director, player, scene } });
   await director.open();
   return {
     store,
