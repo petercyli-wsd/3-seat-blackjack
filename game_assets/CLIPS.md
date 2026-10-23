@@ -6,25 +6,27 @@ Seat masks read left to right as seen on screen: `101` = seats 1 and 3 taken, se
 The dealer deals and plays seats right to left (seat 3 first).
 
 Every *wait*, *hold* and *idle* clip also has a ping-pong loop in `loops/` (forward then
-reversed, so it can run for any decision time without a visible jump).
+reversed, so it can run for any decision time without a visible jump). An idle's loop covers
+only its calm stretch (in → out given in the Loop column), so she isn't seen fiddling with the
+discard tray while bets are open.
 
 ## Part 1 — starting hands, one cycle per seat combination
 
 | Clip | Shows | Source in → out | Length | Loop |
 |---|---|---|---|---|
-| `clips/starting_hands/opening_idle.mp4` | empty table, betting loop | 0:00.00 → 0:03.96 | 3.96s | `loops/opening_idle_loop.mp4` |
+| `clips/starting_hands/opening_idle.mp4` | empty table, betting loop | 0:00.00 → 0:03.96 | 3.96s | `loops/opening_idle_loop.mp4` (0:02.84 → 0:03.96) |
 | `clips/starting_hands/001_deal.mp4` | seats `001`: starting hands dealt | 0:03.96 → 0:14.76 | 10.80s |  |
 | `clips/starting_hands/001_wait.mp4` | seats `001`: decision pause | 0:14.76 → 0:18.64 | 3.88s | `loops/001_wait_loop.mp4` |
 | `clips/starting_hands/001_reveal.mp4` | seats `001`: hole card flipped | 0:18.64 → 0:22.36 | 3.71s |  |
 | `clips/starting_hands/001_hold.mp4` | seats `001`: pause after the reveal | 0:22.36 → 0:23.94 | 1.58s | `loops/001_hold_loop.mp4` |
 | `clips/starting_hands/001_discard.mp4` | seats `001`: cards picked up | 0:23.94 → 0:27.86 | 3.92s |  |
-| `clips/starting_hands/001_idle.mp4` | seats `001`: empty table, betting loop | 0:27.86 → 0:34.24 | 6.38s | `loops/001_idle_loop.mp4` |
+| `clips/starting_hands/001_idle.mp4` | seats `001`: empty table, betting loop | 0:27.86 → 0:34.24 | 6.38s | `loops/001_idle_loop.mp4` (0:30.70 → 0:33.58) |
 | `clips/starting_hands/010_deal.mp4` | seats `010`: starting hands dealt | 0:34.24 → 0:44.54 | 10.30s |  |
 | `clips/starting_hands/010_wait.mp4` | seats `010`: decision pause | 0:44.54 → 0:50.63 | 6.09s | `loops/010_wait_loop.mp4` |
 | `clips/starting_hands/010_reveal.mp4` | seats `010`: hole card flipped | 0:50.63 → 0:54.60 | 3.96s |  |
 | `clips/starting_hands/010_hold.mp4` | seats `010`: pause after the reveal | 0:54.60 → 0:56.51 | 1.92s | `loops/010_hold_loop.mp4` |
 | `clips/starting_hands/010_discard.mp4` | seats `010`: cards picked up | 0:56.51 → 1:04.06 | 7.55s |  |
-| `clips/starting_hands/010_idle.mp4` | seats `010`: empty table, betting loop | 1:04.06 → 1:08.36 | 4.30s | `loops/010_idle_loop.mp4` |
+| `clips/starting_hands/010_idle.mp4` | seats `010`: empty table, betting loop | 1:04.06 → 1:08.36 | 4.30s | `loops/010_idle_loop.mp4` (1:04.06 → 1:06.02) |
 | `clips/starting_hands/011_deal.mp4` | seats `011`: starting hands dealt | 1:08.36 → 1:18.58 | 10.22s |  |
 | `clips/starting_hands/011_wait.mp4` | seats `011`: decision pause | 1:18.58 → 1:25.25 | 6.67s | `loops/011_wait_loop.mp4` |
 | `clips/starting_hands/011_reveal.mp4` | seats `011`: hole card flipped | 1:25.25 → 1:29.30 | 4.05s |  |
@@ -36,25 +38,25 @@ reversed, so it can run for any decision time without a visible jump).
 | `clips/starting_hands/100_reveal.mp4` | seats `100`: hole card flipped | 1:56.41 → 2:00.66 | 4.25s |  |
 | `clips/starting_hands/100_hold.mp4` | seats `100`: pause after the reveal | 2:00.66 → 2:02.58 | 1.92s | `loops/100_hold_loop.mp4` |
 | `clips/starting_hands/100_discard.mp4` | seats `100`: cards picked up | 2:02.58 → 2:10.42 | 7.84s |  |
-| `clips/starting_hands/100_idle.mp4` | seats `100`: empty table, betting loop | 2:10.42 → 2:16.76 | 6.34s | `loops/100_idle_loop.mp4` |
+| `clips/starting_hands/100_idle.mp4` | seats `100`: empty table, betting loop | 2:10.42 → 2:16.76 | 6.34s | `loops/100_idle_loop.mp4` (2:11.38 → 2:13.26) |
 | `clips/starting_hands/101_deal.mp4` | seats `101`: starting hands dealt | 2:16.76 → 2:30.86 | 14.10s |  |
 | `clips/starting_hands/101_wait.mp4` | seats `101`: decision pause | 2:30.86 → 2:33.70 | 2.84s | `loops/101_wait_loop.mp4` |
 | `clips/starting_hands/101_reveal.mp4` | seats `101`: hole card flipped | 2:33.70 → 2:37.62 | 3.92s |  |
 | `clips/starting_hands/101_hold.mp4` | seats `101`: pause after the reveal | 2:37.62 → 2:39.53 | 1.92s | `loops/101_hold_loop.mp4` |
 | `clips/starting_hands/101_discard.mp4` | seats `101`: cards picked up | 2:39.53 → 2:46.71 | 7.17s |  |
-| `clips/starting_hands/101_idle.mp4` | seats `101`: empty table, betting loop | 2:46.71 → 2:51.46 | 4.75s | `loops/101_idle_loop.mp4` |
+| `clips/starting_hands/101_idle.mp4` | seats `101`: empty table, betting loop | 2:46.71 → 2:51.46 | 4.75s | `loops/101_idle_loop.mp4` (2:48.13 → 2:50.96) |
 | `clips/starting_hands/110_deal.mp4` | seats `110`: starting hands dealt | 2:51.46 → 3:06.90 | 15.43s |  |
 | `clips/starting_hands/110_wait.mp4` | seats `110`: decision pause | 3:06.90 → 3:09.56 | 2.67s | `loops/110_wait_loop.mp4` |
 | `clips/starting_hands/110_reveal.mp4` | seats `110`: hole card flipped | 3:09.56 → 3:13.82 | 4.25s |  |
 | `clips/starting_hands/110_hold.mp4` | seats `110`: pause after the reveal | 3:13.82 → 3:15.28 | 1.46s | `loops/110_hold_loop.mp4` |
 | `clips/starting_hands/110_discard.mp4` | seats `110`: cards picked up | 3:15.28 → 3:20.49 | 5.21s |  |
-| `clips/starting_hands/110_idle.mp4` | seats `110`: empty table, betting loop | 3:20.49 → 3:28.00 | 7.51s | `loops/110_idle_loop.mp4` |
+| `clips/starting_hands/110_idle.mp4` | seats `110`: empty table, betting loop | 3:20.49 → 3:28.00 | 7.51s | `loops/110_idle_loop.mp4` (3:24.62 → 3:28.00) |
 | `clips/starting_hands/111_deal.mp4` | seats `111`: starting hands dealt | 3:28.00 → 3:48.90 | 20.90s |  |
 | `clips/starting_hands/111_wait.mp4` | seats `111`: decision pause | 3:48.90 → 3:51.98 | 3.09s | `loops/111_wait_loop.mp4` |
 | `clips/starting_hands/111_reveal.mp4` | seats `111`: hole card flipped | 3:51.98 → 3:55.53 | 3.54s |  |
 | `clips/starting_hands/111_hold.mp4` | seats `111`: pause after the reveal | 3:55.53 → 3:57.11 | 1.58s | `loops/111_hold_loop.mp4` |
 | `clips/starting_hands/111_discard.mp4` | seats `111`: cards picked up | 3:57.11 → 4:03.37 | 6.26s |  |
-| `clips/starting_hands/111_idle.mp4` | seats `111`: empty table, betting loop | 4:03.37 → 4:10.46 | 7.09s | `loops/111_idle_loop.mp4` |
+| `clips/starting_hands/111_idle.mp4` | seats `111`: empty table, betting loop | 4:03.37 → 4:10.46 | 7.09s | `loops/111_idle_loop.mp4` (4:07.33 → 4:10.46) |
 
 ## Part 2 — full table, hits up to six cards per seat
 
@@ -89,4 +91,4 @@ reversed, so it can run for any decision time without a visible jump).
 | `clips/full_table/full_table_reveal.mp4` | seats `111`: hole card flipped | 6:23.01 → 6:26.43 | 3.42s |  |
 | `clips/full_table/full_table_hold.mp4` | seats `111`: pause after the reveal | 6:26.43 → 6:28.22 | 1.79s | `loops/full_table_hold_loop.mp4` |
 | `clips/full_table/full_table_discard.mp4` | seats `111`: cards picked up | 6:28.22 → 6:38.06 | 9.84s |  |
-| `clips/full_table/full_table_idle.mp4` | seats `111`: empty table, betting loop | 6:38.06 → 6:44.90 | 6.84s | `loops/full_table_idle_loop.mp4` |
+| `clips/full_table/full_table_idle.mp4` | seats `111`: empty table, betting loop | 6:38.06 → 6:44.90 | 6.84s | `loops/full_table_idle_loop.mp4` (6:40.07 → 6:44.90) |

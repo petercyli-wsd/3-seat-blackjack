@@ -46,9 +46,18 @@ def encoder(path: Path, w: int, h: int) -> subprocess.Popen:
     return subprocess.Popen(cmd, stdin=subprocess.PIPE)
 
 
-def pingpong(src: Path, dst: Path, frames: int) -> None:
+def loop_window(seg: dict) -> tuple[int, int]:
+    """Clip frames [a, b) the seg's loop plays: an idle's calm stretch (see edl.calm_loops), else all of it."""
+    if "loop_in" in seg:
+        return seg["loop_in"] - seg["start"], seg["loop_out"] - seg["start"]
+    return 0, seg["frames"]
+
+
+def pingpong(src: Path, dst: Path, window: tuple[int, int]) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
-    graph = (f"[0:v]split[f][r];[r]reverse,trim=start_frame=1:end_frame={frames - 1},setpts=PTS-STARTPTS[b];"
+    a, b = window
+    graph = (f"[0:v]trim=start_frame={a}:end_frame={b},setpts=PTS-STARTPTS,split[f][r];"
+             f"[r]reverse,trim=start_frame=1:end_frame={b - a - 1},setpts=PTS-STARTPTS[b];"
              f"[f][b]concat=n=2:v=1[out]")
     subprocess.run([FFMPEG, "-y", "-loglevel", "error", "-i", str(src), "-filter_complex", graph,
                     "-map", "[out]", "-r", RATE, *X264, str(dst)], check=True)
@@ -75,8 +84,9 @@ def run(video: str, edl: str, out_dir: str) -> None:
         print(f"{clip_path(s)}  {s['frames']} frames", flush=True)
     for s in segs:
         if s["kind"] in STATIC and s["frames"] >= 3:
-            pingpong(out / clip_path(s), out / loop_path(s), s["frames"])
-            print(f"{loop_path(s)}  {2 * s['frames'] - 2} frames", flush=True)
+            a, b = loop_window(s)
+            pingpong(out / clip_path(s), out / loop_path(s), (a, b))
+            print(f"{loop_path(s)}  {2 * (b - a) - 2} frames", flush=True)
 
 
 if __name__ == "__main__":

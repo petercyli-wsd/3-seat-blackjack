@@ -1,10 +1,10 @@
-import type { ClipInfo, Manifest } from "./manifest";
+import { type ClipInfo, type Manifest, loopSpan } from "./manifest";
 
 /** How the next clip takes over from the current one. */
 export type Handoff =
   /** At the current clip's last frame (non-loop) — seamless when the clips are contiguous in the take. */
   | "end"
-  /** Loops: at the end of the forward pass, whose last frame is the clip's last frame — seamless too. */
+  /** Loops: at the end of the forward pass — seamless too when the loop runs to the clip's last frame. */
   | "anchor"
   /** Immediately, crossfading from wherever the current clip is. */
   | "now";
@@ -86,10 +86,11 @@ export class ClipPlayer {
     const clip = this.m.clips[deck.name];
     let f = deck.fileFrame;
     if (deck.loop) {
-      const n = clip.frames;
+      const { from, n } = loopSpan(clip);
       const period = 2 * n - 2;
       f = ((f % period) + period) % period;
       if (f >= n) f = period - f;
+      f += from;
     }
     return { name: deck.name, clip, frame: Math.min(Math.max(f, 0), clip.frames - 1), loop: deck.loop, deck };
   }
@@ -226,9 +227,9 @@ export class ClipPlayer {
     });
     const p = this.pending;
     if (!p) return;
-    const n = s.clip.frames;
-    if (p.handoff === "end" && !deck.loop && deck.fileFrame >= n - 1) void this.takeOver();
+    if (p.handoff === "end" && !deck.loop && deck.fileFrame >= s.clip.frames - 1) void this.takeOver();
     if (p.handoff === "anchor" && deck.loop) {
+      const { n } = loopSpan(s.clip);
       const period = 2 * n - 2;
       const a = ((prevFrame % period) + period) % period;
       const b = ((deck.fileFrame % period) + period) % period;
@@ -242,7 +243,7 @@ export class ClipPlayer {
   framesToAnchor(): number {
     const d = this.active;
     if (!d || !d.loop || !d.name) return 0;
-    const n = this.m.clips[d.name].frames;
+    const { n } = loopSpan(this.m.clips[d.name]);
     const period = 2 * n - 2;
     const f = ((d.fileFrame % period) + period) % period;
     return f <= n - 1 ? n - 1 - f : period - f + n - 1;
@@ -258,3 +259,4 @@ export class ClipPlayer {
     this.fadingFrom = null;
   }
 }
+

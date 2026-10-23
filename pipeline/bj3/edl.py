@@ -93,7 +93,44 @@ REST = 0.55  # pose motion (mean |dI| of the quarter-res fingerprint) below whic
 REST_RUN = 4
 
 
-def snap_to_rest(segs: list[dict], pose_npz: str, fps: float) -> None:
+def rest_mask(pose_npz: str) -> np.ndarray:
+    """Per frame: is the dealer at rest (arms still, nothing being handled)."""
+    z = np.load(pose_npz)
+    P = z["pose"].astype(np.float32)
+    keep = z["keep"]
+    m = np.zeros(len(P), np.float32)
+    m[1:] = np.abs(P[1:] - P[:-1])[:, keep].mean(1)
+    m = np.convolve(m, np.ones(5) / 5, "same")
+    return m < REST
+
+
+CALM_LOOP_MIN_S = 1.0
+
+
+def calm_loops(segs: list[dict], rest: np.ndarray, fps: float) -> None:
+    """Give each idle a loop window over its longest stretch of rest.
+
+    After a discard she squares the cards in the tray, reaches across the
+    table and comes back to it; looped for a whole betting phase that reads
+    as fidgeting. The idle's loop plays only the calm stretch (`loop_in` to
+    `loop_out`, source frames); the clip itself stays whole and contiguous.
+    """
+    for s in segs:
+        if s["kind"] != "idle":
+            continue
+        best, run = (s["start"], s["start"]), None
+        for f in range(s["start"], s["end"] + 1):
+            if f < s["end"] and rest[f]:
+                run = run if run is not None else f
+            elif run is not None:
+                if f - run > best[1] - best[0]:
+                    best = (run, f)
+                run = None
+        if best[1] - best[0] >= CALM_LOOP_MIN_S * fps and best != (s["start"], s["end"]):
+            s["loop_in"], s["loop_out"] = best
+
+
+def snap_to_rest(segs: list[dict], rest: np.ndarray, fps: float) -> None:
     """Move static/action boundaries to where the dealer actually starts moving or comes to rest.
 
     The felt only moves once a card does; her arm leaves for the shoe ~0.5 s
@@ -103,13 +140,6 @@ def snap_to_rest(segs: list[dict], pose_npz: str, fps: float) -> None:
     again. Loops stay as long as possible and action clips stay tight.
     Contiguity is kept, so natural playback is untouched.
     """
-    z = np.load(pose_npz)
-    P = z["pose"].astype(np.float32)
-    keep = z["keep"]
-    m = np.zeros(len(P), np.float32)
-    m[1:] = np.abs(P[1:] - P[:-1])[:, keep].mean(1)
-    m = np.convolve(m, np.ones(5) / 5, "same")
-    rest = m < REST
     min_loop = int(1.5 * fps)
     for a, b in zip(segs, segs[1:]):
         f = b["start"]
@@ -179,14 +209,17 @@ def build(cards_json: str, signals: str, out: str, pose_npz: str | None = None) 
         seg(f"{prefix}_idle", "idle", idle_a, idle_b, mask=mask, part=part)
 
     if pose_npz:
-        snap_to_rest(segs, pose_npz, fps)
+        rest = rest_mask(pose_npz)
+        snap_to_rest(segs, rest, fps)
+        calm_loops(segs, rest, fps)
     for s in segs:
         s["frames"] = s["end"] - s["start"]
         s["seconds"] = round(s["frames"] / fps, 3)
     Path(out).write_text(json.dumps({"fps": fps, "total_frames": total, "segments": segs}, indent=1))
     ts = lambda f: f"{int(f / fps // 60)}:{f / fps % 60:05.2f}"
     for s in segs:
-        print(f"{s['name']:<22} {s['kind']:<8} {ts(s['start'])} -> {ts(s['end'])}  {s['seconds']:6.2f}s")
+        calm = f"  loop {ts(s['loop_in'])} -> {ts(s['loop_out'])}" if "loop_in" in s else ""
+        print(f"{s['name']:<22} {s['kind']:<8} {ts(s['start'])} -> {ts(s['end'])}  {s['seconds']:6.2f}s{calm}")
 
 
 if __name__ == "__main__":

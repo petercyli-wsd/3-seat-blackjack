@@ -4,7 +4,7 @@ import { settle } from "../engine/settle";
 import { Shoe } from "../engine/shoe";
 import { autoHit } from "../engine/strategy";
 import type { ClipPlayer, Handoff } from "../media/ClipPlayer";
-import { type Manifest, type SeatId, clipName, naturalNext } from "../media/manifest";
+import { type Manifest, type SeatId, clipName, loopSpan, naturalNext } from "../media/manifest";
 import type { TableView } from "../render/scene";
 import { SCENARIOS, stack } from "./scenarios";
 import type { Mode, RoundRecord, SeatStatus, Store } from "./store";
@@ -157,9 +157,11 @@ export class Director {
     const cur = this.player.state();
     let handoff: Handoff = "now";
     if (cur && naturalNext(this.m, cur.name) === target) {
-      // a player is waiting on a hit, so only hold out for the seamless point if it is close
+      const span = loopSpan(cur.clip);
+      // a player is waiting on a hit, so only hold out for the seamless point if it is close;
+      // a loop over only part of its clip (a calm idle) never meets the next clip seamlessly
       if (!cur.loop) handoff = "end";
-      else if (this.player.framesToAnchor() < (opts.patience ?? 0.75) * this.m.fps) handoff = "anchor";
+      else if (span.from + span.n === cur.clip.frames && this.player.framesToAnchor() < (opts.patience ?? 0.75) * this.m.fps) handoff = "anchor";
     }
     this.log(`${cur?.name ?? "-"} → ${target} (${handoff === "now" ? "crossfade" : "seamless"})`);
     await this.player.play(target, { loop: opts.loop, handoff });

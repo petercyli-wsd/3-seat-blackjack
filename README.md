@@ -55,6 +55,9 @@ cards rather than from hand-typed timecodes:
 - Part 1 has **7** combinations (`001`–`111`). `000` isn't in the take and is never needed.
 - Every **bold** pause also gets a ping-pong loop in `loops/`: forward then reversed, with no
   repeated end frames. It can run the full 7 s / 14 s decision time with no visible jump.
+  An idle's loop covers only its longest stretch of rest (`loopFrom`–`loopTo` in the manifest).
+  After a discard she squares the tray and reaches across the table, and over a whole betting
+  phase that repeating reads as fidgeting.
 - [`game_assets/CLIPS.md`](game_assets/CLIPS.md) lists all 73 clips with their source timecodes.
 - Contact sheets of every cut are in `pipeline/work/review/`.
 

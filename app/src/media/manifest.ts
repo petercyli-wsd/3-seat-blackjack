@@ -26,6 +26,9 @@ export interface ClipInfo {
   cards: FootageCard[];
   loop?: string;
   loopFrames?: number;
+  /** The loop plays only clip frames loopFrom..loopTo-1 (an idle's calm stretch); absent = the whole clip. */
+  loopFrom?: number;
+  loopTo?: number;
   still: number;
   mask?: string;
   seat?: SeatId;
@@ -63,6 +66,12 @@ export async function loadManifest(): Promise<Manifest> {
 /** Footage cards of one slot that are on the table at a clip frame. */
 export const cardsAt = (clip: ClipInfo, slot: Slot, frame: number) =>
   clip.cards.filter((c) => c.slot === slot && c.in <= frame && frame < c.out);
+
+/** The clip frames a loop file ping-pongs over: from, from + 1, ..., from + n - 1 and back. */
+export const loopSpan = (c: ClipInfo) => {
+  const from = c.loopFrom ?? 0;
+  return { from, n: (c.loopTo ?? c.frames) - from };
+};
 
 /** Clip names, by the conventions the pipeline writes. */
 export const clipName = {
