@@ -1,0 +1,13 @@
+[project]
+name = "bj3-pipeline"
+version = "0.1.0"
+description = "Footage analysis, trimming and compositing assets for the 3-seat blackjack prototype"
+requires-python = ">=3.11"
+dependencies = [
+  "opencv-python-headless>=4.10",
+  "numpy>=2.0",
+  "imageio-ffmpeg>=0.5",
+]
+
+[tool.uv]
+package = false

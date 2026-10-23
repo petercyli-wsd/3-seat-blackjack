@@ -1,0 +1,31 @@
+{
+  "name": "blackjack-3-seat",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --port 5183",
+    "test": "vitest run",
+    "lint": "oxlint src",
+    "smoke": "node scripts/smoke.mjs",
+    "capture": "node scripts/capture.mjs",
+    "soak": "node scripts/soak.mjs"
+  },
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "oxlint": "^1.88.0",
+    "playwright": "^1.64.1",
+    "typescript": "~6.0.3",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
+  }
+}

@@ -1,0 +1,85 @@
+export type Pt = [number, number];
+/** Face TL, TR, BR, BL in source video pixels (TL->TR is the face's top edge). */
+export type Quad = [Pt, Pt, Pt, Pt];
+
+export type SeatId = "seat1" | "seat2" | "seat3";
+export type Slot = SeatId | "up" | "hole";
+export type ClipKind = "idle" | "deal" | "wait" | "reveal" | "hold" | "discard" | "hit";
+
+/** A physical card visible during a clip; frames are clip-relative (may lie outside the clip). */
+export interface FootageCard {
+  slot: Slot;
+  /** 1-based position in its hand (dealer: up = 1, hole = 2). */
+  index: number;
+  in: number;
+  out: number;
+  flip: number | null;
+  faceDown: boolean;
+  quad: Quad;
+}
+
+export interface ClipInfo {
+  file: string;
+  kind: ClipKind;
+  frames: number;
+  sourceStart: number;
+  cards: FootageCard[];
+  loop?: string;
+  loopFrames?: number;
+  still: number;
+  mask?: string;
+  seat?: SeatId;
+  card?: number;
+  part?: number;
+}
+
+export interface Plate {
+  clip: string;
+  frame: number;
+  cards: Quad[];
+}
+
+export interface Manifest {
+  fps: number;
+  width: number;
+  height: number;
+  seats: SeatId[];
+  playOrder: SeatId[];
+  masks: string;
+  dealer: { up: Quad; hole: Quad; shoe: Pt; discardTray: Pt };
+  plates: Record<SeatId, Record<string, Plate>>;
+  clips: Record<string, ClipInfo>;
+}
+
+/** game_assets/ is the dev server's public dir (see vite.config.ts). */
+export const ASSET_BASE = "/";
+
+export async function loadManifest(): Promise<Manifest> {
+  const r = await fetch(`${ASSET_BASE}manifest.json`);
+  if (!r.ok) throw new Error(`manifest.json: HTTP ${r.status} — run the pipeline first (see README)`);
+  return r.json();
+}
+
+/** Footage cards of one slot that are on the table at a clip frame. */
+export const cardsAt = (clip: ClipInfo, slot: Slot, frame: number) =>
+  clip.cards.filter((c) => c.slot === slot && c.in <= frame && frame < c.out);
+
+/** Clip names, by the conventions the pipeline writes. */
+export const clipName = {
+  openingIdle: "opening_idle",
+  deal: (mask: string) => `${mask}_deal`,
+  wait: (mask: string) => `${mask}_wait`,
+  reveal: (mask: string) => `${mask}_reveal`,
+  hold: (mask: string) => `${mask}_hold`,
+  discard: (mask: string) => `${mask}_discard`,
+  idle: (mask: string) => `${mask}_idle`,
+  hit: (seat: SeatId, card: number) => `${seat}_card${card}_deal`,
+  hitWait: (seat: SeatId, card: number) => `${seat}_card${card}_wait`,
+};
+
+/** The clip that follows `name` in the original take, if any (a seamless continuation). */
+export function naturalNext(m: Manifest, name: string): string | undefined {
+  const c = m.clips[name];
+  const end = c.sourceStart + c.frames;
+  return Object.keys(m.clips).find((k) => m.clips[k].sourceStart === end);
+}
