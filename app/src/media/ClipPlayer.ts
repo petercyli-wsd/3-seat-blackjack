@@ -6,8 +6,16 @@ export type Handoff =
   | "end"
   /** Loops: at the end of the forward pass — seamless too when the loop runs to the clip's last frame. */
   | "anchor"
-  /** Immediately, crossfading from wherever the current clip is. */
+  /** Immediately, cutting from wherever the current clip is. */
   | "now";
+
+/**
+ * Frames of crossfade on a "now" handoff. A hard cut: the scene lays plates
+ * in for one clip at a time, so a blend of two clips shows the other clip's
+ * cards through (ghost cards at seats that should be bare). Generated
+ * bridges between the cut poses are meant to replace these cuts.
+ */
+const CUT_FADE = 0;
 
 export interface Deck {
   el: HTMLVideoElement;
@@ -132,7 +140,7 @@ export class ClipPlayer {
   play(name: string, opts: { loop?: boolean; handoff?: Handoff; fade?: number } = {}): Promise<void> {
     const loop = opts.loop ?? false;
     const handoff = opts.handoff ?? (this.active ? "end" : "now");
-    const fade = opts.fade ?? (handoff === "now" && this.active ? 6 : 0);
+    const fade = opts.fade ?? (handoff === "now" && this.active ? CUT_FADE : 0);
     const deck = this.prepare(name, loop);
     if (this.pending) this.pending.resolve();
     return new Promise<void>((resolve) => {
@@ -158,7 +166,9 @@ export class ClipPlayer {
     if (!p) return;
     this.pending = null;
     await p.deck.ready;
-    p.deck.el.currentTime = 0;
+    // A deck reused for a clip it already played sits on that clip's last frame; drawn before
+    // the seek lands, the end of the clip (cards already dealt) would show for a frame.
+    if (p.deck.el.currentTime > 0) await seekToStart(p.deck.el);
     const prev = this.active;
     this.handoffAt = performance.now();
     try {
@@ -239,7 +249,7 @@ export class ClipPlayer {
     if (p.handoff === "end" && deck.loop) void this.takeOver();
   }
 
-  /** Frames until the current loop reaches its forward anchor (for deciding between waiting and fading). */
+  /** Frames until the current loop reaches its forward anchor (for deciding between waiting and cutting). */
   framesToAnchor(): number {
     const d = this.active;
     if (!d || !d.loop || !d.name) return 0;
@@ -260,3 +270,9 @@ export class ClipPlayer {
   }
 }
 
+function seekToStart(el: HTMLVideoElement): Promise<void> {
+  return new Promise((res) => {
+    el.addEventListener("seeked", () => res(), { once: true });
+    el.currentTime = 0;
+  });
+}

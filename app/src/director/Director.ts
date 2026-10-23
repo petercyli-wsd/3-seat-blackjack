@@ -152,7 +152,7 @@ export class Director {
     if (epoch !== this.epoch) throw new Abort();
   }
 
-  /** Hand the screen to `target`: seamlessly if it follows the current clip in the take, else a short crossfade. */
+  /** Hand the screen to `target`: seamlessly if it follows the current clip in the take, else a cut. */
   private async cutTo(target: string, opts: { loop?: boolean; patience?: number } = {}) {
     const cur = this.player.state();
     let handoff: Handoff = "now";
@@ -163,7 +163,7 @@ export class Director {
       if (!cur.loop) handoff = "end";
       else if (span.from + span.n === cur.clip.frames && this.player.framesToAnchor() < (opts.patience ?? 0.75) * this.m.fps) handoff = "anchor";
     }
-    this.log(`${cur?.name ?? "-"} → ${target} (${handoff === "now" ? "crossfade" : "seamless"})`);
+    this.log(`${cur?.name ?? "-"} → ${target} (${handoff === "now" ? "cut" : "seamless"})`);
     await this.player.play(target, { loop: opts.loop, handoff });
   }
 
@@ -197,12 +197,11 @@ export class Director {
     if (scenario) this.shoe.force(stack(scenario, order));
 
     // the deal, in the order the dealer deals it on film: each seat right to left, then the dealer; twice
-    this.view.seats = { seat1: [], seat2: [], seat3: [] };
-    this.view.dealer = [];
-    this.view.dealerDrawAt = [];
+    const hands: TableView["seats"] = { seat1: [], seat2: [], seat3: [] };
+    const dealer: Card[] = [];
     for (let r = 0; r < 2; r++) {
-      for (const k of order) this.view.seats[k].push(this.shoe.draw());
-      this.view.dealer.push(this.shoe.draw());
+      for (const k of order) hands[k].push(this.shoe.draw());
+      dealer.push(this.shoe.draw());
     }
     this.store.set((s) => ({
       phase: "dealing",
@@ -210,9 +209,9 @@ export class Director {
       round: s.round + 1,
       lastNet: null,
       message: "Dealing",
-      dealer: [...this.view.dealer],
+      dealer: [...dealer],
       seats: Object.fromEntries(seats.map((k) => [k, {
-        ...s.seats[k], cards: [...this.view.seats[k]], result: null,
+        ...s.seats[k], cards: [...hands[k]], result: null,
         status: (s.seats[k].taken ? "waiting" : "empty") as SeatStatus,
       }])) as unknown as typeof s.seats,
     }));
@@ -221,6 +220,12 @@ export class Director {
     const deal = clipName.deal(this.mask);
     await this.cutTo(deal);
     this.guard(epoch);
+    // Cards go into the view only now the clip dealing them is on screen. In the view any
+    // earlier, the idle still playing would get the dealt hands' plates: the result for a moment,
+    // then the deal from the start.
+    this.view.seats = hands;
+    this.view.dealer = dealer;
+    this.view.dealerDrawAt = [];
     void this.follow(clipName.wait(this.mask), true);
     await this.player.whenEnded(deal);
     this.guard(epoch);
@@ -246,13 +251,14 @@ export class Director {
           break;
         }
         const card = this.shoe.draw();
-        hand.push(card);
-        this.store.setSeat(id, { cards: [...hand], status: "waiting" });
         this.store.set({ message: `Seat ${id.slice(-1)} hits` });
-        const k = hand.length;
+        const k = hand.length + 1;
         const hit = clipName.hit(id, k);
         await this.cutTo(hit);
         this.guard(epoch);
+        // on the table only once the hit clip is on screen (see the deal)
+        hand.push(card);
+        this.store.setSeat(id, { cards: [...hand], status: "waiting" });
         void this.follow(clipName.hitWait(id, k), true);
         await this.player.whenFrame(hit, this.landing(hit, id, k) + 2);
         this.guard(epoch);
