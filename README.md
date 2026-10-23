@@ -96,7 +96,13 @@ make it consistent:
 
 Clips that follow each other in the take hand over on the exact frame. Cuts between clips that
 weren't filmed back to back (for example, any idle into a different combination's deal, or a
-wait into a hit) use a 6-frame crossfade between two resting poses.
+wait into a hit) are hard cuts between two resting poses. A crossfade would blend two clips that
+need different seat plates and let the wrong cards ghost through; generated bridge frames are
+meant to replace the cuts.
+
+The table opens once the opening idle and the plate clips are in memory (~22 MB). The rest of
+the footage it plays (~160 MB in all; part 2's own deal, reveal and discard are never used) loads behind
+it, in the order a round needs it, and the LIVE badge shows the progress.
 
 ## Round flow
 
@@ -137,11 +143,11 @@ seats, balance and shoe, and returns to the opening idle.
 - **Card positions shift slightly between the parts.**
   - Part 1 and part 2 cards sit a few pixels apart.
   - On the first hit of a round (a part 1 wait into a part 2 hit), the hitting seat's first two
-    cards jump slightly under the crossfade.
+    cards jump slightly at the cut.
   - Re-filming part 1 with the cards placed on part 2's spots, or generating plates for it,
     would remove this.
 - **Natural successor vs. responsiveness.** A wait loop is followed in the take by its seat's
-  next hit. When the player hits right away, the table crossfades rather than wait up to the
+  next hit. When the player hits right away, the table cuts rather than wait up to the
   whole loop for the seamless point.
 - **Holds are short** (1.6–2 s). Settling runs over the hold's ping-pong loop, which shows on
   long dealer draws. A longer post-reveal pause in the next shoot would help.

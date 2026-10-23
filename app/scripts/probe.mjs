@@ -79,7 +79,7 @@ const res = await page.evaluate(() => {
   const p = window.__probe;
   const shots = p.shots;
   p.shots = [];
-  return { n: p.frames.length, flags: p.flags, shots, clips: [...new Set(p.frames.map((r) => r.clip))] };
+  return { n: p.frames.length, flags: p.flags, shots, clips: p.frames.map((r) => r.clip).filter((c, i, all) => c !== all[i - 1]) };
 });
 res.shots.forEach((s, i) => {
   writeFileSync(file(`probe-${i}.png`), Buffer.from(s.url.split(",")[1], "base64"));
