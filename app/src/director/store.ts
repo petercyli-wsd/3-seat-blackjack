@@ -40,6 +40,8 @@ export interface DebugInfo {
 export interface GameState {
   phase: Phase;
   loading: { label: string; done: number; total: number };
+  /** Footage files in memory, of all the table plays (most load after it opens). */
+  footage: { done: number; total: number };
   error: string | null;
   seats: Record<SeatId, SeatState>;
   dealer: Card[];
@@ -63,6 +65,7 @@ const seat = (): SeatState => ({ taken: false, bet: 0, cards: [], status: "empty
 export const initialState = (): GameState => ({
   phase: "loading",
   loading: { label: "Loading table", done: 0, total: 1 },
+  footage: { done: 0, total: 0 },
   error: null,
   seats: { seat1: seat(), seat2: seat(), seat3: seat() },
   dealer: [],

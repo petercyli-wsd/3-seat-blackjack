@@ -1,4 +1,5 @@
 import { type ClipInfo, type Manifest, loopSpan } from "./manifest";
+import type { ClipLoader } from "./preload";
 
 /** How the next clip takes over from the current one. */
 export type Handoff =
@@ -24,6 +25,8 @@ export interface Deck {
   /** Last presented frame of the file (loop files count the ping-pong frames). */
   fileFrame: number;
   ready: Promise<void> | null;
+  /** Bumped by every prepare(), so a file that arrives for a deck since re-prepared is dropped. */
+  token: number;
 }
 
 export interface PlayingState {
@@ -63,7 +66,7 @@ export class ClipPlayer {
 
   constructor(
     private m: Manifest,
-    private urls: Map<string, string>,
+    private files: ClipLoader,
     host: HTMLElement,
   ) {
     for (let i = 0; i < DECKS; i++) {
@@ -75,7 +78,7 @@ export class ClipPlayer {
       // kept in the DOM (invisibly) so every browser keeps decoding and firing frame callbacks
       el.style.cssText = "position:absolute;width:2px;height:2px;opacity:0.001;pointer-events:none;left:0;top:0";
       host.appendChild(el);
-      const deck: Deck = { el, name: null, loop: false, fileFrame: 0, ready: null };
+      const deck: Deck = { el, name: null, loop: false, fileFrame: 0, ready: null, token: 0 };
       this.decks.push(deck);
       this.watch(deck);
     }
@@ -107,7 +110,12 @@ export class ClipPlayer {
     const c = this.m.clips[name];
     const f = loop ? c.loop : c.file;
     if (!f) throw new Error(`clip ${name} has no ${loop ? "loop" : "file"}`);
-    return this.urls.get(f)!;
+    return f;
+  }
+
+  /** Whether the clip's footage is in memory yet (else playing it waits on the download). */
+  loaded(name: string, loop = false) {
+    return this.files.has(this.fileOf(name, loop));
   }
 
   /** Load a clip into an idle deck so a later handoff starts without a decoder stall. */
@@ -121,15 +129,16 @@ export class ClipPlayer {
     deck.loop = loop;
     deck.fileFrame = 0;
     deck.el.loop = loop;
-    deck.el.src = this.fileOf(name, loop);
-    deck.ready = new Promise<void>((res) => {
-      const done = () => {
-        deck.el.removeEventListener("canplay", done);
-        res();
-      };
-      deck.el.addEventListener("canplay", done);
-    });
-    deck.el.load();
+    const token = ++deck.token;
+    deck.ready = this.files.get(this.fileOf(name, loop)).then(
+      (url) =>
+        new Promise<void>((res) => {
+          if (deck.token !== token) return res();
+          deck.el.addEventListener("canplay", () => res(), { once: true });
+          deck.el.src = url;
+          deck.el.load();
+        }),
+    );
     return deck;
   }
 

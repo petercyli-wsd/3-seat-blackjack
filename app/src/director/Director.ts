@@ -164,7 +164,12 @@ export class Director {
       else if (span.from + span.n === cur.clip.frames && this.player.framesToAnchor() < (opts.patience ?? 0.75) * this.m.fps) handoff = "anchor";
     }
     this.log(`${cur?.name ?? "-"} → ${target} (${handoff === "now" ? "cut" : "seamless"})`);
+    // footage still downloading (it loads after the table opens): say why the table is waiting
+    const before = this.store.get().message;
+    const buffering = !this.player.loaded(target, opts.loop);
+    if (buffering) this.store.set({ message: "Loading footage…" });
     await this.player.play(target, { loop: opts.loop, handoff });
+    if (buffering && this.store.get().message === "Loading footage…") this.store.set({ message: before });
   }
 
   /** Queue a clip to follow the current one with no seam (it is the next shot of the take). */

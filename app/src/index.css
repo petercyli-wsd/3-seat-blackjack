@@ -163,6 +163,8 @@ kbd {
 .stage-live-sep { width: 1px; height: 12px; background: var(--border); }
 .stage-live-table { font-weight: 600; letter-spacing: 0.4px; color: var(--text-body); }
 .stage-live-round { font-weight: 500; letter-spacing: 0.4px; color: var(--gold-light); }
+.stage-live-load { font-weight: 500; letter-spacing: 0.4px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.stage-live-load.is-error { color: var(--lose); }
 
 .seat-marker, .dealer-marker {
   position: absolute;
