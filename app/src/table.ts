@@ -14,6 +14,9 @@ export interface Table {
   dispose(): void;
 }
 
+/** Graphic dealer cards animate on the clock rather than the footage; render every frame while one might be moving. */
+const DRAW_ANIM_MS = 1000;
+
 /**
  * Boot: manifest -> the clips the table opens on into memory (the rest follow in
  * the background) -> plates grabbed from the clips -> compositor -> director; then
@@ -50,6 +53,7 @@ export async function bootTable(canvas: HTMLCanvasElement, host: HTMLElement, st
 
   let raf = 0;
   let lastDebug = 0;
+  let lastDrawn = "";
   const loop = (now: number) => {
     raf = requestAnimationFrame(loop);
     player.tick(now);
@@ -59,6 +63,16 @@ export async function bootTable(canvas: HTMLCanvasElement, host: HTMLElement, st
     const dominant = from && player.fadeT < 0.5 ? from : active;
     const st = player.state(dominant);
     if (!st) return;
+    // The footage runs at 24 fps under a 60-144 Hz display: composite only when a video frame,
+    // the table or a graphic card has moved on since the last one.
+    const v0 = director.view;
+    const drawn = [
+      player.decks.indexOf(active), active.fileFrame, from ? player.decks.indexOf(from) : -1, from?.fileFrame, player.fadeT,
+      v0.seats.seat1.length, v0.seats.seat2.length, v0.seats.seat3.length, v0.dealer.length, store.get().showMasks,
+    ].join();
+    const animating = v0.dealerDrawAt.some((t) => now - t < DRAW_ANIM_MS);
+    if (drawn === lastDrawn && !animating) return;
+    lastDrawn = drawn;
     const res = scene.compute(st, director.view, now);
     compositor.render({
       a: from ? from.el : active.el,
