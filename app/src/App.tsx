@@ -61,7 +61,8 @@ export default function App() {
   useEffect(() => {
     if (!director) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
+      // a held key would otherwise land a second hit the moment the next decision opens
+      if (e.repeat || e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
       const k = e.key.toLowerCase();
       if (k === "h") director.act("hit");
       else if (k === "s") director.act("stand");
