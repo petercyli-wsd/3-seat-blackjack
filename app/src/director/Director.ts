@@ -105,9 +105,18 @@ export class Director {
   }
 
   canDeal() {
+    return this.store.get().phase === "betting" && !this.dealBlocker();
+  }
+
+  /** Why Deal is unavailable during betting, for the bet bar; null when it is available. */
+  dealBlocker(): string | null {
     const s = this.store.get();
     const taken = this.m.seats.filter((k) => s.seats[k].taken);
-    return s.phase === "betting" && taken.length > 0 && taken.every((k) => s.seats[k].bet >= RULES.minBet) && this.committed() <= s.balance;
+    if (!taken.length) return "Take a seat to play";
+    const unbet = taken.filter((k) => s.seats[k].bet < RULES.minBet);
+    if (unbet.length) return `Bet on seat ${unbet.map((k) => k.slice(-1)).join(" & ")}, or leave it`;
+    if (this.committed() > s.balance) return "Bets are more than your balance";
+    return null;
   }
 
   // ---- player-turn commands ------------------------------------------------------------------
@@ -351,15 +360,21 @@ export class Director {
     this.view.dealer = [];
     this.view.dealerDrawAt = [];
     const s = this.store.get();
+    // re-bet: keep the stakes, seat by seat, as far as the balance still covers them all together
+    let left = Math.max(0, s.balance);
+    const rebet = (k: SeatId) => {
+      const bet = s.seats[k].taken ? Math.min(s.seats[k].bet, left) : 0;
+      left -= bet;
+      return bet;
+    };
     this.store.set({
       phase: "betting",
       dealer: [],
-      message: "Place your bets",
+      message: s.balance < RULES.minBet ? "Out of chips — Reset to play again" : "Place your bets",
       seats: Object.fromEntries(seats.map((k) => [k, {
         ...s.seats[k], cards: [], result: null,
         status: (s.seats[k].taken ? "seated" : "empty") as SeatStatus,
-        // re-bet: keep each stake if the balance still covers it
-        bet: s.seats[k].taken ? Math.min(s.seats[k].bet, Math.max(0, s.balance)) : 0,
+        bet: rebet(k),
       }])) as unknown as typeof s.seats,
     });
   }

@@ -93,7 +93,8 @@ function DealerStrip({ store }: { store: Store }) {
   const visible = useGame(store, (s) => s.visible.dealer);
   const phase = useGame(store, (s) => s.phase);
   const shown = dealer.slice(0, visible);
-  const hiddenHole = dealer.length >= 2 && visible === 1;
+  // the hole card lands after every seat's second card: only show its back once the deal is down
+  const hiddenHole = dealer.length >= 2 && visible === 1 && phase !== "dealing";
   return (
     <div className="dealer-strip">
       <span className="dealer-strip-label">Dealer</span>
@@ -114,6 +115,7 @@ function BetBar({ store, director }: { store: Store; director: Director }) {
   const balance = useGame(store, (s) => s.balance);
   const staked = SEATS.reduce((a, k) => a + seats[k].bet, 0);
   const canDeal = phase === "betting" && director.canDeal();
+  const blocker = phase === "betting" ? director.dealBlocker() : null;
   if (phase !== "betting") return <RoundStatus store={store} />;
   return (
     <div className="betbar">
@@ -128,6 +130,7 @@ function BetBar({ store, director }: { store: Store; director: Director }) {
         <div className="betbar-total">
           <span>Total bet</span>
           <strong>{money(staked)}</strong>
+          {blocker && <em className="betbar-blocker">{blocker}</em>}
         </div>
         <button className="btn btn-ghost" onClick={() => director.clearBets()} disabled={!staked}>
           Clear
