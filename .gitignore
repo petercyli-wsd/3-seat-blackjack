@@ -4,3 +4,5 @@ app/shots/
 pipeline/.venv/
 pipeline/work/
 __pycache__/
+bridges/stubs/
+bridges/generated/
