@@ -34,6 +34,21 @@ redo every pass.
 The **Director** button opens a panel showing the clip on screen, the frame, which seats are
 plated, a stacked-shoe picker for demoing specific paths, and round history.
 
+## Hosting (Render Web Service, password-protected)
+
+`app/server.mjs` serves the built app with HTTP Basic auth. It uses Node built-ins only.
+
+1. Go to **New → Web Service** and connect the repo.
+2. Set the service up:
+   - **Root Directory:** `app`
+   - **Build Command:** `npm ci && npm run build`
+   - **Start Command:** `npm start`
+3. Add the environment variable `SITE_PASSWORD`. The server refuses to start without it.
+4. Set **Health Check Path** to `/health`.
+
+Visitors sign in with any username and that password. Each visit downloads the full ~200 MB of
+footage. Locally: `npm run build` then `SITE_PASSWORD=… npm start`, which serves on port 10000.
+
 **Checks:** `npm test` runs the rules engine unit tests. With the dev server running,
 `npm run soak -- 6` plays 6 random rounds in headless Edge, and
 `npm run capture -- splitTable 1,3 "d u.decision h w2000 cmid"` saves native-resolution
