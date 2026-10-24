@@ -41,7 +41,16 @@ function authorised(req) {
   return timingSafeEqual(digest(password), expected);
 }
 
-createServer(async (req, res) => {
+createServer((req, res) => {
+  // a throw from serve() must not become an unhandled rejection: that ends the process
+  serve(req, res).catch(() => {
+    if (!res.headersSent) res.writeHead(400, { "content-type": "text/plain" });
+    res.end();
+  });
+}).listen(PORT, () => console.log(`table on :${PORT}`));
+
+async function serve(req, res) {
+  // `//x` or a malformed %-escape makes these throw
   const url = new URL(req.url ?? "/", "http://localhost");
   if (url.pathname === "/health") {
     res.writeHead(200, { "content-type": "text/plain" }).end("ok");
@@ -69,8 +78,9 @@ createServer(async (req, res) => {
       "cache-control": hashed ? "private, max-age=31536000, immutable" : "private, max-age=3600",
     });
     if (req.method === "HEAD") return res.end();
-    createReadStream(target).pipe(res);
+    // the file can vanish between stat and read during a redeploy: fail this response, not the server
+    createReadStream(target).on("error", () => res.destroy()).pipe(res);
   } catch {
     res.writeHead(404, { "content-type": "text/plain" }).end("Not found");
   }
-}).listen(PORT, () => console.log(`table on :${PORT}`));
+}

@@ -6,3 +6,4 @@ pipeline/work/
 __pycache__/
 bridges/stubs/
 bridges/generated/
+.vite/

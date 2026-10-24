@@ -3,200 +3,200 @@
  "fps": 23.976023976023978,
  "rows": [
   {
-   "src": "001_idle",
-   "frame": 0,
+   "src": "001_discard",
+   "frame": 55,
    "dst": "001_deal",
-   "exit": "001_idle@0000",
-   "output": "001_idle@0000__001_deal.mp4"
+   "exit": "001_discard@0055",
+   "output": "001_discard@0055__001_deal.mp4"
   },
   {
-   "src": "001_idle",
-   "frame": 0,
+   "src": "001_discard",
+   "frame": 55,
    "dst": "010_deal",
-   "exit": "001_idle@0000",
-   "output": "001_idle@0000__010_deal.mp4"
+   "exit": "001_discard@0055",
+   "output": "001_discard@0055__010_deal.mp4"
   },
   {
-   "src": "001_idle",
-   "frame": 0,
+   "src": "001_discard",
+   "frame": 55,
    "dst": "011_deal",
-   "exit": "001_idle@0000",
-   "output": "001_idle@0000__011_deal.mp4"
+   "exit": "001_discard@0055",
+   "output": "001_discard@0055__011_deal.mp4"
   },
   {
-   "src": "001_idle",
-   "frame": 0,
+   "src": "001_discard",
+   "frame": 55,
    "dst": "100_deal",
-   "exit": "001_idle@0000",
-   "output": "001_idle@0000__100_deal.mp4"
+   "exit": "001_discard@0055",
+   "output": "001_discard@0055__100_deal.mp4"
   },
   {
-   "src": "001_idle",
-   "frame": 0,
+   "src": "001_discard",
+   "frame": 55,
    "dst": "101_deal",
-   "exit": "001_idle@0000",
-   "output": "001_idle@0000__101_deal.mp4"
+   "exit": "001_discard@0055",
+   "output": "001_discard@0055__101_deal.mp4"
   },
   {
-   "src": "001_idle",
-   "frame": 0,
+   "src": "001_discard",
+   "frame": 55,
    "dst": "110_deal",
-   "exit": "001_idle@0000",
-   "output": "001_idle@0000__110_deal.mp4"
+   "exit": "001_discard@0055",
+   "output": "001_discard@0055__110_deal.mp4"
   },
   {
-   "src": "001_idle",
-   "frame": 0,
+   "src": "001_discard",
+   "frame": 55,
    "dst": "111_deal",
-   "exit": "001_idle@0000",
-   "output": "001_idle@0000__111_deal.mp4"
+   "exit": "001_discard@0055",
+   "output": "001_discard@0055__111_deal.mp4"
   },
   {
-   "src": "001_idle",
-   "frame": 26,
+   "src": "001_discard",
+   "frame": 85,
    "dst": "001_deal",
-   "exit": "001_idle@0026",
-   "output": "001_idle@0026__001_deal.mp4"
+   "exit": "001_discard@0085",
+   "output": "001_discard@0085__001_deal.mp4"
   },
   {
-   "src": "001_idle",
-   "frame": 26,
+   "src": "001_discard",
+   "frame": 85,
    "dst": "010_deal",
-   "exit": "001_idle@0026",
-   "output": "001_idle@0026__010_deal.mp4"
+   "exit": "001_discard@0085",
+   "output": "001_discard@0085__010_deal.mp4"
   },
   {
-   "src": "001_idle",
-   "frame": 26,
+   "src": "001_discard",
+   "frame": 85,
    "dst": "011_deal",
-   "exit": "001_idle@0026",
-   "output": "001_idle@0026__011_deal.mp4"
+   "exit": "001_discard@0085",
+   "output": "001_discard@0085__011_deal.mp4"
   },
   {
-   "src": "001_idle",
-   "frame": 26,
+   "src": "001_discard",
+   "frame": 85,
    "dst": "100_deal",
-   "exit": "001_idle@0026",
-   "output": "001_idle@0026__100_deal.mp4"
+   "exit": "001_discard@0085",
+   "output": "001_discard@0085__100_deal.mp4"
   },
   {
-   "src": "001_idle",
-   "frame": 26,
+   "src": "001_discard",
+   "frame": 85,
    "dst": "101_deal",
-   "exit": "001_idle@0026",
-   "output": "001_idle@0026__101_deal.mp4"
+   "exit": "001_discard@0085",
+   "output": "001_discard@0085__101_deal.mp4"
   },
   {
-   "src": "001_idle",
-   "frame": 26,
+   "src": "001_discard",
+   "frame": 85,
    "dst": "110_deal",
-   "exit": "001_idle@0026",
-   "output": "001_idle@0026__110_deal.mp4"
+   "exit": "001_discard@0085",
+   "output": "001_discard@0085__110_deal.mp4"
   },
   {
-   "src": "001_idle",
-   "frame": 26,
+   "src": "001_discard",
+   "frame": 85,
    "dst": "111_deal",
-   "exit": "001_idle@0026",
-   "output": "001_idle@0026__111_deal.mp4"
+   "exit": "001_discard@0085",
+   "output": "001_discard@0085__111_deal.mp4"
   },
   {
-   "src": "001_idle",
-   "frame": 46,
+   "src": "001_discard",
+   "frame": 93,
    "dst": "001_deal",
-   "exit": "001_idle@0046",
-   "output": "001_idle@0046__001_deal.mp4"
+   "exit": "001_discard@0093",
+   "output": "001_discard@0093__001_deal.mp4"
   },
   {
-   "src": "001_idle",
-   "frame": 46,
+   "src": "001_discard",
+   "frame": 93,
    "dst": "010_deal",
-   "exit": "001_idle@0046",
-   "output": "001_idle@0046__010_deal.mp4"
+   "exit": "001_discard@0093",
+   "output": "001_discard@0093__010_deal.mp4"
   },
   {
-   "src": "001_idle",
-   "frame": 46,
+   "src": "001_discard",
+   "frame": 93,
    "dst": "011_deal",
-   "exit": "001_idle@0046",
-   "output": "001_idle@0046__011_deal.mp4"
+   "exit": "001_discard@0093",
+   "output": "001_discard@0093__011_deal.mp4"
   },
   {
-   "src": "001_idle",
-   "frame": 46,
+   "src": "001_discard",
+   "frame": 93,
    "dst": "100_deal",
-   "exit": "001_idle@0046",
-   "output": "001_idle@0046__100_deal.mp4"
+   "exit": "001_discard@0093",
+   "output": "001_discard@0093__100_deal.mp4"
   },
   {
-   "src": "001_idle",
-   "frame": 46,
+   "src": "001_discard",
+   "frame": 93,
    "dst": "101_deal",
-   "exit": "001_idle@0046",
-   "output": "001_idle@0046__101_deal.mp4"
+   "exit": "001_discard@0093",
+   "output": "001_discard@0093__101_deal.mp4"
   },
   {
-   "src": "001_idle",
-   "frame": 46,
+   "src": "001_discard",
+   "frame": 93,
    "dst": "110_deal",
-   "exit": "001_idle@0046",
-   "output": "001_idle@0046__110_deal.mp4"
+   "exit": "001_discard@0093",
+   "output": "001_discard@0093__110_deal.mp4"
   },
   {
-   "src": "001_idle",
-   "frame": 46,
+   "src": "001_discard",
+   "frame": 93,
    "dst": "111_deal",
-   "exit": "001_idle@0046",
-   "output": "001_idle@0046__111_deal.mp4"
+   "exit": "001_discard@0093",
+   "output": "001_discard@0093__111_deal.mp4"
   },
   {
    "src": "001_idle",
-   "frame": 78,
+   "frame": 68,
    "dst": "001_deal",
-   "exit": "001_idle@0078",
-   "output": "001_idle@0078__001_deal.mp4"
+   "exit": "001_idle@0068",
+   "output": "001_idle@0068__001_deal.mp4"
   },
   {
    "src": "001_idle",
-   "frame": 78,
+   "frame": 68,
    "dst": "010_deal",
-   "exit": "001_idle@0078",
-   "output": "001_idle@0078__010_deal.mp4"
+   "exit": "001_idle@0068",
+   "output": "001_idle@0068__010_deal.mp4"
   },
   {
    "src": "001_idle",
-   "frame": 78,
+   "frame": 68,
    "dst": "011_deal",
-   "exit": "001_idle@0078",
-   "output": "001_idle@0078__011_deal.mp4"
+   "exit": "001_idle@0068",
+   "output": "001_idle@0068__011_deal.mp4"
   },
   {
    "src": "001_idle",
-   "frame": 78,
+   "frame": 68,
    "dst": "100_deal",
-   "exit": "001_idle@0078",
-   "output": "001_idle@0078__100_deal.mp4"
+   "exit": "001_idle@0068",
+   "output": "001_idle@0068__100_deal.mp4"
   },
   {
    "src": "001_idle",
-   "frame": 78,
+   "frame": 68,
    "dst": "101_deal",
-   "exit": "001_idle@0078",
-   "output": "001_idle@0078__101_deal.mp4"
+   "exit": "001_idle@0068",
+   "output": "001_idle@0068__101_deal.mp4"
   },
   {
    "src": "001_idle",
-   "frame": 78,
+   "frame": 68,
    "dst": "110_deal",
-   "exit": "001_idle@0078",
-   "output": "001_idle@0078__110_deal.mp4"
+   "exit": "001_idle@0068",
+   "output": "001_idle@0068__110_deal.mp4"
   },
   {
    "src": "001_idle",
-   "frame": 78,
+   "frame": 68,
    "dst": "111_deal",
-   "exit": "001_idle@0078",
-   "output": "001_idle@0078__111_deal.mp4"
+   "exit": "001_idle@0068",
+   "output": "001_idle@0068__111_deal.mp4"
   },
   {
    "src": "001_idle",
@@ -249,94 +249,101 @@
   },
   {
    "src": "001_idle",
-   "frame": 126,
+   "frame": 110,
    "dst": "001_deal",
-   "exit": "001_idle@0126",
-   "output": "001_idle@0126__001_deal.mp4"
+   "exit": "001_idle@0110",
+   "output": "001_idle@0110__001_deal.mp4"
   },
   {
    "src": "001_idle",
-   "frame": 126,
+   "frame": 110,
    "dst": "010_deal",
-   "exit": "001_idle@0126",
-   "output": "001_idle@0126__010_deal.mp4"
+   "exit": "001_idle@0110",
+   "output": "001_idle@0110__010_deal.mp4"
   },
   {
    "src": "001_idle",
-   "frame": 126,
+   "frame": 110,
    "dst": "011_deal",
-   "exit": "001_idle@0126",
-   "output": "001_idle@0126__011_deal.mp4"
+   "exit": "001_idle@0110",
+   "output": "001_idle@0110__011_deal.mp4"
   },
   {
    "src": "001_idle",
-   "frame": 126,
+   "frame": 110,
    "dst": "100_deal",
-   "exit": "001_idle@0126",
-   "output": "001_idle@0126__100_deal.mp4"
+   "exit": "001_idle@0110",
+   "output": "001_idle@0110__100_deal.mp4"
   },
   {
    "src": "001_idle",
-   "frame": 126,
+   "frame": 110,
    "dst": "101_deal",
-   "exit": "001_idle@0126",
-   "output": "001_idle@0126__101_deal.mp4"
+   "exit": "001_idle@0110",
+   "output": "001_idle@0110__101_deal.mp4"
   },
   {
    "src": "001_idle",
-   "frame": 126,
+   "frame": 110,
    "dst": "110_deal",
-   "exit": "001_idle@0126",
-   "output": "001_idle@0126__110_deal.mp4"
+   "exit": "001_idle@0110",
+   "output": "001_idle@0110__110_deal.mp4"
   },
   {
    "src": "001_idle",
-   "frame": 126,
+   "frame": 110,
    "dst": "111_deal",
-   "exit": "001_idle@0126",
-   "output": "001_idle@0126__111_deal.mp4"
+   "exit": "001_idle@0110",
+   "output": "001_idle@0110__111_deal.mp4"
   },
   {
    "src": "001_idle",
-   "frame": 152,
+   "frame": 136,
    "dst": "001_deal",
-   "exit": "001_idle@0152",
-   "output": "001_idle@0152__001_deal.mp4"
+   "exit": "001_idle@0136",
+   "output": "001_idle@0136__001_deal.mp4"
   },
   {
    "src": "001_idle",
-   "frame": 152,
+   "frame": 136,
+   "dst": "010_deal",
+   "exit": "001_idle@0136",
+   "output": "001_idle@0136__010_deal.mp4"
+  },
+  {
+   "src": "001_idle",
+   "frame": 136,
    "dst": "011_deal",
-   "exit": "001_idle@0152",
-   "output": "001_idle@0152__011_deal.mp4"
+   "exit": "001_idle@0136",
+   "output": "001_idle@0136__011_deal.mp4"
   },
   {
    "src": "001_idle",
-   "frame": 152,
+   "frame": 136,
    "dst": "100_deal",
-   "exit": "001_idle@0152",
-   "output": "001_idle@0152__100_deal.mp4"
+   "exit": "001_idle@0136",
+   "output": "001_idle@0136__100_deal.mp4"
   },
   {
    "src": "001_idle",
-   "frame": 152,
+   "frame": 136,
    "dst": "101_deal",
-   "exit": "001_idle@0152",
-   "output": "001_idle@0152__101_deal.mp4"
+   "exit": "001_idle@0136",
+   "output": "001_idle@0136__101_deal.mp4"
   },
   {
    "src": "001_idle",
-   "frame": 152,
+   "frame": 136,
    "dst": "110_deal",
-   "exit": "001_idle@0152",
-   "output": "001_idle@0152__110_deal.mp4"
+   "exit": "001_idle@0136",
+   "output": "001_idle@0136__110_deal.mp4"
   },
   {
    "src": "001_idle",
-   "frame": 152,
+   "frame": 136,
    "dst": "111_deal",
-   "exit": "001_idle@0152",
-   "output": "001_idle@0152__111_deal.mp4"
+   "exit": "001_idle@0136",
+   "output": "001_idle@0136__111_deal.mp4"
   },
   {
    "src": "001_wait",
@@ -400,6 +407,300 @@
    "dst": "seat3_card3_deal",
    "exit": "001_wait@0092",
    "output": "001_wait@0092__seat3_card3_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 71,
+   "dst": "001_deal",
+   "exit": "010_discard@0071",
+   "output": "010_discard@0071__001_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 71,
+   "dst": "010_deal",
+   "exit": "010_discard@0071",
+   "output": "010_discard@0071__010_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 71,
+   "dst": "011_deal",
+   "exit": "010_discard@0071",
+   "output": "010_discard@0071__011_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 71,
+   "dst": "100_deal",
+   "exit": "010_discard@0071",
+   "output": "010_discard@0071__100_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 71,
+   "dst": "101_deal",
+   "exit": "010_discard@0071",
+   "output": "010_discard@0071__101_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 71,
+   "dst": "110_deal",
+   "exit": "010_discard@0071",
+   "output": "010_discard@0071__110_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 71,
+   "dst": "111_deal",
+   "exit": "010_discard@0071",
+   "output": "010_discard@0071__111_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 101,
+   "dst": "001_deal",
+   "exit": "010_discard@0101",
+   "output": "010_discard@0101__001_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 101,
+   "dst": "010_deal",
+   "exit": "010_discard@0101",
+   "output": "010_discard@0101__010_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 101,
+   "dst": "011_deal",
+   "exit": "010_discard@0101",
+   "output": "010_discard@0101__011_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 101,
+   "dst": "100_deal",
+   "exit": "010_discard@0101",
+   "output": "010_discard@0101__100_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 101,
+   "dst": "101_deal",
+   "exit": "010_discard@0101",
+   "output": "010_discard@0101__101_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 101,
+   "dst": "110_deal",
+   "exit": "010_discard@0101",
+   "output": "010_discard@0101__110_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 101,
+   "dst": "111_deal",
+   "exit": "010_discard@0101",
+   "output": "010_discard@0101__111_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 113,
+   "dst": "001_deal",
+   "exit": "010_discard@0113",
+   "output": "010_discard@0113__001_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 113,
+   "dst": "010_deal",
+   "exit": "010_discard@0113",
+   "output": "010_discard@0113__010_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 113,
+   "dst": "011_deal",
+   "exit": "010_discard@0113",
+   "output": "010_discard@0113__011_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 113,
+   "dst": "100_deal",
+   "exit": "010_discard@0113",
+   "output": "010_discard@0113__100_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 113,
+   "dst": "101_deal",
+   "exit": "010_discard@0113",
+   "output": "010_discard@0113__101_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 113,
+   "dst": "110_deal",
+   "exit": "010_discard@0113",
+   "output": "010_discard@0113__110_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 113,
+   "dst": "111_deal",
+   "exit": "010_discard@0113",
+   "output": "010_discard@0113__111_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 149,
+   "dst": "001_deal",
+   "exit": "010_discard@0149",
+   "output": "010_discard@0149__001_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 149,
+   "dst": "010_deal",
+   "exit": "010_discard@0149",
+   "output": "010_discard@0149__010_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 149,
+   "dst": "011_deal",
+   "exit": "010_discard@0149",
+   "output": "010_discard@0149__011_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 149,
+   "dst": "100_deal",
+   "exit": "010_discard@0149",
+   "output": "010_discard@0149__100_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 149,
+   "dst": "101_deal",
+   "exit": "010_discard@0149",
+   "output": "010_discard@0149__101_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 149,
+   "dst": "110_deal",
+   "exit": "010_discard@0149",
+   "output": "010_discard@0149__110_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 149,
+   "dst": "111_deal",
+   "exit": "010_discard@0149",
+   "output": "010_discard@0149__111_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 162,
+   "dst": "001_deal",
+   "exit": "010_discard@0162",
+   "output": "010_discard@0162__001_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 162,
+   "dst": "010_deal",
+   "exit": "010_discard@0162",
+   "output": "010_discard@0162__010_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 162,
+   "dst": "011_deal",
+   "exit": "010_discard@0162",
+   "output": "010_discard@0162__011_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 162,
+   "dst": "100_deal",
+   "exit": "010_discard@0162",
+   "output": "010_discard@0162__100_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 162,
+   "dst": "101_deal",
+   "exit": "010_discard@0162",
+   "output": "010_discard@0162__101_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 162,
+   "dst": "110_deal",
+   "exit": "010_discard@0162",
+   "output": "010_discard@0162__110_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 162,
+   "dst": "111_deal",
+   "exit": "010_discard@0162",
+   "output": "010_discard@0162__111_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 180,
+   "dst": "001_deal",
+   "exit": "010_discard@0180",
+   "output": "010_discard@0180__001_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 180,
+   "dst": "010_deal",
+   "exit": "010_discard@0180",
+   "output": "010_discard@0180__010_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 180,
+   "dst": "011_deal",
+   "exit": "010_discard@0180",
+   "output": "010_discard@0180__011_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 180,
+   "dst": "100_deal",
+   "exit": "010_discard@0180",
+   "output": "010_discard@0180__100_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 180,
+   "dst": "101_deal",
+   "exit": "010_discard@0180",
+   "output": "010_discard@0180__101_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 180,
+   "dst": "110_deal",
+   "exit": "010_discard@0180",
+   "output": "010_discard@0180__110_deal.mp4"
+  },
+  {
+   "src": "010_discard",
+   "frame": 180,
+   "dst": "111_deal",
+   "exit": "010_discard@0180",
+   "output": "010_discard@0180__111_deal.mp4"
   },
   {
    "src": "010_idle",
@@ -501,143 +802,52 @@
   },
   {
    "src": "010_idle",
-   "frame": 42,
+   "frame": 46,
    "dst": "001_deal",
-   "exit": "010_idle@0042",
-   "output": "010_idle@0042__001_deal.mp4"
+   "exit": "010_idle@0046",
+   "output": "010_idle@0046__001_deal.mp4"
   },
   {
    "src": "010_idle",
-   "frame": 42,
+   "frame": 46,
    "dst": "010_deal",
-   "exit": "010_idle@0042",
-   "output": "010_idle@0042__010_deal.mp4"
+   "exit": "010_idle@0046",
+   "output": "010_idle@0046__010_deal.mp4"
   },
   {
    "src": "010_idle",
-   "frame": 42,
+   "frame": 46,
    "dst": "011_deal",
-   "exit": "010_idle@0042",
-   "output": "010_idle@0042__011_deal.mp4"
+   "exit": "010_idle@0046",
+   "output": "010_idle@0046__011_deal.mp4"
   },
   {
    "src": "010_idle",
-   "frame": 42,
+   "frame": 46,
    "dst": "100_deal",
-   "exit": "010_idle@0042",
-   "output": "010_idle@0042__100_deal.mp4"
+   "exit": "010_idle@0046",
+   "output": "010_idle@0046__100_deal.mp4"
   },
   {
    "src": "010_idle",
-   "frame": 42,
+   "frame": 46,
    "dst": "101_deal",
-   "exit": "010_idle@0042",
-   "output": "010_idle@0042__101_deal.mp4"
+   "exit": "010_idle@0046",
+   "output": "010_idle@0046__101_deal.mp4"
   },
   {
    "src": "010_idle",
-   "frame": 42,
+   "frame": 46,
    "dst": "110_deal",
-   "exit": "010_idle@0042",
-   "output": "010_idle@0042__110_deal.mp4"
+   "exit": "010_idle@0046",
+   "output": "010_idle@0046__110_deal.mp4"
   },
   {
    "src": "010_idle",
-   "frame": 42,
+   "frame": 46,
    "dst": "111_deal",
-   "exit": "010_idle@0042",
-   "output": "010_idle@0042__111_deal.mp4"
-  },
-  {
-   "src": "010_idle",
-   "frame": 78,
-   "dst": "001_deal",
-   "exit": "010_idle@0078",
-   "output": "010_idle@0078__001_deal.mp4"
-  },
-  {
-   "src": "010_idle",
-   "frame": 78,
-   "dst": "010_deal",
-   "exit": "010_idle@0078",
-   "output": "010_idle@0078__010_deal.mp4"
-  },
-  {
-   "src": "010_idle",
-   "frame": 78,
-   "dst": "011_deal",
-   "exit": "010_idle@0078",
-   "output": "010_idle@0078__011_deal.mp4"
-  },
-  {
-   "src": "010_idle",
-   "frame": 78,
-   "dst": "100_deal",
-   "exit": "010_idle@0078",
-   "output": "010_idle@0078__100_deal.mp4"
-  },
-  {
-   "src": "010_idle",
-   "frame": 78,
-   "dst": "101_deal",
-   "exit": "010_idle@0078",
-   "output": "010_idle@0078__101_deal.mp4"
-  },
-  {
-   "src": "010_idle",
-   "frame": 78,
-   "dst": "110_deal",
-   "exit": "010_idle@0078",
-   "output": "010_idle@0078__110_deal.mp4"
-  },
-  {
-   "src": "010_idle",
-   "frame": 78,
-   "dst": "111_deal",
-   "exit": "010_idle@0078",
-   "output": "010_idle@0078__111_deal.mp4"
-  },
-  {
-   "src": "010_idle",
-   "frame": 102,
-   "dst": "001_deal",
-   "exit": "010_idle@0102",
-   "output": "010_idle@0102__001_deal.mp4"
-  },
-  {
-   "src": "010_idle",
-   "frame": 102,
-   "dst": "010_deal",
-   "exit": "010_idle@0102",
-   "output": "010_idle@0102__010_deal.mp4"
-  },
-  {
-   "src": "010_idle",
-   "frame": 102,
-   "dst": "100_deal",
-   "exit": "010_idle@0102",
-   "output": "010_idle@0102__100_deal.mp4"
-  },
-  {
-   "src": "010_idle",
-   "frame": 102,
-   "dst": "101_deal",
-   "exit": "010_idle@0102",
-   "output": "010_idle@0102__101_deal.mp4"
-  },
-  {
-   "src": "010_idle",
-   "frame": 102,
-   "dst": "110_deal",
-   "exit": "010_idle@0102",
-   "output": "010_idle@0102__110_deal.mp4"
-  },
-  {
-   "src": "010_idle",
-   "frame": 102,
-   "dst": "111_deal",
-   "exit": "010_idle@0102",
-   "output": "010_idle@0102__111_deal.mp4"
+   "exit": "010_idle@0046",
+   "output": "010_idle@0046__111_deal.mp4"
   },
   {
    "src": "010_wait",
@@ -729,6 +939,251 @@
    "dst": "seat2_card3_deal",
    "exit": "010_wait@0145",
    "output": "010_wait@0145__seat2_card3_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 84,
+   "dst": "001_deal",
+   "exit": "011_discard@0084",
+   "output": "011_discard@0084__001_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 84,
+   "dst": "010_deal",
+   "exit": "011_discard@0084",
+   "output": "011_discard@0084__010_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 84,
+   "dst": "011_deal",
+   "exit": "011_discard@0084",
+   "output": "011_discard@0084__011_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 84,
+   "dst": "100_deal",
+   "exit": "011_discard@0084",
+   "output": "011_discard@0084__100_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 84,
+   "dst": "101_deal",
+   "exit": "011_discard@0084",
+   "output": "011_discard@0084__101_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 84,
+   "dst": "110_deal",
+   "exit": "011_discard@0084",
+   "output": "011_discard@0084__110_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 84,
+   "dst": "111_deal",
+   "exit": "011_discard@0084",
+   "output": "011_discard@0084__111_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 114,
+   "dst": "001_deal",
+   "exit": "011_discard@0114",
+   "output": "011_discard@0114__001_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 114,
+   "dst": "010_deal",
+   "exit": "011_discard@0114",
+   "output": "011_discard@0114__010_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 114,
+   "dst": "011_deal",
+   "exit": "011_discard@0114",
+   "output": "011_discard@0114__011_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 114,
+   "dst": "100_deal",
+   "exit": "011_discard@0114",
+   "output": "011_discard@0114__100_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 114,
+   "dst": "101_deal",
+   "exit": "011_discard@0114",
+   "output": "011_discard@0114__101_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 114,
+   "dst": "110_deal",
+   "exit": "011_discard@0114",
+   "output": "011_discard@0114__110_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 114,
+   "dst": "111_deal",
+   "exit": "011_discard@0114",
+   "output": "011_discard@0114__111_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 126,
+   "dst": "001_deal",
+   "exit": "011_discard@0126",
+   "output": "011_discard@0126__001_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 126,
+   "dst": "010_deal",
+   "exit": "011_discard@0126",
+   "output": "011_discard@0126__010_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 126,
+   "dst": "011_deal",
+   "exit": "011_discard@0126",
+   "output": "011_discard@0126__011_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 126,
+   "dst": "100_deal",
+   "exit": "011_discard@0126",
+   "output": "011_discard@0126__100_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 126,
+   "dst": "101_deal",
+   "exit": "011_discard@0126",
+   "output": "011_discard@0126__101_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 126,
+   "dst": "110_deal",
+   "exit": "011_discard@0126",
+   "output": "011_discard@0126__110_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 126,
+   "dst": "111_deal",
+   "exit": "011_discard@0126",
+   "output": "011_discard@0126__111_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 150,
+   "dst": "001_deal",
+   "exit": "011_discard@0150",
+   "output": "011_discard@0150__001_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 150,
+   "dst": "010_deal",
+   "exit": "011_discard@0150",
+   "output": "011_discard@0150__010_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 150,
+   "dst": "011_deal",
+   "exit": "011_discard@0150",
+   "output": "011_discard@0150__011_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 150,
+   "dst": "100_deal",
+   "exit": "011_discard@0150",
+   "output": "011_discard@0150__100_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 150,
+   "dst": "101_deal",
+   "exit": "011_discard@0150",
+   "output": "011_discard@0150__101_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 150,
+   "dst": "110_deal",
+   "exit": "011_discard@0150",
+   "output": "011_discard@0150__110_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 150,
+   "dst": "111_deal",
+   "exit": "011_discard@0150",
+   "output": "011_discard@0150__111_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 191,
+   "dst": "001_deal",
+   "exit": "011_discard@0191",
+   "output": "011_discard@0191__001_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 191,
+   "dst": "010_deal",
+   "exit": "011_discard@0191",
+   "output": "011_discard@0191__010_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 191,
+   "dst": "011_deal",
+   "exit": "011_discard@0191",
+   "output": "011_discard@0191__011_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 191,
+   "dst": "100_deal",
+   "exit": "011_discard@0191",
+   "output": "011_discard@0191__100_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 191,
+   "dst": "101_deal",
+   "exit": "011_discard@0191",
+   "output": "011_discard@0191__101_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 191,
+   "dst": "110_deal",
+   "exit": "011_discard@0191",
+   "output": "011_discard@0191__110_deal.mp4"
+  },
+  {
+   "src": "011_discard",
+   "frame": 191,
+   "dst": "111_deal",
+   "exit": "011_discard@0191",
+   "output": "011_discard@0191__111_deal.mp4"
   },
   {
    "src": "011_idle",
@@ -1032,102 +1487,298 @@
    "output": "011_wait@0159__seat3_card3_deal.mp4"
   },
   {
-   "src": "100_idle",
-   "frame": 0,
+   "src": "100_discard",
+   "frame": 83,
    "dst": "001_deal",
-   "exit": "100_idle@0000",
-   "output": "100_idle@0000__001_deal.mp4"
+   "exit": "100_discard@0083",
+   "output": "100_discard@0083__001_deal.mp4"
   },
   {
-   "src": "100_idle",
-   "frame": 0,
+   "src": "100_discard",
+   "frame": 83,
    "dst": "010_deal",
-   "exit": "100_idle@0000",
-   "output": "100_idle@0000__010_deal.mp4"
+   "exit": "100_discard@0083",
+   "output": "100_discard@0083__010_deal.mp4"
   },
   {
-   "src": "100_idle",
-   "frame": 0,
+   "src": "100_discard",
+   "frame": 83,
    "dst": "011_deal",
-   "exit": "100_idle@0000",
-   "output": "100_idle@0000__011_deal.mp4"
+   "exit": "100_discard@0083",
+   "output": "100_discard@0083__011_deal.mp4"
   },
   {
-   "src": "100_idle",
-   "frame": 0,
+   "src": "100_discard",
+   "frame": 83,
    "dst": "100_deal",
-   "exit": "100_idle@0000",
-   "output": "100_idle@0000__100_deal.mp4"
+   "exit": "100_discard@0083",
+   "output": "100_discard@0083__100_deal.mp4"
   },
   {
-   "src": "100_idle",
-   "frame": 0,
+   "src": "100_discard",
+   "frame": 83,
    "dst": "101_deal",
-   "exit": "100_idle@0000",
-   "output": "100_idle@0000__101_deal.mp4"
+   "exit": "100_discard@0083",
+   "output": "100_discard@0083__101_deal.mp4"
   },
   {
-   "src": "100_idle",
-   "frame": 0,
+   "src": "100_discard",
+   "frame": 83,
    "dst": "110_deal",
-   "exit": "100_idle@0000",
-   "output": "100_idle@0000__110_deal.mp4"
+   "exit": "100_discard@0083",
+   "output": "100_discard@0083__110_deal.mp4"
   },
   {
-   "src": "100_idle",
-   "frame": 0,
+   "src": "100_discard",
+   "frame": 83,
    "dst": "111_deal",
-   "exit": "100_idle@0000",
-   "output": "100_idle@0000__111_deal.mp4"
+   "exit": "100_discard@0083",
+   "output": "100_discard@0083__111_deal.mp4"
   },
   {
-   "src": "100_idle",
-   "frame": 30,
+   "src": "100_discard",
+   "frame": 113,
    "dst": "001_deal",
-   "exit": "100_idle@0030",
-   "output": "100_idle@0030__001_deal.mp4"
+   "exit": "100_discard@0113",
+   "output": "100_discard@0113__001_deal.mp4"
   },
   {
-   "src": "100_idle",
-   "frame": 30,
+   "src": "100_discard",
+   "frame": 113,
    "dst": "010_deal",
-   "exit": "100_idle@0030",
-   "output": "100_idle@0030__010_deal.mp4"
+   "exit": "100_discard@0113",
+   "output": "100_discard@0113__010_deal.mp4"
   },
   {
-   "src": "100_idle",
-   "frame": 30,
+   "src": "100_discard",
+   "frame": 113,
    "dst": "011_deal",
-   "exit": "100_idle@0030",
-   "output": "100_idle@0030__011_deal.mp4"
+   "exit": "100_discard@0113",
+   "output": "100_discard@0113__011_deal.mp4"
   },
   {
-   "src": "100_idle",
-   "frame": 30,
+   "src": "100_discard",
+   "frame": 113,
    "dst": "100_deal",
-   "exit": "100_idle@0030",
-   "output": "100_idle@0030__100_deal.mp4"
+   "exit": "100_discard@0113",
+   "output": "100_discard@0113__100_deal.mp4"
   },
   {
-   "src": "100_idle",
-   "frame": 30,
+   "src": "100_discard",
+   "frame": 113,
    "dst": "101_deal",
-   "exit": "100_idle@0030",
-   "output": "100_idle@0030__101_deal.mp4"
+   "exit": "100_discard@0113",
+   "output": "100_discard@0113__101_deal.mp4"
   },
   {
-   "src": "100_idle",
-   "frame": 30,
+   "src": "100_discard",
+   "frame": 113,
    "dst": "110_deal",
-   "exit": "100_idle@0030",
-   "output": "100_idle@0030__110_deal.mp4"
+   "exit": "100_discard@0113",
+   "output": "100_discard@0113__110_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 113,
+   "dst": "111_deal",
+   "exit": "100_discard@0113",
+   "output": "100_discard@0113__111_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 125,
+   "dst": "001_deal",
+   "exit": "100_discard@0125",
+   "output": "100_discard@0125__001_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 125,
+   "dst": "010_deal",
+   "exit": "100_discard@0125",
+   "output": "100_discard@0125__010_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 125,
+   "dst": "011_deal",
+   "exit": "100_discard@0125",
+   "output": "100_discard@0125__011_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 125,
+   "dst": "100_deal",
+   "exit": "100_discard@0125",
+   "output": "100_discard@0125__100_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 125,
+   "dst": "101_deal",
+   "exit": "100_discard@0125",
+   "output": "100_discard@0125__101_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 125,
+   "dst": "110_deal",
+   "exit": "100_discard@0125",
+   "output": "100_discard@0125__110_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 125,
+   "dst": "111_deal",
+   "exit": "100_discard@0125",
+   "output": "100_discard@0125__111_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 161,
+   "dst": "001_deal",
+   "exit": "100_discard@0161",
+   "output": "100_discard@0161__001_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 161,
+   "dst": "010_deal",
+   "exit": "100_discard@0161",
+   "output": "100_discard@0161__010_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 161,
+   "dst": "011_deal",
+   "exit": "100_discard@0161",
+   "output": "100_discard@0161__011_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 161,
+   "dst": "100_deal",
+   "exit": "100_discard@0161",
+   "output": "100_discard@0161__100_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 161,
+   "dst": "101_deal",
+   "exit": "100_discard@0161",
+   "output": "100_discard@0161__101_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 161,
+   "dst": "110_deal",
+   "exit": "100_discard@0161",
+   "output": "100_discard@0161__110_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 161,
+   "dst": "111_deal",
+   "exit": "100_discard@0161",
+   "output": "100_discard@0161__111_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 187,
+   "dst": "001_deal",
+   "exit": "100_discard@0187",
+   "output": "100_discard@0187__001_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 187,
+   "dst": "010_deal",
+   "exit": "100_discard@0187",
+   "output": "100_discard@0187__010_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 187,
+   "dst": "011_deal",
+   "exit": "100_discard@0187",
+   "output": "100_discard@0187__011_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 187,
+   "dst": "100_deal",
+   "exit": "100_discard@0187",
+   "output": "100_discard@0187__100_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 187,
+   "dst": "101_deal",
+   "exit": "100_discard@0187",
+   "output": "100_discard@0187__101_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 187,
+   "dst": "110_deal",
+   "exit": "100_discard@0187",
+   "output": "100_discard@0187__110_deal.mp4"
+  },
+  {
+   "src": "100_discard",
+   "frame": 187,
+   "dst": "111_deal",
+   "exit": "100_discard@0187",
+   "output": "100_discard@0187__111_deal.mp4"
   },
   {
    "src": "100_idle",
-   "frame": 30,
+   "frame": 23,
+   "dst": "001_deal",
+   "exit": "100_idle@0023",
+   "output": "100_idle@0023__001_deal.mp4"
+  },
+  {
+   "src": "100_idle",
+   "frame": 23,
+   "dst": "010_deal",
+   "exit": "100_idle@0023",
+   "output": "100_idle@0023__010_deal.mp4"
+  },
+  {
+   "src": "100_idle",
+   "frame": 23,
+   "dst": "011_deal",
+   "exit": "100_idle@0023",
+   "output": "100_idle@0023__011_deal.mp4"
+  },
+  {
+   "src": "100_idle",
+   "frame": 23,
+   "dst": "100_deal",
+   "exit": "100_idle@0023",
+   "output": "100_idle@0023__100_deal.mp4"
+  },
+  {
+   "src": "100_idle",
+   "frame": 23,
+   "dst": "101_deal",
+   "exit": "100_idle@0023",
+   "output": "100_idle@0023__101_deal.mp4"
+  },
+  {
+   "src": "100_idle",
+   "frame": 23,
+   "dst": "110_deal",
+   "exit": "100_idle@0023",
+   "output": "100_idle@0023__110_deal.mp4"
+  },
+  {
+   "src": "100_idle",
+   "frame": 23,
    "dst": "111_deal",
-   "exit": "100_idle@0030",
-   "output": "100_idle@0030__111_deal.mp4"
+   "exit": "100_idle@0023",
+   "output": "100_idle@0023__111_deal.mp4"
   },
   {
    "src": "100_idle",
@@ -1180,192 +1831,52 @@
   },
   {
    "src": "100_idle",
-   "frame": 66,
+   "frame": 67,
    "dst": "001_deal",
-   "exit": "100_idle@0066",
-   "output": "100_idle@0066__001_deal.mp4"
+   "exit": "100_idle@0067",
+   "output": "100_idle@0067__001_deal.mp4"
   },
   {
    "src": "100_idle",
-   "frame": 66,
+   "frame": 67,
    "dst": "010_deal",
-   "exit": "100_idle@0066",
-   "output": "100_idle@0066__010_deal.mp4"
+   "exit": "100_idle@0067",
+   "output": "100_idle@0067__010_deal.mp4"
   },
   {
    "src": "100_idle",
-   "frame": 66,
+   "frame": 67,
    "dst": "011_deal",
-   "exit": "100_idle@0066",
-   "output": "100_idle@0066__011_deal.mp4"
+   "exit": "100_idle@0067",
+   "output": "100_idle@0067__011_deal.mp4"
   },
   {
    "src": "100_idle",
-   "frame": 66,
+   "frame": 67,
    "dst": "100_deal",
-   "exit": "100_idle@0066",
-   "output": "100_idle@0066__100_deal.mp4"
+   "exit": "100_idle@0067",
+   "output": "100_idle@0067__100_deal.mp4"
   },
   {
    "src": "100_idle",
-   "frame": 66,
+   "frame": 67,
    "dst": "101_deal",
-   "exit": "100_idle@0066",
-   "output": "100_idle@0066__101_deal.mp4"
+   "exit": "100_idle@0067",
+   "output": "100_idle@0067__101_deal.mp4"
   },
   {
    "src": "100_idle",
-   "frame": 66,
+   "frame": 67,
    "dst": "110_deal",
-   "exit": "100_idle@0066",
-   "output": "100_idle@0066__110_deal.mp4"
+   "exit": "100_idle@0067",
+   "output": "100_idle@0067__110_deal.mp4"
   },
   {
    "src": "100_idle",
-   "frame": 66,
+   "frame": 67,
    "dst": "111_deal",
-   "exit": "100_idle@0066",
-   "output": "100_idle@0066__111_deal.mp4"
-  },
-  {
-   "src": "100_idle",
-   "frame": 102,
-   "dst": "001_deal",
-   "exit": "100_idle@0102",
-   "output": "100_idle@0102__001_deal.mp4"
-  },
-  {
-   "src": "100_idle",
-   "frame": 102,
-   "dst": "010_deal",
-   "exit": "100_idle@0102",
-   "output": "100_idle@0102__010_deal.mp4"
-  },
-  {
-   "src": "100_idle",
-   "frame": 102,
-   "dst": "011_deal",
-   "exit": "100_idle@0102",
-   "output": "100_idle@0102__011_deal.mp4"
-  },
-  {
-   "src": "100_idle",
-   "frame": 102,
-   "dst": "100_deal",
-   "exit": "100_idle@0102",
-   "output": "100_idle@0102__100_deal.mp4"
-  },
-  {
-   "src": "100_idle",
-   "frame": 102,
-   "dst": "101_deal",
-   "exit": "100_idle@0102",
-   "output": "100_idle@0102__101_deal.mp4"
-  },
-  {
-   "src": "100_idle",
-   "frame": 102,
-   "dst": "110_deal",
-   "exit": "100_idle@0102",
-   "output": "100_idle@0102__110_deal.mp4"
-  },
-  {
-   "src": "100_idle",
-   "frame": 102,
-   "dst": "111_deal",
-   "exit": "100_idle@0102",
-   "output": "100_idle@0102__111_deal.mp4"
-  },
-  {
-   "src": "100_idle",
-   "frame": 126,
-   "dst": "001_deal",
-   "exit": "100_idle@0126",
-   "output": "100_idle@0126__001_deal.mp4"
-  },
-  {
-   "src": "100_idle",
-   "frame": 126,
-   "dst": "010_deal",
-   "exit": "100_idle@0126",
-   "output": "100_idle@0126__010_deal.mp4"
-  },
-  {
-   "src": "100_idle",
-   "frame": 126,
-   "dst": "011_deal",
-   "exit": "100_idle@0126",
-   "output": "100_idle@0126__011_deal.mp4"
-  },
-  {
-   "src": "100_idle",
-   "frame": 126,
-   "dst": "100_deal",
-   "exit": "100_idle@0126",
-   "output": "100_idle@0126__100_deal.mp4"
-  },
-  {
-   "src": "100_idle",
-   "frame": 126,
-   "dst": "101_deal",
-   "exit": "100_idle@0126",
-   "output": "100_idle@0126__101_deal.mp4"
-  },
-  {
-   "src": "100_idle",
-   "frame": 126,
-   "dst": "110_deal",
-   "exit": "100_idle@0126",
-   "output": "100_idle@0126__110_deal.mp4"
-  },
-  {
-   "src": "100_idle",
-   "frame": 126,
-   "dst": "111_deal",
-   "exit": "100_idle@0126",
-   "output": "100_idle@0126__111_deal.mp4"
-  },
-  {
-   "src": "100_idle",
-   "frame": 151,
-   "dst": "001_deal",
-   "exit": "100_idle@0151",
-   "output": "100_idle@0151__001_deal.mp4"
-  },
-  {
-   "src": "100_idle",
-   "frame": 151,
-   "dst": "010_deal",
-   "exit": "100_idle@0151",
-   "output": "100_idle@0151__010_deal.mp4"
-  },
-  {
-   "src": "100_idle",
-   "frame": 151,
-   "dst": "011_deal",
-   "exit": "100_idle@0151",
-   "output": "100_idle@0151__011_deal.mp4"
-  },
-  {
-   "src": "100_idle",
-   "frame": 151,
-   "dst": "100_deal",
-   "exit": "100_idle@0151",
-   "output": "100_idle@0151__100_deal.mp4"
-  },
-  {
-   "src": "100_idle",
-   "frame": 151,
-   "dst": "110_deal",
-   "exit": "100_idle@0151",
-   "output": "100_idle@0151__110_deal.mp4"
-  },
-  {
-   "src": "100_idle",
-   "frame": 151,
-   "dst": "111_deal",
-   "exit": "100_idle@0151",
-   "output": "100_idle@0151__111_deal.mp4"
+   "exit": "100_idle@0067",
+   "output": "100_idle@0067__111_deal.mp4"
   },
   {
    "src": "100_wait",
@@ -1445,291 +1956,396 @@
    "output": "100_wait@0125__seat1_card3_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 0,
+   "src": "101_discard",
+   "frame": 92,
    "dst": "001_deal",
-   "exit": "101_idle@0000",
-   "output": "101_idle@0000__001_deal.mp4"
+   "exit": "101_discard@0092",
+   "output": "101_discard@0092__001_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 0,
+   "src": "101_discard",
+   "frame": 92,
    "dst": "010_deal",
-   "exit": "101_idle@0000",
-   "output": "101_idle@0000__010_deal.mp4"
+   "exit": "101_discard@0092",
+   "output": "101_discard@0092__010_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 0,
+   "src": "101_discard",
+   "frame": 92,
    "dst": "011_deal",
-   "exit": "101_idle@0000",
-   "output": "101_idle@0000__011_deal.mp4"
+   "exit": "101_discard@0092",
+   "output": "101_discard@0092__011_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 0,
+   "src": "101_discard",
+   "frame": 92,
    "dst": "100_deal",
-   "exit": "101_idle@0000",
-   "output": "101_idle@0000__100_deal.mp4"
+   "exit": "101_discard@0092",
+   "output": "101_discard@0092__100_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 0,
+   "src": "101_discard",
+   "frame": 92,
    "dst": "101_deal",
-   "exit": "101_idle@0000",
-   "output": "101_idle@0000__101_deal.mp4"
+   "exit": "101_discard@0092",
+   "output": "101_discard@0092__101_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 0,
+   "src": "101_discard",
+   "frame": 92,
    "dst": "110_deal",
-   "exit": "101_idle@0000",
-   "output": "101_idle@0000__110_deal.mp4"
+   "exit": "101_discard@0092",
+   "output": "101_discard@0092__110_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 0,
+   "src": "101_discard",
+   "frame": 92,
    "dst": "111_deal",
-   "exit": "101_idle@0000",
-   "output": "101_idle@0000__111_deal.mp4"
+   "exit": "101_discard@0092",
+   "output": "101_discard@0092__111_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 28,
+   "src": "101_discard",
+   "frame": 122,
    "dst": "001_deal",
-   "exit": "101_idle@0028",
-   "output": "101_idle@0028__001_deal.mp4"
+   "exit": "101_discard@0122",
+   "output": "101_discard@0122__001_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 28,
+   "src": "101_discard",
+   "frame": 122,
    "dst": "010_deal",
-   "exit": "101_idle@0028",
-   "output": "101_idle@0028__010_deal.mp4"
+   "exit": "101_discard@0122",
+   "output": "101_discard@0122__010_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 28,
+   "src": "101_discard",
+   "frame": 122,
    "dst": "011_deal",
-   "exit": "101_idle@0028",
-   "output": "101_idle@0028__011_deal.mp4"
+   "exit": "101_discard@0122",
+   "output": "101_discard@0122__011_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 28,
+   "src": "101_discard",
+   "frame": 122,
    "dst": "100_deal",
-   "exit": "101_idle@0028",
-   "output": "101_idle@0028__100_deal.mp4"
+   "exit": "101_discard@0122",
+   "output": "101_discard@0122__100_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 28,
+   "src": "101_discard",
+   "frame": 122,
    "dst": "101_deal",
-   "exit": "101_idle@0028",
-   "output": "101_idle@0028__101_deal.mp4"
+   "exit": "101_discard@0122",
+   "output": "101_discard@0122__101_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 28,
+   "src": "101_discard",
+   "frame": 122,
    "dst": "110_deal",
-   "exit": "101_idle@0028",
-   "output": "101_idle@0028__110_deal.mp4"
+   "exit": "101_discard@0122",
+   "output": "101_discard@0122__110_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 28,
+   "src": "101_discard",
+   "frame": 122,
    "dst": "111_deal",
-   "exit": "101_idle@0028",
-   "output": "101_idle@0028__111_deal.mp4"
+   "exit": "101_discard@0122",
+   "output": "101_discard@0122__111_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 51,
+   "src": "101_discard",
+   "frame": 134,
    "dst": "001_deal",
-   "exit": "101_idle@0051",
-   "output": "101_idle@0051__001_deal.mp4"
+   "exit": "101_discard@0134",
+   "output": "101_discard@0134__001_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 51,
+   "src": "101_discard",
+   "frame": 134,
    "dst": "010_deal",
-   "exit": "101_idle@0051",
-   "output": "101_idle@0051__010_deal.mp4"
+   "exit": "101_discard@0134",
+   "output": "101_discard@0134__010_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 51,
+   "src": "101_discard",
+   "frame": 134,
    "dst": "011_deal",
-   "exit": "101_idle@0051",
-   "output": "101_idle@0051__011_deal.mp4"
+   "exit": "101_discard@0134",
+   "output": "101_discard@0134__011_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 51,
+   "src": "101_discard",
+   "frame": 134,
    "dst": "100_deal",
-   "exit": "101_idle@0051",
-   "output": "101_idle@0051__100_deal.mp4"
+   "exit": "101_discard@0134",
+   "output": "101_discard@0134__100_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 51,
+   "src": "101_discard",
+   "frame": 134,
    "dst": "101_deal",
-   "exit": "101_idle@0051",
-   "output": "101_idle@0051__101_deal.mp4"
+   "exit": "101_discard@0134",
+   "output": "101_discard@0134__101_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 51,
+   "src": "101_discard",
+   "frame": 134,
    "dst": "110_deal",
-   "exit": "101_idle@0051",
-   "output": "101_idle@0051__110_deal.mp4"
+   "exit": "101_discard@0134",
+   "output": "101_discard@0134__110_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 51,
+   "src": "101_discard",
+   "frame": 134,
    "dst": "111_deal",
-   "exit": "101_idle@0051",
-   "output": "101_idle@0051__111_deal.mp4"
+   "exit": "101_discard@0134",
+   "output": "101_discard@0134__111_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 72,
+   "src": "101_discard",
+   "frame": 171,
    "dst": "001_deal",
-   "exit": "101_idle@0072",
-   "output": "101_idle@0072__001_deal.mp4"
+   "exit": "101_discard@0171",
+   "output": "101_discard@0171__001_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 72,
+   "src": "101_discard",
+   "frame": 171,
    "dst": "010_deal",
-   "exit": "101_idle@0072",
-   "output": "101_idle@0072__010_deal.mp4"
+   "exit": "101_discard@0171",
+   "output": "101_discard@0171__010_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 72,
+   "src": "101_discard",
+   "frame": 171,
    "dst": "011_deal",
-   "exit": "101_idle@0072",
-   "output": "101_idle@0072__011_deal.mp4"
+   "exit": "101_discard@0171",
+   "output": "101_discard@0171__011_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 72,
+   "src": "101_discard",
+   "frame": 171,
    "dst": "100_deal",
-   "exit": "101_idle@0072",
-   "output": "101_idle@0072__100_deal.mp4"
+   "exit": "101_discard@0171",
+   "output": "101_discard@0171__100_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 72,
+   "src": "101_discard",
+   "frame": 171,
    "dst": "101_deal",
-   "exit": "101_idle@0072",
-   "output": "101_idle@0072__101_deal.mp4"
+   "exit": "101_discard@0171",
+   "output": "101_discard@0171__101_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 72,
+   "src": "101_discard",
+   "frame": 171,
    "dst": "110_deal",
-   "exit": "101_idle@0072",
-   "output": "101_idle@0072__110_deal.mp4"
+   "exit": "101_discard@0171",
+   "output": "101_discard@0171__110_deal.mp4"
   },
   {
-   "src": "101_idle",
-   "frame": 72,
+   "src": "101_discard",
+   "frame": 171,
    "dst": "111_deal",
-   "exit": "101_idle@0072",
-   "output": "101_idle@0072__111_deal.mp4"
+   "exit": "101_discard@0171",
+   "output": "101_discard@0171__111_deal.mp4"
   },
   {
    "src": "101_idle",
-   "frame": 90,
+   "frame": 34,
    "dst": "001_deal",
-   "exit": "101_idle@0090",
-   "output": "101_idle@0090__001_deal.mp4"
+   "exit": "101_idle@0034",
+   "output": "101_idle@0034__001_deal.mp4"
   },
   {
    "src": "101_idle",
-   "frame": 90,
+   "frame": 34,
    "dst": "010_deal",
-   "exit": "101_idle@0090",
-   "output": "101_idle@0090__010_deal.mp4"
+   "exit": "101_idle@0034",
+   "output": "101_idle@0034__010_deal.mp4"
   },
   {
    "src": "101_idle",
-   "frame": 90,
+   "frame": 34,
    "dst": "011_deal",
-   "exit": "101_idle@0090",
-   "output": "101_idle@0090__011_deal.mp4"
+   "exit": "101_idle@0034",
+   "output": "101_idle@0034__011_deal.mp4"
   },
   {
    "src": "101_idle",
-   "frame": 90,
+   "frame": 34,
    "dst": "100_deal",
-   "exit": "101_idle@0090",
-   "output": "101_idle@0090__100_deal.mp4"
+   "exit": "101_idle@0034",
+   "output": "101_idle@0034__100_deal.mp4"
   },
   {
    "src": "101_idle",
-   "frame": 90,
+   "frame": 34,
    "dst": "101_deal",
-   "exit": "101_idle@0090",
-   "output": "101_idle@0090__101_deal.mp4"
+   "exit": "101_idle@0034",
+   "output": "101_idle@0034__101_deal.mp4"
   },
   {
    "src": "101_idle",
-   "frame": 90,
+   "frame": 34,
    "dst": "110_deal",
-   "exit": "101_idle@0090",
-   "output": "101_idle@0090__110_deal.mp4"
+   "exit": "101_idle@0034",
+   "output": "101_idle@0034__110_deal.mp4"
   },
   {
    "src": "101_idle",
-   "frame": 90,
+   "frame": 34,
    "dst": "111_deal",
-   "exit": "101_idle@0090",
-   "output": "101_idle@0090__111_deal.mp4"
+   "exit": "101_idle@0034",
+   "output": "101_idle@0034__111_deal.mp4"
   },
   {
    "src": "101_idle",
-   "frame": 113,
+   "frame": 64,
    "dst": "001_deal",
-   "exit": "101_idle@0113",
-   "output": "101_idle@0113__001_deal.mp4"
+   "exit": "101_idle@0064",
+   "output": "101_idle@0064__001_deal.mp4"
   },
   {
    "src": "101_idle",
-   "frame": 113,
+   "frame": 64,
    "dst": "010_deal",
-   "exit": "101_idle@0113",
-   "output": "101_idle@0113__010_deal.mp4"
+   "exit": "101_idle@0064",
+   "output": "101_idle@0064__010_deal.mp4"
   },
   {
    "src": "101_idle",
-   "frame": 113,
+   "frame": 64,
    "dst": "011_deal",
-   "exit": "101_idle@0113",
-   "output": "101_idle@0113__011_deal.mp4"
+   "exit": "101_idle@0064",
+   "output": "101_idle@0064__011_deal.mp4"
   },
   {
    "src": "101_idle",
-   "frame": 113,
+   "frame": 64,
    "dst": "100_deal",
-   "exit": "101_idle@0113",
-   "output": "101_idle@0113__100_deal.mp4"
+   "exit": "101_idle@0064",
+   "output": "101_idle@0064__100_deal.mp4"
   },
   {
    "src": "101_idle",
-   "frame": 113,
+   "frame": 64,
    "dst": "101_deal",
-   "exit": "101_idle@0113",
-   "output": "101_idle@0113__101_deal.mp4"
+   "exit": "101_idle@0064",
+   "output": "101_idle@0064__101_deal.mp4"
   },
   {
    "src": "101_idle",
-   "frame": 113,
+   "frame": 64,
+   "dst": "110_deal",
+   "exit": "101_idle@0064",
+   "output": "101_idle@0064__110_deal.mp4"
+  },
+  {
+   "src": "101_idle",
+   "frame": 64,
    "dst": "111_deal",
-   "exit": "101_idle@0113",
-   "output": "101_idle@0113__111_deal.mp4"
+   "exit": "101_idle@0064",
+   "output": "101_idle@0064__111_deal.mp4"
+  },
+  {
+   "src": "101_idle",
+   "frame": 88,
+   "dst": "001_deal",
+   "exit": "101_idle@0088",
+   "output": "101_idle@0088__001_deal.mp4"
+  },
+  {
+   "src": "101_idle",
+   "frame": 88,
+   "dst": "010_deal",
+   "exit": "101_idle@0088",
+   "output": "101_idle@0088__010_deal.mp4"
+  },
+  {
+   "src": "101_idle",
+   "frame": 88,
+   "dst": "011_deal",
+   "exit": "101_idle@0088",
+   "output": "101_idle@0088__011_deal.mp4"
+  },
+  {
+   "src": "101_idle",
+   "frame": 88,
+   "dst": "100_deal",
+   "exit": "101_idle@0088",
+   "output": "101_idle@0088__100_deal.mp4"
+  },
+  {
+   "src": "101_idle",
+   "frame": 88,
+   "dst": "101_deal",
+   "exit": "101_idle@0088",
+   "output": "101_idle@0088__101_deal.mp4"
+  },
+  {
+   "src": "101_idle",
+   "frame": 88,
+   "dst": "110_deal",
+   "exit": "101_idle@0088",
+   "output": "101_idle@0088__110_deal.mp4"
+  },
+  {
+   "src": "101_idle",
+   "frame": 88,
+   "dst": "111_deal",
+   "exit": "101_idle@0088",
+   "output": "101_idle@0088__111_deal.mp4"
+  },
+  {
+   "src": "101_idle",
+   "frame": 101,
+   "dst": "001_deal",
+   "exit": "101_idle@0101",
+   "output": "101_idle@0101__001_deal.mp4"
+  },
+  {
+   "src": "101_idle",
+   "frame": 101,
+   "dst": "010_deal",
+   "exit": "101_idle@0101",
+   "output": "101_idle@0101__010_deal.mp4"
+  },
+  {
+   "src": "101_idle",
+   "frame": 101,
+   "dst": "011_deal",
+   "exit": "101_idle@0101",
+   "output": "101_idle@0101__011_deal.mp4"
+  },
+  {
+   "src": "101_idle",
+   "frame": 101,
+   "dst": "100_deal",
+   "exit": "101_idle@0101",
+   "output": "101_idle@0101__100_deal.mp4"
+  },
+  {
+   "src": "101_idle",
+   "frame": 101,
+   "dst": "101_deal",
+   "exit": "101_idle@0101",
+   "output": "101_idle@0101__101_deal.mp4"
+  },
+  {
+   "src": "101_idle",
+   "frame": 101,
+   "dst": "110_deal",
+   "exit": "101_idle@0101",
+   "output": "101_idle@0101__110_deal.mp4"
+  },
+  {
+   "src": "101_idle",
+   "frame": 101,
+   "dst": "111_deal",
+   "exit": "101_idle@0101",
+   "output": "101_idle@0101__111_deal.mp4"
   },
   {
    "src": "101_wait",
@@ -1809,298 +2425,249 @@
    "output": "101_wait@0067__seat3_card3_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 0,
+   "src": "110_discard",
+   "frame": 86,
    "dst": "001_deal",
-   "exit": "110_idle@0000",
-   "output": "110_idle@0000__001_deal.mp4"
+   "exit": "110_discard@0086",
+   "output": "110_discard@0086__001_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 0,
+   "src": "110_discard",
+   "frame": 86,
    "dst": "010_deal",
-   "exit": "110_idle@0000",
-   "output": "110_idle@0000__010_deal.mp4"
+   "exit": "110_discard@0086",
+   "output": "110_discard@0086__010_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 0,
+   "src": "110_discard",
+   "frame": 86,
    "dst": "011_deal",
-   "exit": "110_idle@0000",
-   "output": "110_idle@0000__011_deal.mp4"
+   "exit": "110_discard@0086",
+   "output": "110_discard@0086__011_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 0,
+   "src": "110_discard",
+   "frame": 86,
    "dst": "100_deal",
-   "exit": "110_idle@0000",
-   "output": "110_idle@0000__100_deal.mp4"
+   "exit": "110_discard@0086",
+   "output": "110_discard@0086__100_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 0,
+   "src": "110_discard",
+   "frame": 86,
    "dst": "101_deal",
-   "exit": "110_idle@0000",
-   "output": "110_idle@0000__101_deal.mp4"
+   "exit": "110_discard@0086",
+   "output": "110_discard@0086__101_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 0,
+   "src": "110_discard",
+   "frame": 86,
    "dst": "110_deal",
-   "exit": "110_idle@0000",
-   "output": "110_idle@0000__110_deal.mp4"
+   "exit": "110_discard@0086",
+   "output": "110_discard@0086__110_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 0,
+   "src": "110_discard",
+   "frame": 86,
    "dst": "111_deal",
-   "exit": "110_idle@0000",
-   "output": "110_idle@0000__111_deal.mp4"
+   "exit": "110_discard@0086",
+   "output": "110_discard@0086__111_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 18,
+   "src": "110_discard",
+   "frame": 116,
    "dst": "001_deal",
-   "exit": "110_idle@0018",
-   "output": "110_idle@0018__001_deal.mp4"
+   "exit": "110_discard@0116",
+   "output": "110_discard@0116__001_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 18,
+   "src": "110_discard",
+   "frame": 116,
    "dst": "010_deal",
-   "exit": "110_idle@0018",
-   "output": "110_idle@0018__010_deal.mp4"
+   "exit": "110_discard@0116",
+   "output": "110_discard@0116__010_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 18,
+   "src": "110_discard",
+   "frame": 116,
    "dst": "011_deal",
-   "exit": "110_idle@0018",
-   "output": "110_idle@0018__011_deal.mp4"
+   "exit": "110_discard@0116",
+   "output": "110_discard@0116__011_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 18,
+   "src": "110_discard",
+   "frame": 116,
    "dst": "100_deal",
-   "exit": "110_idle@0018",
-   "output": "110_idle@0018__100_deal.mp4"
+   "exit": "110_discard@0116",
+   "output": "110_discard@0116__100_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 18,
+   "src": "110_discard",
+   "frame": 116,
    "dst": "101_deal",
-   "exit": "110_idle@0018",
-   "output": "110_idle@0018__101_deal.mp4"
+   "exit": "110_discard@0116",
+   "output": "110_discard@0116__101_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 18,
+   "src": "110_discard",
+   "frame": 116,
    "dst": "110_deal",
-   "exit": "110_idle@0018",
-   "output": "110_idle@0018__110_deal.mp4"
+   "exit": "110_discard@0116",
+   "output": "110_discard@0116__110_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 18,
+   "src": "110_discard",
+   "frame": 116,
    "dst": "111_deal",
-   "exit": "110_idle@0018",
-   "output": "110_idle@0018__111_deal.mp4"
+   "exit": "110_discard@0116",
+   "output": "110_discard@0116__111_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 54,
+   "src": "110_discard",
+   "frame": 124,
    "dst": "001_deal",
-   "exit": "110_idle@0054",
-   "output": "110_idle@0054__001_deal.mp4"
+   "exit": "110_discard@0124",
+   "output": "110_discard@0124__001_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 54,
+   "src": "110_discard",
+   "frame": 124,
    "dst": "010_deal",
-   "exit": "110_idle@0054",
-   "output": "110_idle@0054__010_deal.mp4"
+   "exit": "110_discard@0124",
+   "output": "110_discard@0124__010_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 54,
+   "src": "110_discard",
+   "frame": 124,
    "dst": "011_deal",
-   "exit": "110_idle@0054",
-   "output": "110_idle@0054__011_deal.mp4"
+   "exit": "110_discard@0124",
+   "output": "110_discard@0124__011_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 54,
+   "src": "110_discard",
+   "frame": 124,
    "dst": "100_deal",
-   "exit": "110_idle@0054",
-   "output": "110_idle@0054__100_deal.mp4"
+   "exit": "110_discard@0124",
+   "output": "110_discard@0124__100_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 54,
+   "src": "110_discard",
+   "frame": 124,
    "dst": "101_deal",
-   "exit": "110_idle@0054",
-   "output": "110_idle@0054__101_deal.mp4"
+   "exit": "110_discard@0124",
+   "output": "110_discard@0124__101_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 54,
+   "src": "110_discard",
+   "frame": 124,
    "dst": "110_deal",
-   "exit": "110_idle@0054",
-   "output": "110_idle@0054__110_deal.mp4"
+   "exit": "110_discard@0124",
+   "output": "110_discard@0124__110_deal.mp4"
   },
   {
-   "src": "110_idle",
-   "frame": 54,
+   "src": "110_discard",
+   "frame": 124,
    "dst": "111_deal",
-   "exit": "110_idle@0054",
-   "output": "110_idle@0054__111_deal.mp4"
+   "exit": "110_discard@0124",
+   "output": "110_discard@0124__111_deal.mp4"
   },
   {
    "src": "110_idle",
-   "frame": 78,
+   "frame": 99,
    "dst": "001_deal",
-   "exit": "110_idle@0078",
-   "output": "110_idle@0078__001_deal.mp4"
+   "exit": "110_idle@0099",
+   "output": "110_idle@0099__001_deal.mp4"
   },
   {
    "src": "110_idle",
-   "frame": 78,
+   "frame": 99,
    "dst": "010_deal",
-   "exit": "110_idle@0078",
-   "output": "110_idle@0078__010_deal.mp4"
+   "exit": "110_idle@0099",
+   "output": "110_idle@0099__010_deal.mp4"
   },
   {
    "src": "110_idle",
-   "frame": 78,
+   "frame": 99,
    "dst": "011_deal",
-   "exit": "110_idle@0078",
-   "output": "110_idle@0078__011_deal.mp4"
+   "exit": "110_idle@0099",
+   "output": "110_idle@0099__011_deal.mp4"
   },
   {
    "src": "110_idle",
-   "frame": 78,
+   "frame": 99,
    "dst": "100_deal",
-   "exit": "110_idle@0078",
-   "output": "110_idle@0078__100_deal.mp4"
+   "exit": "110_idle@0099",
+   "output": "110_idle@0099__100_deal.mp4"
   },
   {
    "src": "110_idle",
-   "frame": 78,
+   "frame": 99,
    "dst": "101_deal",
-   "exit": "110_idle@0078",
-   "output": "110_idle@0078__101_deal.mp4"
+   "exit": "110_idle@0099",
+   "output": "110_idle@0099__101_deal.mp4"
   },
   {
    "src": "110_idle",
-   "frame": 78,
+   "frame": 99,
    "dst": "110_deal",
-   "exit": "110_idle@0078",
-   "output": "110_idle@0078__110_deal.mp4"
+   "exit": "110_idle@0099",
+   "output": "110_idle@0099__110_deal.mp4"
   },
   {
    "src": "110_idle",
-   "frame": 78,
+   "frame": 99,
    "dst": "111_deal",
-   "exit": "110_idle@0078",
-   "output": "110_idle@0078__111_deal.mp4"
+   "exit": "110_idle@0099",
+   "output": "110_idle@0099__111_deal.mp4"
   },
   {
    "src": "110_idle",
-   "frame": 102,
+   "frame": 129,
    "dst": "001_deal",
-   "exit": "110_idle@0102",
-   "output": "110_idle@0102__001_deal.mp4"
+   "exit": "110_idle@0129",
+   "output": "110_idle@0129__001_deal.mp4"
   },
   {
    "src": "110_idle",
-   "frame": 102,
+   "frame": 129,
    "dst": "010_deal",
-   "exit": "110_idle@0102",
-   "output": "110_idle@0102__010_deal.mp4"
+   "exit": "110_idle@0129",
+   "output": "110_idle@0129__010_deal.mp4"
   },
   {
    "src": "110_idle",
-   "frame": 102,
+   "frame": 129,
    "dst": "011_deal",
-   "exit": "110_idle@0102",
-   "output": "110_idle@0102__011_deal.mp4"
+   "exit": "110_idle@0129",
+   "output": "110_idle@0129__011_deal.mp4"
   },
   {
    "src": "110_idle",
-   "frame": 102,
+   "frame": 129,
    "dst": "100_deal",
-   "exit": "110_idle@0102",
-   "output": "110_idle@0102__100_deal.mp4"
+   "exit": "110_idle@0129",
+   "output": "110_idle@0129__100_deal.mp4"
   },
   {
    "src": "110_idle",
-   "frame": 102,
+   "frame": 129,
    "dst": "101_deal",
-   "exit": "110_idle@0102",
-   "output": "110_idle@0102__101_deal.mp4"
+   "exit": "110_idle@0129",
+   "output": "110_idle@0129__101_deal.mp4"
   },
   {
    "src": "110_idle",
-   "frame": 102,
+   "frame": 129,
    "dst": "110_deal",
-   "exit": "110_idle@0102",
-   "output": "110_idle@0102__110_deal.mp4"
+   "exit": "110_idle@0129",
+   "output": "110_idle@0129__110_deal.mp4"
   },
   {
    "src": "110_idle",
-   "frame": 102,
+   "frame": 129,
    "dst": "111_deal",
-   "exit": "110_idle@0102",
-   "output": "110_idle@0102__111_deal.mp4"
-  },
-  {
-   "src": "110_idle",
-   "frame": 114,
-   "dst": "001_deal",
-   "exit": "110_idle@0114",
-   "output": "110_idle@0114__001_deal.mp4"
-  },
-  {
-   "src": "110_idle",
-   "frame": 114,
-   "dst": "010_deal",
-   "exit": "110_idle@0114",
-   "output": "110_idle@0114__010_deal.mp4"
-  },
-  {
-   "src": "110_idle",
-   "frame": 114,
-   "dst": "011_deal",
-   "exit": "110_idle@0114",
-   "output": "110_idle@0114__011_deal.mp4"
-  },
-  {
-   "src": "110_idle",
-   "frame": 114,
-   "dst": "100_deal",
-   "exit": "110_idle@0114",
-   "output": "110_idle@0114__100_deal.mp4"
-  },
-  {
-   "src": "110_idle",
-   "frame": 114,
-   "dst": "101_deal",
-   "exit": "110_idle@0114",
-   "output": "110_idle@0114__101_deal.mp4"
-  },
-  {
-   "src": "110_idle",
-   "frame": 114,
-   "dst": "110_deal",
-   "exit": "110_idle@0114",
-   "output": "110_idle@0114__110_deal.mp4"
-  },
-  {
-   "src": "110_idle",
-   "frame": 114,
-   "dst": "111_deal",
-   "exit": "110_idle@0114",
-   "output": "110_idle@0114__111_deal.mp4"
+   "exit": "110_idle@0129",
+   "output": "110_idle@0129__111_deal.mp4"
   },
   {
    "src": "110_idle",
@@ -2271,249 +2838,200 @@
    "output": "110_wait@0063__seat2_card3_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 0,
+   "src": "111_discard",
+   "frame": 111,
    "dst": "001_deal",
-   "exit": "111_idle@0000",
-   "output": "111_idle@0000__001_deal.mp4"
+   "exit": "111_discard@0111",
+   "output": "111_discard@0111__001_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 0,
+   "src": "111_discard",
+   "frame": 111,
    "dst": "010_deal",
-   "exit": "111_idle@0000",
-   "output": "111_idle@0000__010_deal.mp4"
+   "exit": "111_discard@0111",
+   "output": "111_discard@0111__010_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 0,
+   "src": "111_discard",
+   "frame": 111,
    "dst": "011_deal",
-   "exit": "111_idle@0000",
-   "output": "111_idle@0000__011_deal.mp4"
+   "exit": "111_discard@0111",
+   "output": "111_discard@0111__011_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 0,
+   "src": "111_discard",
+   "frame": 111,
    "dst": "100_deal",
-   "exit": "111_idle@0000",
-   "output": "111_idle@0000__100_deal.mp4"
+   "exit": "111_discard@0111",
+   "output": "111_discard@0111__100_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 0,
+   "src": "111_discard",
+   "frame": 111,
    "dst": "101_deal",
-   "exit": "111_idle@0000",
-   "output": "111_idle@0000__101_deal.mp4"
+   "exit": "111_discard@0111",
+   "output": "111_discard@0111__101_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 0,
+   "src": "111_discard",
+   "frame": 111,
    "dst": "110_deal",
-   "exit": "111_idle@0000",
-   "output": "111_idle@0000__110_deal.mp4"
+   "exit": "111_discard@0111",
+   "output": "111_discard@0111__110_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 0,
+   "src": "111_discard",
+   "frame": 111,
    "dst": "111_deal",
-   "exit": "111_idle@0000",
-   "output": "111_idle@0000__111_deal.mp4"
+   "exit": "111_discard@0111",
+   "output": "111_discard@0111__111_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 29,
+   "src": "111_discard",
+   "frame": 141,
    "dst": "001_deal",
-   "exit": "111_idle@0029",
-   "output": "111_idle@0029__001_deal.mp4"
+   "exit": "111_discard@0141",
+   "output": "111_discard@0141__001_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 29,
+   "src": "111_discard",
+   "frame": 141,
    "dst": "010_deal",
-   "exit": "111_idle@0029",
-   "output": "111_idle@0029__010_deal.mp4"
+   "exit": "111_discard@0141",
+   "output": "111_discard@0141__010_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 29,
+   "src": "111_discard",
+   "frame": 141,
    "dst": "011_deal",
-   "exit": "111_idle@0029",
-   "output": "111_idle@0029__011_deal.mp4"
+   "exit": "111_discard@0141",
+   "output": "111_discard@0141__011_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 29,
+   "src": "111_discard",
+   "frame": 141,
    "dst": "100_deal",
-   "exit": "111_idle@0029",
-   "output": "111_idle@0029__100_deal.mp4"
+   "exit": "111_discard@0141",
+   "output": "111_discard@0141__100_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 29,
+   "src": "111_discard",
+   "frame": 141,
    "dst": "101_deal",
-   "exit": "111_idle@0029",
-   "output": "111_idle@0029__101_deal.mp4"
+   "exit": "111_discard@0141",
+   "output": "111_discard@0141__101_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 29,
+   "src": "111_discard",
+   "frame": 141,
    "dst": "110_deal",
-   "exit": "111_idle@0029",
-   "output": "111_idle@0029__110_deal.mp4"
+   "exit": "111_discard@0141",
+   "output": "111_discard@0141__110_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 29,
+   "src": "111_discard",
+   "frame": 141,
    "dst": "111_deal",
-   "exit": "111_idle@0029",
-   "output": "111_idle@0029__111_deal.mp4"
+   "exit": "111_discard@0141",
+   "output": "111_discard@0141__111_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 52,
+   "src": "111_discard",
+   "frame": 149,
    "dst": "001_deal",
-   "exit": "111_idle@0052",
-   "output": "111_idle@0052__001_deal.mp4"
+   "exit": "111_discard@0149",
+   "output": "111_discard@0149__001_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 52,
+   "src": "111_discard",
+   "frame": 149,
    "dst": "010_deal",
-   "exit": "111_idle@0052",
-   "output": "111_idle@0052__010_deal.mp4"
+   "exit": "111_discard@0149",
+   "output": "111_discard@0149__010_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 52,
+   "src": "111_discard",
+   "frame": 149,
    "dst": "011_deal",
-   "exit": "111_idle@0052",
-   "output": "111_idle@0052__011_deal.mp4"
+   "exit": "111_discard@0149",
+   "output": "111_discard@0149__011_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 52,
+   "src": "111_discard",
+   "frame": 149,
    "dst": "100_deal",
-   "exit": "111_idle@0052",
-   "output": "111_idle@0052__100_deal.mp4"
+   "exit": "111_discard@0149",
+   "output": "111_discard@0149__100_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 52,
+   "src": "111_discard",
+   "frame": 149,
    "dst": "101_deal",
-   "exit": "111_idle@0052",
-   "output": "111_idle@0052__101_deal.mp4"
+   "exit": "111_discard@0149",
+   "output": "111_discard@0149__101_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 52,
+   "src": "111_discard",
+   "frame": 149,
    "dst": "110_deal",
-   "exit": "111_idle@0052",
-   "output": "111_idle@0052__110_deal.mp4"
+   "exit": "111_discard@0149",
+   "output": "111_discard@0149__110_deal.mp4"
   },
   {
-   "src": "111_idle",
-   "frame": 52,
+   "src": "111_discard",
+   "frame": 149,
    "dst": "111_deal",
-   "exit": "111_idle@0052",
-   "output": "111_idle@0052__111_deal.mp4"
+   "exit": "111_discard@0149",
+   "output": "111_discard@0149__111_deal.mp4"
   },
   {
    "src": "111_idle",
-   "frame": 78,
+   "frame": 95,
    "dst": "001_deal",
-   "exit": "111_idle@0078",
-   "output": "111_idle@0078__001_deal.mp4"
+   "exit": "111_idle@0095",
+   "output": "111_idle@0095__001_deal.mp4"
   },
   {
    "src": "111_idle",
-   "frame": 78,
+   "frame": 95,
    "dst": "010_deal",
-   "exit": "111_idle@0078",
-   "output": "111_idle@0078__010_deal.mp4"
+   "exit": "111_idle@0095",
+   "output": "111_idle@0095__010_deal.mp4"
   },
   {
    "src": "111_idle",
-   "frame": 78,
+   "frame": 95,
    "dst": "011_deal",
-   "exit": "111_idle@0078",
-   "output": "111_idle@0078__011_deal.mp4"
+   "exit": "111_idle@0095",
+   "output": "111_idle@0095__011_deal.mp4"
   },
   {
    "src": "111_idle",
-   "frame": 78,
+   "frame": 95,
    "dst": "100_deal",
-   "exit": "111_idle@0078",
-   "output": "111_idle@0078__100_deal.mp4"
+   "exit": "111_idle@0095",
+   "output": "111_idle@0095__100_deal.mp4"
   },
   {
    "src": "111_idle",
-   "frame": 78,
+   "frame": 95,
    "dst": "101_deal",
-   "exit": "111_idle@0078",
-   "output": "111_idle@0078__101_deal.mp4"
+   "exit": "111_idle@0095",
+   "output": "111_idle@0095__101_deal.mp4"
   },
   {
    "src": "111_idle",
-   "frame": 78,
+   "frame": 95,
    "dst": "110_deal",
-   "exit": "111_idle@0078",
-   "output": "111_idle@0078__110_deal.mp4"
+   "exit": "111_idle@0095",
+   "output": "111_idle@0095__110_deal.mp4"
   },
   {
    "src": "111_idle",
-   "frame": 78,
+   "frame": 95,
    "dst": "111_deal",
-   "exit": "111_idle@0078",
-   "output": "111_idle@0078__111_deal.mp4"
-  },
-  {
-   "src": "111_idle",
-   "frame": 102,
-   "dst": "001_deal",
-   "exit": "111_idle@0102",
-   "output": "111_idle@0102__001_deal.mp4"
-  },
-  {
-   "src": "111_idle",
-   "frame": 102,
-   "dst": "010_deal",
-   "exit": "111_idle@0102",
-   "output": "111_idle@0102__010_deal.mp4"
-  },
-  {
-   "src": "111_idle",
-   "frame": 102,
-   "dst": "011_deal",
-   "exit": "111_idle@0102",
-   "output": "111_idle@0102__011_deal.mp4"
-  },
-  {
-   "src": "111_idle",
-   "frame": 102,
-   "dst": "100_deal",
-   "exit": "111_idle@0102",
-   "output": "111_idle@0102__100_deal.mp4"
-  },
-  {
-   "src": "111_idle",
-   "frame": 102,
-   "dst": "101_deal",
-   "exit": "111_idle@0102",
-   "output": "111_idle@0102__101_deal.mp4"
-  },
-  {
-   "src": "111_idle",
-   "frame": 102,
-   "dst": "110_deal",
-   "exit": "111_idle@0102",
-   "output": "111_idle@0102__110_deal.mp4"
-  },
-  {
-   "src": "111_idle",
-   "frame": 102,
-   "dst": "111_deal",
-   "exit": "111_idle@0102",
-   "output": "111_idle@0102__111_deal.mp4"
+   "exit": "111_idle@0095",
+   "output": "111_idle@0095__111_deal.mp4"
   },
   {
    "src": "111_idle",
@@ -2769,199 +3287,52 @@
   },
   {
    "src": "opening_idle",
-   "frame": 0,
+   "frame": 68,
    "dst": "001_deal",
-   "exit": "opening_idle@0000",
-   "output": "opening_idle@0000__001_deal.mp4"
+   "exit": "opening_idle@0068",
+   "output": "opening_idle@0068__001_deal.mp4"
   },
   {
    "src": "opening_idle",
-   "frame": 0,
+   "frame": 68,
    "dst": "010_deal",
-   "exit": "opening_idle@0000",
-   "output": "opening_idle@0000__010_deal.mp4"
+   "exit": "opening_idle@0068",
+   "output": "opening_idle@0068__010_deal.mp4"
   },
   {
    "src": "opening_idle",
-   "frame": 0,
+   "frame": 68,
    "dst": "011_deal",
-   "exit": "opening_idle@0000",
-   "output": "opening_idle@0000__011_deal.mp4"
+   "exit": "opening_idle@0068",
+   "output": "opening_idle@0068__011_deal.mp4"
   },
   {
    "src": "opening_idle",
-   "frame": 0,
+   "frame": 68,
    "dst": "100_deal",
-   "exit": "opening_idle@0000",
-   "output": "opening_idle@0000__100_deal.mp4"
+   "exit": "opening_idle@0068",
+   "output": "opening_idle@0068__100_deal.mp4"
   },
   {
    "src": "opening_idle",
-   "frame": 0,
+   "frame": 68,
    "dst": "101_deal",
-   "exit": "opening_idle@0000",
-   "output": "opening_idle@0000__101_deal.mp4"
+   "exit": "opening_idle@0068",
+   "output": "opening_idle@0068__101_deal.mp4"
   },
   {
    "src": "opening_idle",
-   "frame": 0,
+   "frame": 68,
    "dst": "110_deal",
-   "exit": "opening_idle@0000",
-   "output": "opening_idle@0000__110_deal.mp4"
+   "exit": "opening_idle@0068",
+   "output": "opening_idle@0068__110_deal.mp4"
   },
   {
    "src": "opening_idle",
-   "frame": 0,
+   "frame": 68,
    "dst": "111_deal",
-   "exit": "opening_idle@0000",
-   "output": "opening_idle@0000__111_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 18,
-   "dst": "001_deal",
-   "exit": "opening_idle@0018",
-   "output": "opening_idle@0018__001_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 18,
-   "dst": "010_deal",
-   "exit": "opening_idle@0018",
-   "output": "opening_idle@0018__010_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 18,
-   "dst": "011_deal",
-   "exit": "opening_idle@0018",
-   "output": "opening_idle@0018__011_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 18,
-   "dst": "100_deal",
-   "exit": "opening_idle@0018",
-   "output": "opening_idle@0018__100_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 18,
-   "dst": "101_deal",
-   "exit": "opening_idle@0018",
-   "output": "opening_idle@0018__101_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 18,
-   "dst": "110_deal",
-   "exit": "opening_idle@0018",
-   "output": "opening_idle@0018__110_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 18,
-   "dst": "111_deal",
-   "exit": "opening_idle@0018",
-   "output": "opening_idle@0018__111_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 44,
-   "dst": "001_deal",
-   "exit": "opening_idle@0044",
-   "output": "opening_idle@0044__001_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 44,
-   "dst": "010_deal",
-   "exit": "opening_idle@0044",
-   "output": "opening_idle@0044__010_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 44,
-   "dst": "011_deal",
-   "exit": "opening_idle@0044",
-   "output": "opening_idle@0044__011_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 44,
-   "dst": "100_deal",
-   "exit": "opening_idle@0044",
-   "output": "opening_idle@0044__100_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 44,
-   "dst": "101_deal",
-   "exit": "opening_idle@0044",
-   "output": "opening_idle@0044__101_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 44,
-   "dst": "110_deal",
-   "exit": "opening_idle@0044",
-   "output": "opening_idle@0044__110_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 44,
-   "dst": "111_deal",
-   "exit": "opening_idle@0044",
-   "output": "opening_idle@0044__111_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 70,
-   "dst": "001_deal",
-   "exit": "opening_idle@0070",
-   "output": "opening_idle@0070__001_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 70,
-   "dst": "010_deal",
-   "exit": "opening_idle@0070",
-   "output": "opening_idle@0070__010_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 70,
-   "dst": "011_deal",
-   "exit": "opening_idle@0070",
-   "output": "opening_idle@0070__011_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 70,
-   "dst": "100_deal",
-   "exit": "opening_idle@0070",
-   "output": "opening_idle@0070__100_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 70,
-   "dst": "101_deal",
-   "exit": "opening_idle@0070",
-   "output": "opening_idle@0070__101_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 70,
-   "dst": "110_deal",
-   "exit": "opening_idle@0070",
-   "output": "opening_idle@0070__110_deal.mp4"
-  },
-  {
-   "src": "opening_idle",
-   "frame": 70,
-   "dst": "111_deal",
-   "exit": "opening_idle@0070",
-   "output": "opening_idle@0070__111_deal.mp4"
+   "exit": "opening_idle@0068",
+   "output": "opening_idle@0068__111_deal.mp4"
   },
   {
    "src": "opening_idle",

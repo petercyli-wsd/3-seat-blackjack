@@ -1,6 +1,6 @@
 import { type Card, faceIndex } from "../engine/cards";
 import type { PlayingState } from "../media/ClipPlayer";
-import { type ClipInfo, type FootageCard, type Manifest, type Quad, type SeatId, cardsAt, faceFrom, faceQuadAt } from "../media/manifest";
+import { type ClipInfo, type FootageCard, type Manifest, type Quad, type SeatId, cardsAt, faceFrom, faceQuadAt, faceUntil } from "../media/manifest";
 import type { PlateSet } from "../media/plates";
 import type { CardDraw, PlateDraw } from "./Compositor";
 import { centre, lerpQuad, rotateQuad, scaleQuad, translateQuad } from "./homography";
@@ -91,7 +91,7 @@ export class Scene {
       const card = c.slot === "up" || c.slot === "hole" ? view.dealer[c.index - 1] : undefined;
       if (!card) continue;
       const hole = c.slot === "hole";
-      const quad = hole ? (c.flip !== null && c.flip <= f && c.in <= f && f < c.out ? c.quad : null) : faceQuadAt(c, f);
+      const quad = !hole || (c.flip !== null && c.flip <= f) ? faceQuadAt(c, f) : null;
       if (!quad) continue;
       cards.push(footageFace(c, quad, f, faceIndex(card), hole ? (c.flip as number) : faceFrom(c)));
       if (f >= c.in) dealerShown++;
@@ -119,9 +119,11 @@ export class Scene {
   }
 }
 
-/** A face on a physical card, fading in from the frame it first shows face up (`from`). */
+/** A face on a physical card, fading in from the frame it first shows face up (`from`) and out
+ * as it is swept into the pile in her hand. */
 function footageFace(c: FootageCard, quad: Quad, f: number, cell: number, from: number): CardDraw {
-  const alpha = from >= 0 ? Math.min(1, (f - from + 1) / LAND_FADE) : 1;
+  const fadeIn = from >= 0 ? Math.min(1, (f - from + 1) / LAND_FADE) : 1;
+  const alpha = Math.min(fadeIn, (faceUntil(c) - f) / LAND_FADE);
   // where the card was a frame ago, so a moving face gets the footage's motion blur
   const prev = f > from ? (faceQuadAt(c, f - 1) ?? quad) : quad;
   return { quad, prev, cell, alpha, mode: "footage" };

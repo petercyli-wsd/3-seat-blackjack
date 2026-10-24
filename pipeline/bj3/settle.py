@@ -14,6 +14,11 @@ rigid ones of `flight` (shift, turn on the table, scale), so the outline
 stays the card's own shape.
 
 The hole card's face only shows after the flip, so it is fitted from then.
+
+It also finds where each card *leaves*: the frame its resting outline loses
+its edges for good, as the dealer starts sweeping it up. The tracker's pickup
+frame is later (when most of the outline is bare felt), and a face kept on
+the resting outline until then is painted onto whatever passes beneath it.
 """
 
 import json
@@ -26,13 +31,15 @@ from bj3.rigid import posed, sample, soft_card, table_map
 from bj3.video import Frames
 
 SAMPLES = 24
+LEAVE_LOOK = 96  # frames before the pickup to look for the card starting to move
 PAD = 34
 EDGE_T = np.linspace(0.12, 0.88, 12, dtype=np.float32)
 OFFS = (0.6, 1.4)
 
 
-def edge_contrast(m: np.ndarray, quads: np.ndarray) -> np.ndarray:
-    """Mean (inside - outside) of m across every side of each quad (..., 4, 2), clockwise on screen."""
+def edge_contrast(m: np.ndarray, quads: np.ndarray, per_side: bool = False) -> np.ndarray:
+    """Mean (inside - outside) of m across every side of each quad (..., 4, 2), clockwise on screen;
+    or, per_side, one value per side (..., 4)."""
     a = quads
     b = np.roll(quads, -1, axis=-2)
     d = b - a
@@ -41,8 +48,9 @@ def edge_contrast(m: np.ndarray, quads: np.ndarray) -> np.ndarray:
     p = a[..., None, :] + d[..., None, :] * EDGE_T[:, None]  # (..., 4, 12, 2)
     total = 0.0
     for o in OFFS:
-        total = total + (sample(m, p - o * n) - sample(m, p + o * n)).mean((-1, -2))
-    return total / len(OFFS)
+        total = total + (sample(m, p - o * n) - sample(m, p + o * n)).mean(-1)
+    total = total / len(OFFS)
+    return total if per_side else total.mean(-1)
 
 
 def _search(m, frame, p0, reach, step, turn, turn_step, scales):
@@ -82,6 +90,29 @@ def fit_frame(img: np.ndarray, q: np.ndarray, search: str) -> tuple[np.ndarray, 
     return _search(m, frame, p, 0.5, 0.125, 0.75, 0.25, (0.99, 0.995, 1.0, 1.005, 1.01))
 
 
+def still_there(img: np.ndarray, q: np.ndarray) -> float:
+    """How plainly the card still lies on outline q: the second-best side's edge contrast. A card
+    beside it (the hole card flipped white next to the up card) or a finger can take a side or two
+    without the card having moved; once the card moves, every side goes."""
+    cx, cy = q.mean(0)
+    x0, y0 = max(0, int(cx) - PAD), max(0, int(cy) - PAD)
+    m = soft_card(img[y0:y0 + 2 * PAD, x0:x0 + 2 * PAD])
+    return float(np.sort(edge_contrast(m, (q - (x0, y0))[None], per_side=True)[0])[-2])
+
+
+def leave_frame(fr: Frames, c: dict, q: np.ndarray, rest: float) -> int:
+    """First frame of the card's last stretch below half its resting `still_there`, up to its pickup:
+    where it starts to move for good (a hand passing over it and away doesn't count)."""
+    a = max(c["birth"] + 1, c["death"] - LEAVE_LOOK)
+    low = [still_there(fr.get(f), q) < 0.5 * rest for f in range(a, c["death"])]
+    leave = c["death"]
+    for i in range(len(low) - 1, -1, -1):
+        if not low[i]:
+            break
+        leave = a + i
+    return leave
+
+
 def settle(fr: Frames, c: dict) -> dict | None:
     q = np.asarray(c["quad"], np.float32)
     if c["face_down"] and c["flip"] is None:
@@ -101,7 +132,9 @@ def settle(fr: Frames, c: dict) -> dict | None:
     M = table_map(q)
     centre = q.mean(0)
     out = posed((q - centre) @ np.linalg.inv(M).T, M, centre, pose)
+    rest = float(np.median([still_there(fr.get(int(f)), out) for f in frames]))
     return {
+        "leave": leave_frame(fr, c, out, rest),
         "quad": [[round(float(x), 2), round(float(y), 2)] for x, y in out],
         "shift": round(float(np.hypot(pose[0], pose[1])), 2),
         "turn": round(float(np.rad2deg(pose[2])), 2),
@@ -122,19 +155,21 @@ def run(video: str, cards_json: str, out: str) -> None:
             continue
         rest[c["id"]] = r
         print(f"{c['id']} {c['region']:5s} shift {r['shift']:4.2f}px turn {r['turn']:+5.2f} "
-              f"scale {r['scale']:.3f} from {r['frames']} frames (contrast {r['contrast']:.2f})", flush=True)
+              f"scale {r['scale']:.3f} from {r['frames']} frames (contrast {r['contrast']:.2f}), "
+              f"leaves {c['death'] - r['leave']} frames before pickup", flush=True)
     Path(out).write_text(json.dumps({"rest": rest}, indent=1))
     print(f"{len(rest)} resting outlines -> {out}")
 
 
 def apply(cards: list[dict], rest_json: str | None) -> list[dict]:
-    """The cards with their settled outlines swapped in (for the passes after this one)."""
+    """The cards with their settled outlines (and the frame each leaves) swapped in, for later passes."""
     if not rest_json or not Path(rest_json).exists():
         return cards
     rest = json.load(open(rest_json))["rest"]
     for c in cards:
         if c["id"] in rest:
             c["quad"] = rest[c["id"]]["quad"]
+            c["leave"] = rest[c["id"]].get("leave", c["death"])
     return cards
 
 

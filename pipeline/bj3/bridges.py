@@ -4,12 +4,14 @@ were not filmed back to back.
     python -m bj3.bridges plan  <full_footage.mp4>   # stubs + CSV for the interpolation tool
     python -m bj3.bridges ingest <tool output dir>   # (after generation) cut bridges into game_assets
 
-The game only ever leaves a clip from a loop (wait / idle) — the dealer at
-rest — and enters the first frame of an action clip (deal / hit / reveal).
-A pre-rendered bridge needs a fixed exit frame, so each source loop gets
-exit *anchors*: both ends of the clip plus interior frames about a second
-apart (at the stillest frame near each grid point). The player then never
-waits more than ~1 s for the next anchor after hitting or dealing.
+The game leaves a clip from a loop (wait / idle) — the dealer at rest — or,
+once betting has reopened, from the tail of a discard (she is squaring the
+tray and a Deal may cut it short), and enters the first frame of an action
+clip (deal / hit / reveal). A pre-rendered bridge needs a fixed exit frame,
+so each source gets exit *anchors*: both ends of the frames it can be left
+from (an idle loop plays only its calm window) plus interior frames about a
+second apart (at the stillest frame near each grid point). The player then
+never waits more than ~1 s for the next anchor after hitting or dealing.
 
 Cuts that are contiguous in the take (a loop's last frame -> the clip that
 followed it) are already seamless and get no bridge. Hold loops only ever
@@ -27,15 +29,17 @@ import subprocess
 import sys
 from pathlib import Path
 
-import cv2
 import numpy as np
 
-from bj3.export import FFMPEG, RATE, X264
+from bj3.export import FFMPEG, RATE, X264, loop_window
 from bj3.geometry import PLAY_ORDER
+from bj3.video import Frames
 
 STUB = 8  # frames per stub: enough context, small uploads
 ANCHOR_SPACING = 24  # ~1 s at 23.976 fps
 ANCHOR_SEARCH = 6  # look this many frames either side of a grid point for the stillest frame
+# Director.CLEARED_FRAMES: betting reopens this many frames after a discard's last card is in the tray
+CLEARED_FRAMES = 6
 HERE = Path(__file__).resolve().parents[1]
 BRIDGE_DIR = HERE.parent / "bridges"
 
@@ -45,12 +49,12 @@ def seats_in(mask: str) -> list[str]:
 
 
 def transitions(segs: dict[str, dict]) -> dict[str, set[str]]:
-    """Every (loop -> action clip) cut the round script can make."""
+    """Every (loop or discard tail -> action clip) cut the round script can make."""
     masks = sorted({s["mask"] for s in segs.values() if s.get("part") == 1})
     deals = [f"{m}_deal" for m in masks]
     out: dict[str, set[str]] = {}
-    # betting: any idle loop -> any combination's deal
-    for name in ["opening_idle"] + [f"{m}_idle" for m in masks]:
+    # betting: any idle loop, or a discard once its cards are in the tray -> any combination's deal
+    for name in ["opening_idle"] + [f"{m}_idle" for m in masks] + [f"{m}_discard" for m in masks]:
         out[name] = set(deals)
     # first decision on the part-1 wait: a seat's first hit, or (all stood) the reveal
     for m in masks:
@@ -72,12 +76,22 @@ def natural_next(segs: dict[str, dict], name: str) -> str | None:
     return next((k for k, s in segs.items() if s["start"] == end), None)
 
 
-def anchors(seg: dict, motion: np.ndarray) -> list[int]:
-    """Exit frames (clip-relative): both ends plus the stillest frame near every ~1 s grid point."""
-    n = seg["end"] - seg["start"]
-    out = {0, n - 1}
-    for g in range(ANCHOR_SPACING, n - ANCHOR_SPACING // 2, ANCHOR_SPACING):
-        lo, hi = max(1, g - ANCHOR_SEARCH), min(n - 2, g + ANCHOR_SEARCH)
+def exit_span(seg: dict, cards: list[dict]) -> tuple[int, int]:
+    """Clip frames [a, b) the game can leave `seg` from: a loop's window, or a discard's tail
+    from when betting reopens (the frame Director waits for) to its end."""
+    if seg["kind"] != "discard":
+        return loop_window(seg)
+    a, b = seg["start"], seg["end"]
+    last_out = max([c["death"] - a for c in cards if c["birth"] < b and c["death"] > a], default=0)
+    return min(b - a - 1, last_out + CLEARED_FRAMES), b - a
+
+
+def anchors(seg: dict, span: tuple[int, int], motion: np.ndarray) -> list[int]:
+    """Exit frames (clip-relative): both ends of the span plus the stillest frame near every ~1 s grid point."""
+    a, b = span
+    out = {a, b - 1}
+    for g in range(a + ANCHOR_SPACING, b - ANCHOR_SPACING // 2, ANCHOR_SPACING):
+        lo, hi = max(a + 1, g - ANCHOR_SEARCH), min(b - 2, g + ANCHOR_SEARCH)
         if hi > lo:
             out.add(lo + int(np.argmin(motion[seg["start"] + lo:seg["start"] + hi + 1])))
     return sorted(out)
@@ -98,6 +112,7 @@ def plan(video: str, work: str = "work", out_dir: str | None = None) -> None:
     work_p = Path(work)
     bdir = Path(out_dir) if out_dir else BRIDGE_DIR
     segs = {s["name"]: s for s in json.load(open(work_p / "edl.json"))["segments"]}
+    cards = json.load(open(work_p / "cards.json"))["cards"]
     z = np.load(work_p / "pose.npz")
     P = z["pose"].astype(np.float32)
     keep = z["keep"]
@@ -110,43 +125,31 @@ def plan(video: str, work: str = "work", out_dir: str | None = None) -> None:
         seg = segs[src]
         nat = natural_next(segs, src)
         last = seg["end"] - seg["start"] - 1
-        for f in anchors(seg, motion):
+        span = exit_span(seg, cards)
+        for f in anchors(seg, span, motion):
             for dst in sorted(targets):
                 if dst == nat and f == last:
                     continue  # already seamless in the take
                 exit_id = f"{src}@{f:04d}"
-                exits[exit_id] = (src, f, f == 0)
+                # a ping-pong loop reaches the start of its window going backwards
+                exits[exit_id] = (src, f, seg["kind"] != "discard" and f == span[0])
                 entries.add(dst)
                 rows.append({"src": src, "frame": f, "dst": dst, "exit": exit_id, "output": f"{exit_id}__{dst}.mp4"})
 
-    # stubs: frames read in one pass over the take
-    need: dict[int, None] = {}
-    exit_frames = {}
+    # stubs, in take order so reads mostly run forward; one stub's frames in memory at a time
+    stubs = bdir / "stubs"
+    jobs = []
     for exit_id, (src, f, at_start) in exits.items():
         a = segs[src]["start"] + f
-        # the stub runs in the direction of travel into the anchor: the start anchor is reached going backwards
+        # the stub runs in the direction of travel into the anchor
         idx = list(range(a + STUB - 1, a - 1, -1)) if at_start else list(range(a - STUB + 1, a + 1))
-        exit_frames[exit_id] = idx
-        need.update(dict.fromkeys(idx))
-    entry_frames = {dst: list(range(segs[dst]["start"], segs[dst]["start"] + STUB)) for dst in entries}
-    for idx in entry_frames.values():
-        need.update(dict.fromkeys(idx))
-    cache = {}
-    cap = cv2.VideoCapture(video)
-    hi = max(need)
-    i = 0
-    while i <= hi:
-        ok, fr = cap.read()
-        if not ok:
-            break
-        if i in need:
-            cache[i] = fr
-        i += 1
-    stubs = bdir / "stubs"
-    for exit_id, idx in exit_frames.items():
-        write_stub([cache[j] for j in idx], stubs / "exit" / f"{exit_id}.mp4")
-    for dst, idx in entry_frames.items():
-        write_stub([cache[j] for j in idx], stubs / "entry" / f"{dst}.mp4")
+        jobs.append((idx, stubs / "exit" / f"{exit_id}.mp4"))
+    for dst in entries:
+        jobs.append((list(range(segs[dst]["start"], segs[dst]["start"] + STUB)), stubs / "entry" / f"{dst}.mp4"))
+    fr = Frames(video)
+    for idx, path in sorted(jobs, key=lambda j: min(j[0])):
+        got = {j: fr.get(j).copy() for j in sorted(idx)}
+        write_stub([got[j] for j in idx], path)
 
     with open(bdir / "bridges.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)

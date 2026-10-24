@@ -18,6 +18,8 @@ export interface FootageCard {
   quad: Quad;
   /** Outline per frame while the dealer slides it in face up: quads[i] is frame from + i, up to `in`. */
   path?: { from: number; quads: Quad[] };
+  /** From the frame it starts to be swept up: its outline while it moves on its own (quads[i] is frame from + i), then none. */
+  away?: { from: number; quads: Quad[] };
 }
 
 export interface ClipInfo {
@@ -72,8 +74,12 @@ export const cardsAt = (clip: ClipInfo, slot: Slot, frame: number) =>
 /** First clip frame the card shows its face up: where its slide-in path starts, else where it lands. */
 export const faceFrom = (c: FootageCard) => (c.path?.quads.length ? c.path.from : c.in);
 
-/** The card's outline at a clip frame while it is face up on screen (sliding in or lying), else null. */
+/** Frame the card's face stops showing: when it is no longer followed after leaving its resting place. */
+export const faceUntil = (c: FootageCard) => (c.away ? c.away.from + c.away.quads.length : c.out);
+
+/** The card's outline at a clip frame while it is face up on screen (sliding in, lying, being swept off), else null. */
 export function faceQuadAt(c: FootageCard, frame: number): Quad | null {
+  if (c.away && frame >= c.away.from) return c.away.quads[frame - c.away.from] ?? null;
   if (frame >= c.out) return null;
   if (frame >= c.in) return c.quad;
   const i = c.path ? frame - c.path.from : -1;

@@ -58,6 +58,9 @@ export class ClipPlayer {
   private fadeStart = 0;
   private fadeDur = 0;
   private pending: Pending | null = null;
+  /** The deck a takeover is readying (its file can still be downloading), and that takeover's number. */
+  private taking: Deck | null = null;
+  private takeoverGen = 0;
   private frameWaiters: { name: string; frame: number; resolve: () => void }[] = [];
   private startListeners: ((name: string) => void)[] = [];
   /** Frames the decoder took to take over at each handoff (for the director panel). */
@@ -122,9 +125,13 @@ export class ClipPlayer {
   prepare(name: string, loop = false): Deck {
     const have = this.decks.find((d) => d !== this.active && d !== this.fadingFrom && d.name === name && d.loop === loop);
     if (have) return have;
+    const spare = (d: Deck) => d !== this.active && d !== this.fadingFrom && d !== this.pending?.deck;
     const deck =
-      this.decks.find((d) => d !== this.active && d !== this.fadingFrom && d !== this.pending?.deck && !d.name) ??
-      this.decks.find((d) => d !== this.active && d !== this.fadingFrom && d !== this.pending?.deck)!;
+      this.decks.find((d) => spare(d) && d !== this.taking && !d.name) ??
+      this.decks.find((d) => spare(d) && d !== this.taking) ??
+      this.decks.find(spare)!;
+    // no other deck free: the takeover readying this one gives way rather than play the wrong clip
+    if (deck === this.taking) this.takeoverGen++;
     deck.name = name;
     deck.loop = loop;
     deck.fileFrame = 0;
@@ -170,14 +177,35 @@ export class ClipPlayer {
     return this.whenFrame(name, this.m.clips[name].frames - 1);
   }
 
+  /**
+   * Put the pending clip on screen once its file is in. A newer takeover can start while this
+   * one waits (a cut after a queued follow whose file is still downloading); this one then
+   * gives way, or it would finish last and put the stale clip back on screen.
+   */
   private async takeOver() {
     const p = this.pending;
     if (!p) return;
     this.pending = null;
-    await p.deck.ready;
+    const gen = ++this.takeoverGen;
+    this.taking = p.deck;
+    // `taking` then belongs to the newer takeover, so it is left alone
+    const superseded = () => {
+      if (gen === this.takeoverGen) return false;
+      p.resolve();
+      return true;
+    };
+    try {
+      await p.deck.ready;
+    } catch {
+      // the file failed to download: the table shows a footage error, and this clip can't play
+      if (gen === this.takeoverGen) this.taking = null;
+      return;
+    }
+    if (superseded()) return;
     // A deck reused for a clip it already played sits on that clip's last frame; drawn before
     // the seek lands, the end of the clip (cards already dealt) would show for a frame.
     if (p.deck.el.currentTime > 0) await seekToStart(p.deck.el);
+    if (superseded()) return;
     const prev = this.active;
     this.handoffAt = performance.now();
     try {
@@ -185,6 +213,8 @@ export class ClipPlayer {
     } catch {
       /* autoplay of muted video is always allowed; a rejected play() means the src changed under us */
     }
+    if (superseded()) return;
+    this.taking = null;
     if (prev && prev !== p.deck) {
       if (p.fade > 0) {
         this.fadingFrom = prev;
@@ -270,6 +300,8 @@ export class ClipPlayer {
 
   stopAll() {
     this.pending = null;
+    this.taking = null;
+    this.takeoverGen++;
     for (const d of this.decks) {
       d.el.pause();
       d.name = null;

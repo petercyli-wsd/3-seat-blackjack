@@ -5,7 +5,9 @@ for landing, flip and pickup; outline quads; which seat and which card of
 that seat's hand), so the app can put a face on every card and knows how
 many cards each seat shows at any moment. A card the dealer slides in also
 carries its per-frame outline from the frame its face turns up to the frame
-before it lands (`path`), so the face rides along with it.
+before it lands (`path`), so the face rides along with it; and in the clip
+it is swept up in, its outline from the frame it leaves its resting place
+for as long as it moves on its own (`away`), after which its face is gone.
 
 Plates: for each seat and each hand size the game can need (0, 2-6), a clip
 frame where that seat shows exactly that many cards and nothing covers it.
@@ -125,8 +127,8 @@ def build(cards_json: str, edl_json: str, pose_npz: str, out_dir: str,
         a, b = s["start"], s["end"]
         visible = []
         for c in cards:
-            fl = flights.get(c["id"])
-            start = fl["from"] if fl and fl["quads"] else c["birth"]
+            fl = flights.get(c["id"], {})
+            start = fl["from"] if fl.get("quads") else c["birth"]
             if start < b and c["death"] > a:
                 v = {
                     "slot": c["region"], "index": c["index"],
@@ -135,8 +137,13 @@ def build(cards_json: str, edl_json: str, pose_npz: str, out_dir: str,
                     "faceDown": c["face_down"],
                     "quad": c["quad"],
                 }
-                if fl and fl["quads"]:
+                # only a clip the card is still sliding in during needs the path
+                if fl.get("quads") and c["birth"] > a:
                     v["path"] = {"from": fl["from"] - a, "quads": fl["quads"]}
+                # and only the clip it is swept up in needs where it goes from its resting place
+                away = fl.get("away")
+                if away and away["from"] < b:
+                    v["away"] = {"from": away["from"] - a, "quads": away["quads"]}
                 visible.append(v)
         visible.sort(key=lambda v: (v["slot"], v["index"]))
         entry = {
