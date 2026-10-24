@@ -97,21 +97,33 @@ function loadOrder(m: Manifest): { files: string[]; boot: number } {
     const f = c && (loop ? c.loop : c.file);
     if (f && !out.includes(f)) out.push(f);
   };
+  if (m.clips[clipName.openingIdle]?.loopFrom) add(clipName.openingIdle);
   add(clipName.openingIdle, true);
   for (const seat of m.seats) for (const p of Object.values(m.plates[seat])) add(p.clip);
   const boot = out.length;
+  // the first thing a Deal plays is a bridge out of the betting idle
+  const bridgesInto = (kind: string) => {
+    for (const [name, c] of Object.entries(m.clips)) if (c.bridge && m.clips[c.bridge.to]?.kind === kind) add(name);
+  };
+  bridgesInto("deal");
   const masks = [...new Set(Object.values(m.clips).flatMap((c) => (c.kind === "deal" && c.part === 1 && c.mask ? [c.mask] : [])))];
   for (const step of ["deal", "wait", "reveal", "hold", "discard", "idle"] as const) {
-    for (const mask of masks) add(clipName[step](mask), step === "wait" || step === "hold" || step === "idle");
+    for (const mask of masks) {
+      const name = clipName[step](mask);
+      // a loop whose window starts late is entered by playing its lead-in from the plain file
+      if (m.clips[name]?.loopFrom) add(name);
+      add(name, step === "wait" || step === "hold" || step === "idle");
+    }
   }
+  bridgesInto("hit");
+  bridgesInto("reveal");
   for (const seat of m.playOrder) {
     for (let k = 3; k <= 6; k++) {
       add(clipName.hit(seat, k));
       add(clipName.hitWait(seat, k), true);
     }
   }
-  // the rest of the take (part 2's deal, reveal and discard; the plain files behind the
-  // loops) is never played, so it is never downloaded
+  // the rest of the take (part 2's deal, reveal and discard) is never played, so it is never downloaded
   return { files: out, boot };
 }
 

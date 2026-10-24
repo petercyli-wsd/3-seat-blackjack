@@ -16,7 +16,7 @@ import argparse
 import time
 from pathlib import Path
 
-from bj3 import edl, export, flight, manifest, pose, review, settle, signals, tracker
+from bj3 import bridges, edl, export, flight, manifest, pose, review, settle, signals, tracker
 
 
 def main() -> None:
@@ -49,6 +49,8 @@ def main() -> None:
     step("export", out / "clips", lambda: export.run(a.video, str(work / "edl.json"), str(out)))
     step("manifest", out / "manifest.json", lambda: manifest.build(str(work / "cards.json"), str(work / "edl.json"), str(work / "pose.npz"), str(out), str(work / "flights.json"), str(work / "rest.json")))
 
+    step("bridges-plan", bridges.BRIDGE_DIR / "plan.json", lambda: bridges.plan(a.video, str(work)))
+    step("bridges-local", out / "bridges.json", lambda: bridges.local(a.video, str(work)))
 
 if __name__ == "__main__":
     main()

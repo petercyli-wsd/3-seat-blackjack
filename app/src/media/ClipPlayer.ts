@@ -8,7 +8,13 @@ export type Handoff =
   /** Loops: at the end of the forward pass — seamless too when the loop runs to the clip's last frame. */
   | "anchor"
   /** Immediately, cutting from wherever the current clip is. */
-  | "now";
+  | "now"
+  /**
+   * When the current clip presents this clip frame — going either way through a ping-pong
+   * loop. Where a bridge starts (its first generated frame follows that frame), and where a
+   * lead-in hands over to its loop.
+   */
+  | { exitAt: number };
 
 /**
  * Frames of crossfade on a "now" handoff. A hard cut: the scene lays plates
@@ -62,6 +68,7 @@ export class ClipPlayer {
   private taking: Deck | null = null;
   private takeoverGen = 0;
   private frameWaiters: { name: string; frame: number; resolve: () => void }[] = [];
+  private nextStartWaiters: ((name: string) => void)[] = [];
   private startListeners: ((name: string) => void)[] = [];
   /** Frames the decoder took to take over at each handoff (for the director panel). */
   lastHandoffGap = 0;
@@ -155,7 +162,9 @@ export class ClipPlayer {
    */
   play(name: string, opts: { loop?: boolean; handoff?: Handoff; fade?: number } = {}): Promise<void> {
     const loop = opts.loop ?? false;
-    const handoff = opts.handoff ?? (this.active ? "end" : "now");
+    let handoff = opts.handoff ?? (this.active ? "end" : "now");
+    // the exit frame is on screen right now: go
+    if (typeof handoff === "object" && this.framesUntil(handoff.exitAt) === 0) handoff = "now";
     const fade = opts.fade ?? (handoff === "now" && this.active ? CUT_FADE : 0);
     const deck = this.prepare(name, loop);
     if (this.pending) this.pending.resolve();
@@ -163,6 +172,34 @@ export class ClipPlayer {
       this.pending = { deck, name, loop, handoff, fade, resolve };
       if (handoff === "now" || !this.active) void this.takeOver();
     });
+  }
+
+  /** Whether a handoff is queued (the current clip will be followed by another on its own). */
+  get hasPending() {
+    return !!this.pending || !!this.taking;
+  }
+
+  /** Resolves when the next clip takes the screen. */
+  whenNextStart(): Promise<string> {
+    return new Promise((resolve) => this.nextStartWaiters.push(resolve));
+  }
+
+  /**
+   * Frames until the active clip presents clip frame `at` (0: on screen now; Infinity: a
+   * clip that plays once and is past it, or doesn't reach it).
+   */
+  framesUntil(at: number): number {
+    const d = this.active;
+    if (!d || !d.name) return Infinity;
+    const clip = this.m.clips[d.name];
+    if (!d.loop) return at >= d.fileFrame ? at - d.fileFrame : Infinity;
+    const { from, n } = loopSpan(clip);
+    const i = at - from;
+    if (i < 0 || i >= n) return Infinity;
+    const period = 2 * n - 2;
+    const f = ((d.fileFrame % period) + period) % period;
+    const ahead = (p: number) => (p - f + period) % period;
+    return Math.min(ahead(i), ahead(period - i === period ? 0 : period - i));
   }
 
   /** Resolves when the given clip is on screen at or past `frame`. */
@@ -230,6 +267,9 @@ export class ClipPlayer {
     this.active = p.deck;
     p.deck.fileFrame = 0;
     for (const fn of this.startListeners) fn(p.name);
+    const waiting = this.nextStartWaiters;
+    this.nextStartWaiters = [];
+    for (const fn of waiting) fn(p.name);
     p.resolve();
   }
 
@@ -276,6 +316,10 @@ export class ClipPlayer {
     });
     const p = this.pending;
     if (!p) return;
+    if (typeof p.handoff === "object") {
+      if (this.crossed(deck, prevFrame, p.handoff.exitAt)) void this.takeOver();
+      return;
+    }
     if (p.handoff === "end" && !deck.loop && deck.fileFrame >= s.clip.frames - 1) void this.takeOver();
     if (p.handoff === "anchor" && deck.loop) {
       const { n } = loopSpan(s.clip);
@@ -286,6 +330,22 @@ export class ClipPlayer {
       if (crossed || b === n - 1) void this.takeOver();
     }
     if (p.handoff === "end" && deck.loop) void this.takeOver();
+  }
+
+  /** Whether the deck's last presented frame reached clip frame `at` since the frame before (rVFC can skip frames). */
+  private crossed(deck: Deck, prevFile: number, at: number): boolean {
+    const clip = this.m.clips[deck.name!];
+    if (!deck.loop) return prevFile < at && deck.fileFrame >= at || deck.fileFrame === at;
+    const { from, n } = loopSpan(clip);
+    const i = at - from;
+    if (i < 0 || i >= n) return false;
+    const period = 2 * n - 2;
+    const a = ((prevFile % period) + period) % period;
+    const b = ((deck.fileFrame % period) + period) % period;
+    // the file frames showing clip frame `at`: on the way out and (unless an end) on the way back
+    const marks = i === 0 || i === n - 1 ? [i] : [i, period - i];
+    const between = (p: number) => (a < b ? a < p && p <= b : a < p || p <= b);
+    return a !== b && marks.some(between) || marks.includes(b);
   }
 
   /** Frames until the current loop reaches its forward anchor (for deciding between waiting and cutting). */

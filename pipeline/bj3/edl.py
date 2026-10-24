@@ -21,6 +21,7 @@ from pathlib import Path
 
 import numpy as np
 
+from bj3 import graph
 from bj3.geometry import SEATS
 
 QUIET_MIN_S = 0.4
@@ -155,6 +156,69 @@ def snap_to_rest(segs: list[dict], rest: np.ndarray, fps: float) -> None:
             a["end"] = b["start"] = g
 
 
+def wait_windows(segs: list[dict], fps: float) -> None:
+    """A decision wait loops over its first WAIT_LOOP_S: she has just come back to rest from
+    dealing. Exits from there keep a hit quick (the next exit is never more than one short
+    loop away), and the rest of the wait — the beat before she reaches for the shoe — becomes
+    the lead-in of whatever is dealt next (see recut_entries)."""
+    for s in segs:
+        if s["kind"] == "wait":
+            s["loop_in"] = s["start"]
+            s["loop_out"] = min(s["end"], s["start"] + int(graph.WAIT_LOOP_S * fps))
+
+
+def recut_entries(segs: list[dict], rest: np.ndarray, pose_npz: str, fps: float) -> None:
+    """Move the first frame of every clip the game cuts into onto the frame that best matches
+    the loops it is cut into from.
+
+    The dealer's resting pose drifts through the take (sway, head tilt, hands placed
+    differently), and before each deal she leans into a ready pose with her hand parked on
+    the shoe. An entry in that pose is a long way from every other loop. Each entry is chosen
+    among the resting frames just before it, scored by its mean distance to the nearest frame
+    of each source loop, so a bridge has as little as possible to invent.
+
+    A deal enters at a frame inside its idle's calm stretch, which then ends there: the take's
+    own next deal stays seamless, and the lean towards the shoe opens the deal clip.
+    """
+    from bj3.gaps import Gaps
+
+    # how far back an entry may move: a hit is a player waiting on a card, a deal can open with
+    # the dealer getting ready; and each second earlier must buy a real improvement
+    reach = {"hit": 3.5, "reveal": 2.0}
+    per_second = {"hit": 1.2, "reveal": 0.8, "deal": 0.3}
+    G = Gaps(pose_npz)
+    by = {s["name"]: s for s in segs}
+    srcs_of = graph.sources(by)
+    # deals first: they move idle windows, which are sources for nothing else
+    order = sorted(srcs_of, key=lambda n: by[n]["kind"] != "deal")
+    for name in order:
+        t = by[name]
+        p = by[graph.predecessor(by, name)]
+        if t["kind"] == "deal":
+            if "loop_in" not in p:
+                continue
+            # anywhere from a second into the calm stretch: the lean to the shoe opens the deal
+            lo, hi = p["loop_in"] + int(1.0 * fps), t["start"]
+            sources = [n for n in srcs_of[name] if n != p["name"]]
+        else:
+            lo, hi = p["start"] + int((graph.WAIT_LOOP_S + 0.25) * fps), t["start"]
+            lo = max(lo, t["start"] - int(reach[t["kind"]] * fps))
+            sources = list(srcs_of[name])
+        cands = [e for e in range(lo, hi + 1) if rest[e]] or [t["start"]]
+        windows = [list(range(*graph.loop_window(by[n]))) for n in sources]
+        if not windows:
+            continue
+        costs = np.mean([G.matrix(w, cands).min(0) for w in windows], axis=0)
+        before = float(costs[cands.index(t["start"])]) if t["start"] in cands else float("nan")
+        costs += per_second[t["kind"]] * (t["start"] - np.asarray(cands)) / fps
+        e = int(cands[int(np.argmin(costs))])
+        print(f"recut {name:<18} moved {(e - t['start']) / fps:+5.2f}s  gap {before:5.2f} -> "
+              f"{np.mean([G.matrix(w, [e]).min() for w in windows]):5.2f}")
+        p["end"] = t["start"] = e
+        if t["kind"] == "deal":
+            p["loop_out"] = e
+
+
 def build(cards_json: str, signals: str, out: str, pose_npz: str | None = None) -> None:
     d = np.load(signals)
     fps = float(d["fps"])
@@ -212,6 +276,8 @@ def build(cards_json: str, signals: str, out: str, pose_npz: str | None = None) 
         rest = rest_mask(pose_npz)
         snap_to_rest(segs, rest, fps)
         calm_loops(segs, rest, fps)
+        wait_windows(segs, fps)
+        recut_entries(segs, rest, pose_npz, fps)
     for s in segs:
         s["frames"] = s["end"] - s["start"]
         s["seconds"] = round(s["frames"] / fps, 3)

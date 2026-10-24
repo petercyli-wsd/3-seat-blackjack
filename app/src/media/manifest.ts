@@ -4,7 +4,7 @@ export type Quad = [Pt, Pt, Pt, Pt];
 
 export type SeatId = "seat1" | "seat2" | "seat3";
 export type Slot = SeatId | "up" | "hole";
-export type ClipKind = "idle" | "deal" | "wait" | "reveal" | "hold" | "discard" | "hit";
+export type ClipKind = "idle" | "deal" | "wait" | "reveal" | "hold" | "discard" | "hit" | "bridge";
 
 /** A physical card visible during a clip; frames are clip-relative (may lie outside the clip). */
 export interface FootageCard {
@@ -38,6 +38,26 @@ export interface ClipInfo {
   seat?: SeatId;
   card?: number;
   part?: number;
+  /** A bridge clip: the generated frames between `from` at clip frame `at` and `to`'s first frame. */
+  bridge?: { from: string; at: number; to: string };
+}
+
+/**
+ * An interpolated move between two clips that were not filmed back to back
+ * (game_assets/bridges.json, written by the pipeline's bridges pass). Leaving
+ * `from` on clip frame `at`, then playing `frames` generated frames, lands on
+ * `to`'s first frame. `frames` 0 means the two frames already match: a cut.
+ */
+export interface Bridge {
+  name: string;
+  from: string;
+  at: number;
+  to: string;
+  file: string | null;
+  frames: number;
+  class: "cut" | "short" | "long" | "generative";
+  critical: boolean;
+  source: "local" | "tool";
 }
 
 export interface Plate {
@@ -65,6 +85,32 @@ export async function loadManifest(): Promise<Manifest> {
   const r = await fetch(`${ASSET_BASE}manifest.json`);
   if (!r.ok) throw new Error(`manifest.json: HTTP ${r.status} — run the pipeline first (see README)`);
   return r.json();
+}
+
+/**
+ * Bridges join the manifest as clips of kind "bridge" (so the player and loader treat them like
+ * any footage) and are indexed by the clip they leave from. No bridges file: none, every cut is hard.
+ */
+export async function loadBridges(m: Manifest): Promise<Map<string, Bridge[]>> {
+  const byFrom = new Map<string, Bridge[]>();
+  const r = await fetch(`${ASSET_BASE}bridges.json`).catch(() => null);
+  if (!r?.ok) return byFrom;
+  const { bridges } = (await r.json()) as { bridges: Bridge[] };
+  for (const b of bridges) {
+    if (!m.clips[b.from] || !m.clips[b.to]) continue;
+    if (b.frames > 0 && b.file) {
+      m.clips[b.name] = {
+        file: b.file, kind: "bridge", frames: b.frames, cards: [], still: 0,
+        // never a natural successor of anything
+        sourceStart: -1e9,
+        bridge: { from: b.from, at: b.at, to: b.to },
+      };
+    }
+    const list = byFrom.get(b.from) ?? [];
+    list.push(b);
+    byFrom.set(b.from, list);
+  }
+  return byFrom;
 }
 
 /** Footage cards of one slot that are on the table at a clip frame. */

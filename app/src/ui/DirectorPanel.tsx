@@ -31,6 +31,7 @@ export function DirectorPanel({ store, director }: { store: Store; director: Dir
         <dl className="dp-stats">
           <dt>Frame</dt><dd>{d.frame + 1} / {d.frames}</dd>
           <dt>Handoff gap</dt><dd>{d.handoffGap} fr</dd>
+          <dt>Bridges</dt><dd>{d.bridges.tool} generated · {d.bridges.local} stand-in</dd>
           <dt>Crossfade</dt><dd>{d.fade < 1 ? `${Math.round(d.fade * 100)}%` : "—"}</dd>
           <dt>Shoe</dt><dd>{d.shoeRemaining} cards · shoe {d.shuffles}</dd>
         </dl>

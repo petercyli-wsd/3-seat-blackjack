@@ -1,26 +1,27 @@
-"""Interpolated bridges for every cut the game can make between clips that
-were not filmed back to back.
+"""Interpolated bridges for every cut the game makes between clips that were
+not filmed back to back.
 
-    python -m bj3.bridges plan  <full_footage.mp4>   # stubs + CSV for the interpolation tool
-    python -m bj3.bridges ingest <tool output dir>   # (after generation) cut bridges into game_assets
+    python -m bj3.bridges plan   <full_footage.mp4>   # exits, gap scores, stubs, CSVs
+    python -m bj3.bridges local  <full_footage.mp4>   # stand-in bridges by optical flow, into game_assets
+    python -m bj3.bridges ingest <tool output dir>    # the interpolation tool's bridges, into game_assets
 
-The game leaves a clip from a loop (wait / idle) — the dealer at rest — or,
-once betting has reopened, from the tail of a discard (she is squaring the
-tray and a Deal may cut it short), and enters the first frame of an action
-clip (deal / hit / reveal). A pre-rendered bridge needs a fixed exit frame,
-so each source gets exit *anchors*: both ends of the frames it can be left
-from (an idle loop plays only its calm window) plus interior frames about a
-second apart (at the stillest frame near each grid point). The player then
-never waits more than ~1 s for the next anchor after hitting or dealing.
+The game leaves the take's order only from a loop (see graph.py) and always
+enters a clip at its first frame (which edl.recut_entries has placed on the
+pose that best matches its sources). Per (loop, target) pair the planner
+picks the exit frame in the loop that is closest to the target's entry:
 
-Cuts that are contiguous in the take (a loop's last frame -> the clip that
-followed it) are already seamless and get no bridge. Hold loops only ever
-lead to their own discard, so the game waits for that seamless anchor.
+* a cut a player waits on (a hit) gets two exits, the best in each half of
+  the loop, so the dealer is never more than about a second from one;
+* any other cut gets the single best exit (the loop comes round to it).
 
-The interpolation tool joins "entire first video -> bridge -> entire second
-video". Each row's first video is a short stub ending exactly on the exit
-frame, its second a short stub starting exactly on the entry frame; ingest
-finds the bridge between them by matching those two frames.
+Each exit is scored by optical flow (how far the dealer moves, and what
+warping can't explain) into a class that sets the method and length:
+cut (no bridge), short / long flow bridge (FILM, RIFE), or generative
+(Kling / Seedance) where the poses differ too much for flow — only where a
+long bridge doesn't hold a player up.
+
+Rows go out in the tool's three-column CSV, all together and split by
+suggested method, plus a full CSV with the planning columns.
 """
 
 import csv
@@ -29,72 +30,78 @@ import subprocess
 import sys
 from pathlib import Path
 
+import cv2
 import numpy as np
 
-from bj3.export import FFMPEG, RATE, X264, loop_window
-from bj3.geometry import PLAY_ORDER
+from bj3 import graph
+from bj3.export import FFMPEG, RATE, X264
+from bj3.gaps import FlowGap, Gaps
 from bj3.video import Frames
 
 STUB = 8  # frames per stub: enough context, small uploads
-ANCHOR_SPACING = 24  # ~1 s at 23.976 fps
-ANCHOR_SEARCH = 6  # look this many frames either side of a grid point for the stillest frame
-# Director.CLEARED_FRAMES: betting reopens this many frames after a discard's last card is in the tray
-CLEARED_FRAMES = 6
 HERE = Path(__file__).resolve().parents[1]
 BRIDGE_DIR = HERE.parent / "bridges"
+ASSETS = HERE.parent / "game_assets"
+FPS = 24000 / 1001
+
+# Flow classes: (max motion px, max % unexplained) -> class; see gaps.FlowGap for the calibration.
+CLASSES = [
+    ("cut", 2.0, 0.1),
+    ("short", 12.0, 1.0),
+    ("long", 40.0, 3.0),
+]
+# seconds of bridge per class; a generative bridge is as long as the models allow
+SECONDS = {"cut": 0.0, "short": 0.33, "long": 0.67, "generative": 3.0}
+METHOD = {"cut": "none", "short": "FILM", "long": "FILM", "generative": "Kling"}
+# the longest a bridge may be where a player is waiting on it
+CRITICAL_MAX_S = 0.75
 
 
-def seats_in(mask: str) -> list[str]:
-    return [f"seat{i + 1}" for i, b in enumerate(mask) if b == "1"]
+def classify(motion: float, resid: float) -> str:
+    for name, m, r in CLASSES:
+        if motion <= m and resid <= r:
+            return name
+    return "generative"
 
 
-def transitions(segs: dict[str, dict]) -> dict[str, set[str]]:
-    """Every (loop or discard tail -> action clip) cut the round script can make."""
-    masks = sorted({s["mask"] for s in segs.values() if s.get("part") == 1})
-    deals = [f"{m}_deal" for m in masks]
-    out: dict[str, set[str]] = {}
-    # betting: any idle loop, or a discard once its cards are in the tray -> any combination's deal
-    for name in ["opening_idle"] + [f"{m}_idle" for m in masks] + [f"{m}_discard" for m in masks]:
-        out[name] = set(deals)
-    # first decision on the part-1 wait: a seat's first hit, or (all stood) the reveal
-    for m in masks:
-        out[f"{m}_wait"] = {f"{s}_card3_deal" for s in seats_in(m)} | {f"{m}_reveal"}
-    # after a seat has hit (part-2 wait loops): its next hit, a later seat's first hit, or the reveal
-    for s in PLAY_ORDER:
-        later = PLAY_ORDER[PLAY_ORDER.index(s) + 1:]
-        for k in range(3, 7):
-            t = {f"{x}_card3_deal" for x in later}
-            t |= {f"{m}_reveal" for m in masks if s in seats_in(m)}
-            if k < 6:
-                t.add(f"{s}_card{k + 1}_deal")
-            out[f"{s}_card{k}_wait"] = t
-    return out
+def exits_for(window: list[int], d: np.ndarray, critical: bool) -> list[int]:
+    if not critical or len(window) < 12:
+        return [window[int(np.argmin(d))]]
+    h = len(window) // 2
+    return [window[int(np.argmin(d[:h]))], window[h + int(np.argmin(d[h:]))]]
 
 
-def natural_next(segs: dict[str, dict], name: str) -> str | None:
-    end = segs[name]["end"]
-    return next((k for k, s in segs.items() if s["start"] == end), None)
+def _smooth(e0: float, e1: float, x: np.ndarray) -> np.ndarray:
+    t = np.clip((x - e0) / (e1 - e0), 0, 1)
+    return t * t * (3 - 2 * t)
 
 
-def exit_span(seg: dict, cards: list[dict]) -> tuple[int, int]:
-    """Clip frames [a, b) the game can leave `seg` from: a loop's window, or a discard's tail
-    from when betting reopens (the frame Director waits for) to its end."""
-    if seg["kind"] != "discard":
-        return loop_window(seg)
-    a, b = seg["start"], seg["end"]
-    last_out = max([c["death"] - a for c in cards if c["birth"] < b and c["death"] > a], default=0)
-    return min(b - a - 1, last_out + CLEARED_FRAMES), b - a
+class SeatCleaner:
+    """Takes the cards off the players' seats in a frame, leaving bare felt.
 
+    A bridge is generated between frames of two different clips whose seats hold different
+    cards (part 1's two-card hands, part 2's six-card stacks). Interpolated, those cards
+    morph and drift — anywhere, not only where a plate can cover them. So bridges are made
+    from frames with the seats cleared to an empty table, and during a bridge the game lays
+    a plate of each seat's real hand over every seat. Keyed exactly as the app's compositor
+    keys plates (felt or card stock is replaced, anything else — her arm — stays).
+    """
 
-def anchors(seg: dict, span: tuple[int, int], motion: np.ndarray) -> list[int]:
-    """Exit frames (clip-relative): both ends of the span plus the stillest frame near every ~1 s grid point."""
-    a, b = span
-    out = {a, b - 1}
-    for g in range(a + ANCHOR_SPACING, b - ANCHOR_SPACING // 2, ANCHOR_SPACING):
-        lo, hi = max(a + 1, g - ANCHOR_SEARCH), min(b - 2, g + ANCHOR_SEARCH)
-        if hi > lo:
-            out.add(lo + int(np.argmin(motion[seg["start"] + lo:seg["start"] + hi + 1])))
-    return sorted(out)
+    def __init__(self, fr: Frames, segs: dict):
+        idle = segs["full_table_idle"]
+        a, b = idle.get("loop_in", idle["start"]), idle.get("loop_out", idle["end"])
+        self.empty = np.median(np.stack([fr.get(f) for f in range(a, b, max(1, (b - a) // 7))]), axis=0).astype(np.uint8)
+        m = cv2.imread(str(ASSETS / "masks" / "seats.png")).astype(np.float32) / 255
+        self.mask = cv2.dilate(m.max(axis=2), np.ones((15, 15), np.uint8))[..., None]
+
+    def __call__(self, frame: np.ndarray) -> np.ndarray:
+        f = frame.astype(np.float32) / 255
+        b_, g_, r_ = f[..., 0], f[..., 1], f[..., 2]
+        felt = _smooth(0.03, 0.12, b_ - np.maximum(r_, g_))
+        card = _smooth(0.55, 0.70, f.min(axis=2)) * (1 - _smooth(0.02, 0.06, r_ - b_))
+        key = cv2.dilate(np.maximum(felt, card), np.ones((3, 3), np.uint8))[..., None]
+        w = self.mask * key
+        return (frame * (1 - w) + self.empty * w).round().astype(np.uint8)
 
 
 def write_stub(frames: list[np.ndarray], path: Path) -> None:
@@ -112,60 +119,217 @@ def plan(video: str, work: str = "work", out_dir: str | None = None) -> None:
     work_p = Path(work)
     bdir = Path(out_dir) if out_dir else BRIDGE_DIR
     segs = {s["name"]: s for s in json.load(open(work_p / "edl.json"))["segments"]}
-    cards = json.load(open(work_p / "cards.json"))["cards"]
-    z = np.load(work_p / "pose.npz")
-    P = z["pose"].astype(np.float32)
-    keep = z["keep"]
-    motion = np.zeros(len(P), np.float32)
-    motion[1:] = np.abs(P[1:] - P[:-1])[:, keep].mean(1)
-    motion = np.convolve(motion, np.ones(5) / 5, "same")
-
-    rows, exits, entries = [], {}, set()
-    for src, targets in sorted(transitions(segs).items()):
-        seg = segs[src]
-        nat = natural_next(segs, src)
-        last = seg["end"] - seg["start"] - 1
-        span = exit_span(seg, cards)
-        for f in anchors(seg, span, motion):
-            for dst in sorted(targets):
-                if dst == nat and f == last:
-                    continue  # already seamless in the take
-                exit_id = f"{src}@{f:04d}"
-                # a ping-pong loop reaches the start of its window going backwards
-                exits[exit_id] = (src, f, seg["kind"] != "discard" and f == span[0])
-                entries.add(dst)
-                rows.append({"src": src, "frame": f, "dst": dst, "exit": exit_id, "output": f"{exit_id}__{dst}.mp4"})
-
-    # stubs, in take order so reads mostly run forward; one stub's frames in memory at a time
-    stubs = bdir / "stubs"
-    jobs = []
-    for exit_id, (src, f, at_start) in exits.items():
-        a = segs[src]["start"] + f
-        # the stub runs in the direction of travel into the anchor
-        idx = list(range(a + STUB - 1, a - 1, -1)) if at_start else list(range(a - STUB + 1, a + 1))
-        jobs.append((idx, stubs / "exit" / f"{exit_id}.mp4"))
-    for dst in entries:
-        jobs.append((list(range(segs[dst]["start"], segs[dst]["start"] + STUB)), stubs / "entry" / f"{dst}.mp4"))
+    G = Gaps(str(work_p / "pose.npz"))
+    flow = FlowGap()
     fr = Frames(video)
-    for idx, path in sorted(jobs, key=lambda j: min(j[0])):
-        got = {j: fr.get(j).copy() for j in sorted(idx)}
-        write_stub([got[j] for j in idx], path)
 
-    with open(bdir / "bridges.csv", "w", newline="", encoding="utf-8") as fh:
+    rows = []
+    for src, targets in sorted(graph.transitions(segs).items()):
+        a, b = graph.loop_window(segs[src])
+        window = list(range(a, b))
+        for dst in sorted(targets):
+            if graph.seamless(segs, src, dst):
+                continue
+            entry = segs[dst]["start"]
+            d = G.matrix(window, [entry])[:, 0]
+            crit = graph.critical(dst)
+            for x in exits_for(window, d, crit):
+                motion, resid = flow(fr.get(x), fr.get(entry))
+                cls = classify(motion, resid)
+                if crit and cls == "generative":
+                    cls = "long"  # a player is waiting: the longest flow bridge we can afford, flagged
+                seconds = min(SECONDS[cls], CRITICAL_MAX_S) if crit else SECONDS[cls]
+                exit_id = f"{src}@{x - segs[src]['start']:04d}"
+                rows.append({
+                    "src": src, "frame": x - segs[src]["start"], "dst": dst, "exit": exit_id,
+                    "output": f"{exit_id}__{dst}.mp4", "critical": crit,
+                    "max_seconds": CRITICAL_MAX_S if crit else 4.0,
+                    "class": cls, "method": METHOD[cls], "seconds": seconds,
+                    "flow_px": round(motion, 1), "unexplained_pct": round(resid, 2), "pose_gap": round(float(d[x - a]), 2),
+                    "exit_source_frame": x, "entry_source_frame": entry,
+                })
+
+    # stubs: the frames running into the exit, and the target's first frames
+    stubs = bdir / "stubs"
+    for sub in ("exit", "entry"):
+        for f in (stubs / sub).glob("*.mp4"):
+            f.unlink()
+    clean = SeatCleaner(fr, segs)
+    for exit_id in sorted({r["exit"] for r in rows}):
+        r = next(r for r in rows if r["exit"] == exit_id)
+        x = r["exit_source_frame"]
+        write_stub([clean(fr.get(i)) for i in range(x - STUB + 1, x + 1)], stubs / "exit" / f"{exit_id}.mp4")
+    for dst in sorted({r["dst"] for r in rows}):
+        s = segs[dst]["start"]
+        write_stub([clean(fr.get(i)) for i in range(s, s + STUB)], stubs / "entry" / f"{dst}.mp4")
+
+    gen = [r for r in rows if r["class"] != "cut"]
+    bdir.mkdir(parents=True, exist_ok=True)
+
+    def tool_csv(path: Path, rs):
+        with open(path, "w", newline="", encoding="utf-8") as fh:
+            w = csv.writer(fh)
+            w.writerow(["first_half", "second_half", "output"])
+            for r in rs:
+                w.writerow([f"exit/{r['exit']}.mp4", f"entry/{r['dst']}.mp4", r["output"]])
+
+    tool_csv(bdir / "bridges.csv", gen)
+    for cls in ("short", "long", "generative"):
+        tool_csv(bdir / f"bridges_{cls}.csv", [r for r in gen if r["class"] == cls])
+    cols = ["first_half", "second_half", "output", "max_seconds", "critical", "class", "method", "seconds",
+            "flow_px", "unexplained_pct", "src", "dst"]
+    with open(bdir / "bridges_full.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
-        w.writerow(["first_half", "second_half", "output"])
+        w.writerow(cols)
         for r in rows:
-            w.writerow([f"exit/{r['exit']}.mp4", f"entry/{r['dst']}.mp4", r["output"]])
-    (bdir / "plan.json").write_text(json.dumps({"stub": STUB, "fps": 24000 / 1001, "rows": rows}, indent=1))
-    per_src = {}
+            w.writerow([f"exit/{r['exit']}.mp4", f"entry/{r['dst']}.mp4", r["output"], r["max_seconds"],
+                        int(r["critical"]), r["class"], r["method"], r["seconds"], r["flow_px"], r["unexplained_pct"],
+                        r["src"], r["dst"]])
+    (bdir / "plan.json").write_text(json.dumps({"stub": STUB, "fps": FPS, "rows": rows}, indent=1))
+    for old in ("plan.prev.json",):
+        (bdir / old).unlink(missing_ok=True)
+    count = {c: sum(r["class"] == c for r in rows) for c in ("cut", "short", "long", "generative")}
+    print(f"{len(rows)} exits over {len({(r['src'], r['dst']) for r in rows})} loop->clip pairs: {count}")
+    print(f"critical (hit) rows: {sum(r['critical'] for r in rows)}; to generate: {len(gen)}")
+
+
+# ---------------------------------------------------------------- bridges into the game
+
+
+def interpolate(a: np.ndarray, b: np.ndarray, n: int) -> list[np.ndarray]:
+    """n in-between frames by bidirectional optical flow — a stand-in until the tool's bridges arrive."""
+    ga, gb = cv2.cvtColor(a, cv2.COLOR_BGR2GRAY), cv2.cvtColor(b, cv2.COLOR_BGR2GRAY)
+    dis = cv2.DISOpticalFlow_create(cv2.DISOPTICAL_FLOW_PRESET_MEDIUM)
+    dis.setFinestScale(0)  # full-resolution detail: fingers and card edges
+    dis.setGradientDescentIterations(25)
+    fab = dis.calc(ga, gb, None)
+    fba = dis.calc(gb, ga, None)
+    h, w = ga.shape
+    gx, gy = np.meshgrid(np.arange(w, dtype=np.float32), np.arange(h, dtype=np.float32))
+    out = []
+    for i in range(1, n + 1):
+        t = i / (n + 1)
+        # sample each end where the pixel now at x came from / is going to
+        wa = cv2.remap(a, gx - t * fab[..., 0], gy - t * fab[..., 1], cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
+        wb = cv2.remap(b, gx - (1 - t) * fba[..., 0], gy - (1 - t) * fba[..., 1], cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
+        e = t * t * (3 - 2 * t)
+        out.append(cv2.addWeighted(wa, 1 - e, wb, e, 0))
+    return out
+
+
+def encode(frames: list[np.ndarray], path: Path) -> None:
+    write_stub(frames, path)
+
+
+def registry_path() -> Path:
+    return ASSETS / "bridges.json"
+
+
+def load_registry() -> dict:
+    p = registry_path()
+    return json.loads(p.read_text()) if p.exists() else {"fps": FPS, "bridges": []}
+
+
+def save_registry(reg: dict, rows: list[dict]) -> None:
+    order = {r["output"]: i for i, r in enumerate(rows)}
+    reg["bridges"].sort(key=lambda b: order.get(b["name"], 1 << 30))
+    registry_path().write_text(json.dumps(reg, indent=1))
+
+
+def put(reg: dict, row: dict, frames: int, source: str) -> None:
+    reg["bridges"] = [b for b in reg["bridges"] if b["name"] != row["output"]]
+    reg["bridges"].append({
+        "name": row["output"], "from": row["src"], "at": row["frame"], "to": row["dst"],
+        "file": f"bridges/{row['output']}" if frames else None, "frames": frames,
+        "class": row["class"], "critical": row["critical"], "source": source,
+    })
+
+
+def local(video: str, work: str = "work") -> None:
+    """Stand-in bridges for every planned row, so the game plays bridges before the tool's arrive.
+    A row already filled from the tool is left alone."""
+    rows = json.load(open(BRIDGE_DIR / "plan.json"))["rows"]
+    reg = load_registry()
+    have_tool = {b["name"] for b in reg["bridges"] if b["source"] == "tool"}
+    fr = Frames(video)
+    segs = {s["name"]: s for s in json.load(open(Path(work) / "edl.json"))["segments"]}
+    clean = SeatCleaner(fr, segs)
+    out = ASSETS / "bridges"
+    out.mkdir(parents=True, exist_ok=True)
     for r in rows:
-        per_src[r["src"]] = per_src.get(r["src"], 0) + 1
-    print(f"{len(rows)} bridges from {len(exits)} exit anchors into {len(entries)} entry clips")
-    for k, v in sorted(per_src.items()):
-        print(f"  {k:<20} {v:4d}")
-    print(f"CSV: {bdir / 'bridges.csv'}  (source folder to select: {stubs})")
+        if r["output"] in have_tool:
+            continue
+        # a generated move can't be stood in for by flow; a long flow bridge is the closest stand-in
+        seconds = min(r["seconds"], SECONDS["long"])
+        n = int(round(seconds * FPS))
+        if n:
+            frames = interpolate(clean(fr.get(r["exit_source_frame"])), clean(fr.get(r["entry_source_frame"])), n)
+            encode(frames, out / r["output"])
+        put(reg, r, n, "local")
+    save_registry(reg, rows)
+    print(f"{len(rows)} bridges registered ({sum(1 for b in reg['bridges'] if b['source'] == 'local')} stand-ins)")
+
+
+def read_all(path: Path) -> list[np.ndarray]:
+    cap = cv2.VideoCapture(str(path))
+    out = []
+    while True:
+        ok, f = cap.read()
+        if not ok:
+            return out
+        out.append(f)
+
+
+def ingest(tool_dir: str, video: str | None = None) -> None:
+    """The tool's outputs (exit stub + bridge + entry stub) -> just the bridge, into the game.
+
+    The bridge is found by locating the two known stubs in the output, not by counting, so a
+    tool that pads or trims around them still yields exactly the frames between them."""
+    rows = json.load(open(BRIDGE_DIR / "plan.json"))["rows"]
+    reg = load_registry()
+    out = ASSETS / "bridges"
+    out.mkdir(parents=True, exist_ok=True)
+    stubs = BRIDGE_DIR / "stubs"
+    done = missing = bad = 0
+    for r in rows:
+        if r["class"] == "cut":
+            put(reg, r, 0, "tool")
+            continue
+        src = Path(tool_dir) / r["output"]
+        if not src.exists():
+            hits = list(Path(tool_dir).rglob(r["output"]))
+            src = hits[0] if hits else src
+        if not src.exists():
+            missing += 1
+            continue
+        frames = [f.astype(np.float32) for f in read_all(src)]
+        A = [f.astype(np.float32) for f in read_all(stubs / "exit" / f"{r['exit']}.mp4")]
+        Bs = [f.astype(np.float32) for f in read_all(stubs / "entry" / f"{r['dst']}.mp4")]
+        # Align each stub as a whole sequence (its frames carry the dealer's own motion, so it
+        # fits in one place only); the bridge is what lies between them. Single-frame matching
+        # is ambiguous: a bridge between two close poses looks like its ends all the way through.
+        n = len(frames)
+
+        def fit(stub, lo, hi):
+            costs = [np.mean([np.abs(frames[o + k] - stub[k]).mean() for k in range(len(stub))])
+                     for o in range(lo, hi + 1)]
+            o = int(np.argmin(costs))
+            return lo + o, costs[o]
+
+        oa, ca = fit(A, 0, max(0, n - len(A) - len(Bs)))
+        ob, cb = fit(Bs, oa + len(A), n - len(Bs))
+        bridge = [f.round().astype(np.uint8) for f in frames[oa + len(A):ob]]
+        if not bridge or ca > 8 or cb > 8:
+            print(f"  ! {r['output']}: stubs not found (exit {ca:.1f}, entry {cb:.1f}, {len(bridge)} frames between)")
+            bad += 1
+            continue
+        encode(bridge, out / r["output"])
+        put(reg, r, len(bridge), "tool")
+        done += 1
+    save_registry(reg, rows)
+    print(f"ingested {done}; missing {missing}; unreadable {bad}")
 
 
 if __name__ == "__main__":
     cmd, *args = sys.argv[1:]
-    {"plan": plan}[cmd](*args)
+    {"plan": plan, "local": local, "ingest": ingest}[cmd](*args)

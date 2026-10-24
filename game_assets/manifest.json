@@ -2286,7 +2286,9 @@
    "mask": "001",
    "part": 1,
    "loop": "loops/001_wait_loop.mp4",
-   "loopFrames": 184,
+   "loopFrames": 92,
+   "loopFrom": 0,
+   "loopTo": 47,
    "still": 35
   },
   "001_reveal": {
@@ -2819,29 +2821,29 @@
   "001_idle": {
    "file": "clips/starting_hands/001_idle.mp4",
    "kind": "idle",
-   "frames": 153,
+   "frames": 133,
    "sourceStart": 668,
    "cards": [],
    "mask": "001",
    "part": 1,
    "loop": "loops/001_idle_loop.mp4",
-   "loopFrames": 136,
+   "loopFrames": 128,
    "loopFrom": 68,
-   "loopTo": 137,
+   "loopTo": 133,
    "still": 129
   },
   "010_deal": {
    "file": "clips/starting_hands/010_deal.mp4",
    "kind": "deal",
-   "frames": 247,
-   "sourceStart": 821,
+   "frames": 267,
+   "sourceStart": 801,
    "cards": [
     {
      "slot": "hole",
      "index": 2,
-     "in": 228,
-     "out": 569,
-     "flip": 453,
+     "in": 248,
+     "out": 589,
+     "flip": 473,
      "faceDown": true,
      "quad": [
       [
@@ -2865,8 +2867,8 @@
     {
      "slot": "seat2",
      "index": 1,
-     "in": 99,
-     "out": 597,
+     "in": 119,
+     "out": 617,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -2888,7 +2890,7 @@
       ]
      ],
      "path": {
-      "from": 64,
+      "from": 84,
       "quads": [
        [
         [
@@ -3526,8 +3528,8 @@
     {
      "slot": "seat2",
      "index": 2,
-     "in": 169,
-     "out": 599,
+     "in": 189,
+     "out": 619,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -3549,7 +3551,7 @@
       ]
      ],
      "path": {
-      "from": 164,
+      "from": 184,
       "quads": [
        [
         [
@@ -3647,8 +3649,8 @@
     {
      "slot": "up",
      "index": 1,
-     "in": 228,
-     "out": 567,
+     "in": 248,
+     "out": 587,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -3670,7 +3672,7 @@
       ]
      ],
      "path": {
-      "from": 127,
+      "from": 147,
       "quads": [
        [
         [
@@ -5496,7 +5498,7 @@
    ],
    "mask": "010",
    "part": 1,
-   "still": 217
+   "still": 0
   },
   "010_wait": {
    "file": "clips/starting_hands/010_wait.mp4",
@@ -5612,7 +5614,9 @@
    "mask": "010",
    "part": 1,
    "loop": "loops/010_wait_loop.mp4",
-   "loopFrames": 290,
+   "loopFrames": 92,
+   "loopFrom": 0,
+   "loopTo": 47,
    "still": 95
   },
   "010_reveal": {
@@ -6128,29 +6132,27 @@
   "010_idle": {
    "file": "clips/starting_hands/010_idle.mp4",
    "kind": "idle",
-   "frames": 103,
+   "frames": 46,
    "sourceStart": 1536,
    "cards": [],
    "mask": "010",
    "part": 1,
    "loop": "loops/010_idle_loop.mp4",
-   "loopFrames": 92,
-   "loopFrom": 0,
-   "loopTo": 47,
+   "loopFrames": 90,
    "still": 38
   },
   "011_deal": {
    "file": "clips/starting_hands/011_deal.mp4",
    "kind": "deal",
-   "frames": 245,
-   "sourceStart": 1639,
+   "frames": 302,
+   "sourceStart": 1582,
    "cards": [
     {
      "slot": "hole",
      "index": 2,
-     "in": 221,
-     "out": 580,
-     "flip": 463,
+     "in": 278,
+     "out": 637,
+     "flip": 520,
      "faceDown": true,
      "quad": [
       [
@@ -6174,8 +6176,8 @@
     {
      "slot": "seat2",
      "index": 1,
-     "in": 66,
-     "out": 610,
+     "in": 123,
+     "out": 667,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -6197,7 +6199,7 @@
       ]
      ],
      "path": {
-      "from": 60,
+      "from": 117,
       "quads": [
        [
         [
@@ -6313,8 +6315,8 @@
     {
      "slot": "seat2",
      "index": 2,
-     "in": 169,
-     "out": 612,
+     "in": 226,
+     "out": 669,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -6336,7 +6338,7 @@
       ]
      ],
      "path": {
-      "from": 165,
+      "from": 222,
       "quads": [
        [
         [
@@ -6416,8 +6418,8 @@
     {
      "slot": "seat3",
      "index": 1,
-     "in": 37,
-     "out": 627,
+     "in": 94,
+     "out": 684,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -6439,7 +6441,7 @@
       ]
      ],
      "path": {
-      "from": 24,
+      "from": 81,
       "quads": [
        [
         [
@@ -6681,8 +6683,8 @@
     {
      "slot": "seat3",
      "index": 2,
-     "in": 134,
-     "out": 628,
+     "in": 191,
+     "out": 685,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -6704,7 +6706,7 @@
       ]
      ],
      "path": {
-      "from": 129,
+      "from": 186,
       "quads": [
        [
         [
@@ -6802,8 +6804,8 @@
     {
      "slot": "up",
      "index": 1,
-     "in": 187,
-     "out": 579,
+     "in": 244,
+     "out": 636,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -6825,7 +6827,7 @@
       ]
      ],
      "path": {
-      "from": 181,
+      "from": 238,
       "quads": [
        [
         [
@@ -6941,12 +6943,12 @@
    ],
    "mask": "011",
    "part": 1,
-   "still": 217
+   "still": 53
   },
   "011_wait": {
    "file": "clips/starting_hands/011_wait.mp4",
    "kind": "wait",
-   "frames": 160,
+   "frames": 159,
    "sourceStart": 1884,
    "cards": [
     {
@@ -7109,21 +7111,23 @@
    "mask": "011",
    "part": 1,
    "loop": "loops/011_wait_loop.mp4",
-   "loopFrames": 318,
+   "loopFrames": 92,
+   "loopFrom": 0,
+   "loopTo": 47,
    "still": 131
   },
   "011_reveal": {
    "file": "clips/starting_hands/011_reveal.mp4",
    "kind": "reveal",
-   "frames": 97,
-   "sourceStart": 2044,
+   "frames": 98,
+   "sourceStart": 2043,
    "cards": [
     {
      "slot": "hole",
      "index": 2,
-     "in": -184,
-     "out": 175,
-     "flip": 58,
+     "in": -183,
+     "out": 176,
+     "flip": 59,
      "faceDown": true,
      "quad": [
       [
@@ -7147,8 +7151,8 @@
     {
      "slot": "seat2",
      "index": 1,
-     "in": -339,
-     "out": 205,
+     "in": -338,
+     "out": 206,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -7173,8 +7177,8 @@
     {
      "slot": "seat2",
      "index": 2,
-     "in": -236,
-     "out": 207,
+     "in": -235,
+     "out": 208,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -7199,8 +7203,8 @@
     {
      "slot": "seat3",
      "index": 1,
-     "in": -368,
-     "out": 222,
+     "in": -367,
+     "out": 223,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -7225,8 +7229,8 @@
     {
      "slot": "seat3",
      "index": 2,
-     "in": -271,
-     "out": 223,
+     "in": -270,
+     "out": 224,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -7251,8 +7255,8 @@
     {
      "slot": "up",
      "index": 1,
-     "in": -218,
-     "out": 174,
+     "in": -217,
+     "out": 175,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -7277,7 +7281,7 @@
    ],
    "mask": "011",
    "part": 1,
-   "still": 71
+   "still": 72
   },
   "011_hold": {
    "file": "clips/starting_hands/011_hold.mp4",
@@ -8327,7 +8331,7 @@
   "100_wait": {
    "file": "clips/starting_hands/100_wait.mp4",
    "kind": "wait",
-   "frames": 126,
+   "frames": 125,
    "sourceStart": 2665,
    "cards": [
     {
@@ -8438,21 +8442,23 @@
    "mask": "100",
    "part": 1,
    "loop": "loops/100_wait_loop.mp4",
-   "loopFrames": 250,
+   "loopFrames": 92,
+   "loopFrom": 0,
+   "loopTo": 47,
    "still": 112
   },
   "100_reveal": {
    "file": "clips/starting_hands/100_reveal.mp4",
    "kind": "reveal",
-   "frames": 102,
-   "sourceStart": 2791,
+   "frames": 103,
+   "sourceStart": 2790,
    "cards": [
     {
      "slot": "hole",
      "index": 2,
-     "in": -145,
-     "out": 188,
-     "flip": 74,
+     "in": -144,
+     "out": 189,
+     "flip": 75,
      "faceDown": true,
      "quad": [
       [
@@ -8476,8 +8482,8 @@
     {
      "slot": "seat1",
      "index": 1,
-     "in": -271,
-     "out": 223,
+     "in": -270,
+     "out": 224,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -8502,8 +8508,8 @@
     {
      "slot": "seat1",
      "index": 2,
-     "in": -203,
-     "out": 225,
+     "in": -202,
+     "out": 226,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -8528,8 +8534,8 @@
     {
      "slot": "up",
      "index": 1,
-     "in": -235,
-     "out": 190,
+     "in": -234,
+     "out": 191,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -8554,7 +8560,7 @@
    ],
    "mask": "100",
    "part": 1,
-   "still": 79
+   "still": 80
   },
   "100_hold": {
    "file": "clips/starting_hands/100_hold.mp4",
@@ -9115,29 +9121,29 @@
   "100_idle": {
    "file": "clips/starting_hands/100_idle.mp4",
    "kind": "idle",
-   "frames": 152,
+   "frames": 67,
    "sourceStart": 3127,
    "cards": [],
    "mask": "100",
    "part": 1,
    "loop": "loops/100_idle_loop.mp4",
-   "loopFrames": 88,
+   "loopFrames": 86,
    "loopFrom": 23,
-   "loopTo": 68,
+   "loopTo": 67,
    "still": 44
   },
   "101_deal": {
    "file": "clips/starting_hands/101_deal.mp4",
    "kind": "deal",
-   "frames": 338,
-   "sourceStart": 3279,
+   "frames": 423,
+   "sourceStart": 3194,
    "cards": [
     {
      "slot": "hole",
      "index": 2,
-     "in": 233,
-     "out": 580,
-     "flip": 470,
+     "in": 318,
+     "out": 665,
+     "flip": 555,
      "faceDown": true,
      "quad": [
       [
@@ -9161,8 +9167,8 @@
     {
      "slot": "seat1",
      "index": 1,
-     "in": 72,
-     "out": 611,
+     "in": 157,
+     "out": 696,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -9184,7 +9190,7 @@
       ]
      ],
      "path": {
-      "from": 65,
+      "from": 150,
       "quads": [
        [
         [
@@ -9318,8 +9324,8 @@
     {
      "slot": "seat1",
      "index": 2,
-     "in": 184,
-     "out": 614,
+     "in": 269,
+     "out": 699,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -9341,7 +9347,7 @@
       ]
      ],
      "path": {
-      "from": 180,
+      "from": 265,
       "quads": [
        [
         [
@@ -9421,8 +9427,8 @@
     {
      "slot": "seat3",
      "index": 1,
-     "in": 32,
-     "out": 632,
+     "in": 117,
+     "out": 717,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -9444,7 +9450,7 @@
       ]
      ],
      "path": {
-      "from": 23,
+      "from": 108,
       "quads": [
        [
         [
@@ -9614,8 +9620,8 @@
     {
      "slot": "seat3",
      "index": 2,
-     "in": 151,
-     "out": 631,
+     "in": 236,
+     "out": 716,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -9637,7 +9643,7 @@
       ]
      ],
      "path": {
-      "from": 146,
+      "from": 231,
       "quads": [
        [
         [
@@ -9735,8 +9741,8 @@
     {
      "slot": "up",
      "index": 1,
-     "in": 105,
-     "out": 577,
+     "in": 190,
+     "out": 662,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -9758,7 +9764,7 @@
       ]
      ],
      "path": {
-      "from": 103,
+      "from": 188,
       "quads": [
        [
         [
@@ -9802,7 +9808,7 @@
    ],
    "mask": "101",
    "part": 1,
-   "still": 224
+   "still": 58
   },
   "101_wait": {
    "file": "clips/starting_hands/101_wait.mp4",
@@ -9970,7 +9976,9 @@
    "mask": "101",
    "part": 1,
    "loop": "loops/101_wait_loop.mp4",
-   "loopFrames": 134,
+   "loopFrames": 92,
+   "loopFrom": 0,
+   "loopTo": 47,
    "still": 46
   },
   "101_reveal": {
@@ -10721,29 +10729,29 @@
   "101_idle": {
    "file": "clips/starting_hands/101_idle.mp4",
    "kind": "idle",
-   "frames": 114,
+   "frames": 101,
    "sourceStart": 3997,
    "cards": [],
    "mask": "101",
    "part": 1,
    "loop": "loops/101_idle_loop.mp4",
-   "loopFrames": 134,
+   "loopFrames": 132,
    "loopFrom": 34,
-   "loopTo": 102,
+   "loopTo": 101,
    "still": 70
   },
   "110_deal": {
    "file": "clips/starting_hands/110_deal.mp4",
    "kind": "deal",
-   "frames": 370,
-   "sourceStart": 4111,
+   "frames": 383,
+   "sourceStart": 4098,
    "cards": [
     {
      "slot": "hole",
      "index": 2,
-     "in": 283,
-     "out": 601,
-     "flip": 494,
+     "in": 296,
+     "out": 614,
+     "flip": 507,
      "faceDown": true,
      "quad": [
       [
@@ -10767,8 +10775,8 @@
     {
      "slot": "seat1",
      "index": 1,
-     "in": 126,
-     "out": 633,
+     "in": 139,
+     "out": 646,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -10790,7 +10798,7 @@
       ]
      ],
      "path": {
-      "from": 118,
+      "from": 131,
       "quads": [
        [
         [
@@ -10942,8 +10950,8 @@
     {
      "slot": "seat1",
      "index": 2,
-     "in": 229,
-     "out": 635,
+     "in": 242,
+     "out": 648,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -10965,7 +10973,7 @@
       ]
      ],
      "path": {
-      "from": 223,
+      "from": 236,
       "quads": [
        [
         [
@@ -11081,8 +11089,8 @@
     {
      "slot": "seat2",
      "index": 1,
-     "in": 92,
-     "out": 651,
+     "in": 105,
+     "out": 664,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -11104,7 +11112,7 @@
       ]
      ],
      "path": {
-      "from": 84,
+      "from": 97,
       "quads": [
        [
         [
@@ -11256,8 +11264,8 @@
     {
      "slot": "seat2",
      "index": 2,
-     "in": 196,
-     "out": 645,
+     "in": 209,
+     "out": 658,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -11279,7 +11287,7 @@
       ]
      ],
      "path": {
-      "from": 190,
+      "from": 203,
       "quads": [
        [
         [
@@ -11395,8 +11403,8 @@
     {
      "slot": "up",
      "index": 1,
-     "in": 284,
-     "out": 599,
+     "in": 297,
+     "out": 612,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -11418,7 +11426,7 @@
       ]
      ],
      "path": {
-      "from": 189,
+      "from": 202,
       "quads": [
        [
         [
@@ -13136,12 +13144,12 @@
    ],
    "mask": "110",
    "part": 1,
-   "still": 274
+   "still": 287
   },
   "110_wait": {
    "file": "clips/starting_hands/110_wait.mp4",
    "kind": "wait",
-   "frames": 64,
+   "frames": 53,
    "sourceStart": 4481,
    "cards": [
     {
@@ -13304,21 +13312,23 @@
    "mask": "110",
    "part": 1,
    "loop": "loops/110_wait_loop.mp4",
-   "loopFrames": 126,
+   "loopFrames": 92,
+   "loopFrom": 0,
+   "loopTo": 47,
    "still": 42
   },
   "110_reveal": {
    "file": "clips/starting_hands/110_reveal.mp4",
    "kind": "reveal",
-   "frames": 102,
-   "sourceStart": 4545,
+   "frames": 113,
+   "sourceStart": 4534,
    "cards": [
     {
      "slot": "hole",
      "index": 2,
-     "in": -151,
-     "out": 167,
-     "flip": 60,
+     "in": -140,
+     "out": 178,
+     "flip": 71,
      "faceDown": true,
      "quad": [
       [
@@ -13342,8 +13352,8 @@
     {
      "slot": "seat1",
      "index": 1,
-     "in": -308,
-     "out": 199,
+     "in": -297,
+     "out": 210,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -13368,8 +13378,8 @@
     {
      "slot": "seat1",
      "index": 2,
-     "in": -205,
-     "out": 201,
+     "in": -194,
+     "out": 212,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -13394,8 +13404,8 @@
     {
      "slot": "seat2",
      "index": 1,
-     "in": -342,
-     "out": 217,
+     "in": -331,
+     "out": 228,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -13420,8 +13430,8 @@
     {
      "slot": "seat2",
      "index": 2,
-     "in": -238,
-     "out": 211,
+     "in": -227,
+     "out": 222,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -13446,8 +13456,8 @@
     {
      "slot": "up",
      "index": 1,
-     "in": -150,
-     "out": 165,
+     "in": -139,
+     "out": 176,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -13472,7 +13482,7 @@
    ],
    "mask": "110",
    "part": 1,
-   "still": 74
+   "still": 85
   },
   "110_hold": {
    "file": "clips/starting_hands/110_hold.mp4",
@@ -15330,7 +15340,9 @@
    "mask": "111",
    "part": 1,
    "loop": "loops/111_wait_loop.mp4",
-   "loopFrames": 146,
+   "loopFrames": 92,
+   "loopFrom": 0,
+   "loopTo": 47,
    "still": 50
   },
   "111_reveal": {
@@ -17423,7 +17435,9 @@
    "mask": "111",
    "part": 2,
    "loop": "loops/full_table_wait_loop.mp4",
-   "loopFrames": 336,
+   "loopFrames": 92,
+   "loopFrom": 0,
+   "loopTo": 47,
    "still": 144
   },
   "seat3_card3_deal": {
@@ -17770,7 +17784,7 @@
   "seat3_card3_wait": {
    "file": "clips/hits/seat3_card3_wait.mp4",
    "kind": "wait",
-   "frames": 106,
+   "frames": 104,
    "sourceStart": 6640,
    "cards": [
     {
@@ -18012,21 +18026,23 @@
    "card": 3,
    "part": 2,
    "loop": "loops/seat3_card3_wait_loop.mp4",
-   "loopFrames": 210,
+   "loopFrames": 92,
+   "loopFrom": 0,
+   "loopTo": 47,
    "still": 38
   },
   "seat3_card4_deal": {
    "file": "clips/hits/seat3_card4_deal.mp4",
    "kind": "hit",
-   "frames": 93,
-   "sourceStart": 6746,
+   "frames": 95,
+   "sourceStart": 6744,
    "cards": [
     {
      "slot": "hole",
      "index": 2,
-     "in": -393,
-     "out": 2593,
-     "flip": 2492,
+     "in": -391,
+     "out": 2595,
+     "flip": 2494,
      "faceDown": true,
      "quad": [
       [
@@ -18050,8 +18066,8 @@
     {
      "slot": "seat1",
      "index": 1,
-     "in": -576,
-     "out": 2634,
+     "in": -574,
+     "out": 2636,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -18076,8 +18092,8 @@
     {
      "slot": "seat1",
      "index": 2,
-     "in": -441,
-     "out": 2637,
+     "in": -439,
+     "out": 2639,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -18102,8 +18118,8 @@
     {
      "slot": "seat2",
      "index": 1,
-     "in": -605,
-     "out": 2678,
+     "in": -603,
+     "out": 2680,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -18128,8 +18144,8 @@
     {
      "slot": "seat2",
      "index": 2,
-     "in": -473,
-     "out": 2684,
+     "in": -471,
+     "out": 2686,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -18154,8 +18170,8 @@
     {
      "slot": "seat3",
      "index": 1,
-     "in": -640,
-     "out": 2707,
+     "in": -638,
+     "out": 2709,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -18180,8 +18196,8 @@
     {
      "slot": "seat3",
      "index": 2,
-     "in": -503,
-     "out": 2710,
+     "in": -501,
+     "out": 2712,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -18206,8 +18222,8 @@
     {
      "slot": "seat3",
      "index": 3,
-     "in": -173,
-     "out": 2709,
+     "in": -171,
+     "out": 2711,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -18232,8 +18248,8 @@
     {
      "slot": "seat3",
      "index": 4,
-     "in": 48,
-     "out": 2707,
+     "in": 50,
+     "out": 2709,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -18255,7 +18271,7 @@
       ]
      ],
      "path": {
-      "from": 42,
+      "from": 44,
       "quads": [
        [
         [
@@ -18371,8 +18387,8 @@
     {
      "slot": "up",
      "index": 1,
-     "in": -538,
-     "out": 2588,
+     "in": -536,
+     "out": 2590,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -18403,7 +18419,7 @@
   "seat3_card4_wait": {
    "file": "clips/hits/seat3_card4_wait.mp4",
    "kind": "wait",
-   "frames": 125,
+   "frames": 122,
    "sourceStart": 6839,
    "cards": [
     {
@@ -18671,21 +18687,23 @@
    "card": 4,
    "part": 2,
    "loop": "loops/seat3_card4_wait_loop.mp4",
-   "loopFrames": 248,
+   "loopFrames": 92,
+   "loopFrom": 0,
+   "loopTo": 47,
    "still": 46
   },
   "seat3_card5_deal": {
    "file": "clips/hits/seat3_card5_deal.mp4",
    "kind": "hit",
-   "frames": 108,
-   "sourceStart": 6964,
+   "frames": 111,
+   "sourceStart": 6961,
    "cards": [
     {
      "slot": "hole",
      "index": 2,
-     "in": -611,
-     "out": 2375,
-     "flip": 2274,
+     "in": -608,
+     "out": 2378,
+     "flip": 2277,
      "faceDown": true,
      "quad": [
       [
@@ -18709,8 +18727,8 @@
     {
      "slot": "seat1",
      "index": 1,
-     "in": -794,
-     "out": 2416,
+     "in": -791,
+     "out": 2419,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -18735,8 +18753,8 @@
     {
      "slot": "seat1",
      "index": 2,
-     "in": -659,
-     "out": 2419,
+     "in": -656,
+     "out": 2422,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -18761,8 +18779,8 @@
     {
      "slot": "seat2",
      "index": 1,
-     "in": -823,
-     "out": 2460,
+     "in": -820,
+     "out": 2463,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -18787,8 +18805,8 @@
     {
      "slot": "seat2",
      "index": 2,
-     "in": -691,
-     "out": 2466,
+     "in": -688,
+     "out": 2469,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -18813,8 +18831,8 @@
     {
      "slot": "seat3",
      "index": 1,
-     "in": -858,
-     "out": 2489,
+     "in": -855,
+     "out": 2492,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -18839,8 +18857,8 @@
     {
      "slot": "seat3",
      "index": 2,
-     "in": -721,
-     "out": 2492,
+     "in": -718,
+     "out": 2495,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -18865,8 +18883,8 @@
     {
      "slot": "seat3",
      "index": 3,
-     "in": -391,
-     "out": 2491,
+     "in": -388,
+     "out": 2494,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -18891,8 +18909,8 @@
     {
      "slot": "seat3",
      "index": 4,
-     "in": -170,
-     "out": 2489,
+     "in": -167,
+     "out": 2492,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -18917,8 +18935,8 @@
     {
      "slot": "seat3",
      "index": 5,
-     "in": 53,
-     "out": 2486,
+     "in": 56,
+     "out": 2489,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -18940,7 +18958,7 @@
       ]
      ],
      "path": {
-      "from": 48,
+      "from": 51,
       "quads": [
        [
         [
@@ -19038,8 +19056,8 @@
     {
      "slot": "up",
      "index": 1,
-     "in": -756,
-     "out": 2370,
+     "in": -753,
+     "out": 2373,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -19065,12 +19083,12 @@
    "seat": "seat3",
    "card": 5,
    "part": 2,
-   "still": 58
+   "still": 0
   },
   "seat3_card5_wait": {
    "file": "clips/hits/seat3_card5_wait.mp4",
    "kind": "wait",
-   "frames": 112,
+   "frames": 111,
    "sourceStart": 7072,
    "cards": [
     {
@@ -19364,21 +19382,23 @@
    "card": 5,
    "part": 2,
    "loop": "loops/seat3_card5_wait_loop.mp4",
-   "loopFrames": 222,
+   "loopFrames": 92,
+   "loopFrom": 0,
+   "loopTo": 47,
    "still": 95
   },
   "seat3_card6_deal": {
    "file": "clips/hits/seat3_card6_deal.mp4",
    "kind": "hit",
-   "frames": 183,
-   "sourceStart": 7184,
+   "frames": 184,
+   "sourceStart": 7183,
    "cards": [
     {
      "slot": "hole",
      "index": 2,
-     "in": -831,
-     "out": 2155,
-     "flip": 2054,
+     "in": -830,
+     "out": 2156,
+     "flip": 2055,
      "faceDown": true,
      "quad": [
       [
@@ -19402,8 +19422,8 @@
     {
      "slot": "seat1",
      "index": 1,
-     "in": -1014,
-     "out": 2196,
+     "in": -1013,
+     "out": 2197,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -19428,8 +19448,8 @@
     {
      "slot": "seat1",
      "index": 2,
-     "in": -879,
-     "out": 2199,
+     "in": -878,
+     "out": 2200,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -19454,8 +19474,8 @@
     {
      "slot": "seat2",
      "index": 1,
-     "in": -1043,
-     "out": 2240,
+     "in": -1042,
+     "out": 2241,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -19480,8 +19500,8 @@
     {
      "slot": "seat2",
      "index": 2,
-     "in": -911,
-     "out": 2246,
+     "in": -910,
+     "out": 2247,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -19506,8 +19526,8 @@
     {
      "slot": "seat3",
      "index": 1,
-     "in": -1078,
-     "out": 2269,
+     "in": -1077,
+     "out": 2270,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -19532,8 +19552,8 @@
     {
      "slot": "seat3",
      "index": 2,
-     "in": -941,
-     "out": 2272,
+     "in": -940,
+     "out": 2273,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -19558,8 +19578,8 @@
     {
      "slot": "seat3",
      "index": 3,
-     "in": -611,
-     "out": 2271,
+     "in": -610,
+     "out": 2272,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -19584,8 +19604,8 @@
     {
      "slot": "seat3",
      "index": 4,
-     "in": -390,
-     "out": 2269,
+     "in": -389,
+     "out": 2270,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -19610,8 +19630,8 @@
     {
      "slot": "seat3",
      "index": 5,
-     "in": -167,
-     "out": 2266,
+     "in": -166,
+     "out": 2267,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -19636,8 +19656,8 @@
     {
      "slot": "seat3",
      "index": 6,
-     "in": 62,
-     "out": 2262,
+     "in": 63,
+     "out": 2263,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -19659,7 +19679,7 @@
       ]
      ],
      "path": {
-      "from": 54,
+      "from": 55,
       "quads": [
        [
         [
@@ -19811,8 +19831,8 @@
     {
      "slot": "up",
      "index": 1,
-     "in": -976,
-     "out": 2150,
+     "in": -975,
+     "out": 2151,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -19838,7 +19858,7 @@
    "seat": "seat3",
    "card": 6,
    "part": 2,
-   "still": 60
+   "still": 0
   },
   "seat3_card6_wait": {
    "file": "clips/hits/seat3_card6_wait.mp4",
@@ -20650,7 +20670,7 @@
   "seat2_card3_wait": {
    "file": "clips/hits/seat2_card3_wait.mp4",
    "kind": "wait",
-   "frames": 119,
+   "frames": 82,
    "sourceStart": 7512,
    "cards": [
     {
@@ -20996,21 +21016,23 @@
    "card": 3,
    "part": 2,
    "loop": "loops/seat2_card3_wait_loop.mp4",
-   "loopFrames": 236,
+   "loopFrames": 92,
+   "loopFrom": 0,
+   "loopTo": 47,
    "still": 43
   },
   "seat2_card4_deal": {
    "file": "clips/hits/seat2_card4_deal.mp4",
    "kind": "hit",
-   "frames": 88,
-   "sourceStart": 7631,
+   "frames": 125,
+   "sourceStart": 7594,
    "cards": [
     {
      "slot": "hole",
      "index": 2,
-     "in": -1278,
-     "out": 1708,
-     "flip": 1607,
+     "in": -1241,
+     "out": 1745,
+     "flip": 1644,
      "faceDown": true,
      "quad": [
       [
@@ -21034,8 +21056,8 @@
     {
      "slot": "seat1",
      "index": 1,
-     "in": -1461,
-     "out": 1749,
+     "in": -1424,
+     "out": 1786,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -21060,8 +21082,8 @@
     {
      "slot": "seat1",
      "index": 2,
-     "in": -1326,
-     "out": 1752,
+     "in": -1289,
+     "out": 1789,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -21086,8 +21108,8 @@
     {
      "slot": "seat2",
      "index": 1,
-     "in": -1490,
-     "out": 1793,
+     "in": -1453,
+     "out": 1830,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -21112,8 +21134,8 @@
     {
      "slot": "seat2",
      "index": 2,
-     "in": -1358,
-     "out": 1799,
+     "in": -1321,
+     "out": 1836,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -21138,8 +21160,8 @@
     {
      "slot": "seat2",
      "index": 3,
-     "in": -167,
-     "out": 1805,
+     "in": -130,
+     "out": 1842,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -21164,8 +21186,8 @@
     {
      "slot": "seat2",
      "index": 4,
-     "in": 56,
-     "out": 1781,
+     "in": 93,
+     "out": 1818,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -21187,7 +21209,7 @@
       ]
      ],
      "path": {
-      "from": 50,
+      "from": 87,
       "quads": [
        [
         [
@@ -21303,8 +21325,8 @@
     {
      "slot": "seat3",
      "index": 1,
-     "in": -1525,
-     "out": 1822,
+     "in": -1488,
+     "out": 1859,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -21329,8 +21351,8 @@
     {
      "slot": "seat3",
      "index": 2,
-     "in": -1388,
-     "out": 1825,
+     "in": -1351,
+     "out": 1862,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -21355,8 +21377,8 @@
     {
      "slot": "seat3",
      "index": 3,
-     "in": -1058,
-     "out": 1824,
+     "in": -1021,
+     "out": 1861,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -21381,8 +21403,8 @@
     {
      "slot": "seat3",
      "index": 4,
-     "in": -837,
-     "out": 1822,
+     "in": -800,
+     "out": 1859,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -21407,8 +21429,8 @@
     {
      "slot": "seat3",
      "index": 5,
-     "in": -614,
-     "out": 1819,
+     "in": -577,
+     "out": 1856,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -21433,8 +21455,8 @@
     {
      "slot": "seat3",
      "index": 6,
-     "in": -385,
-     "out": 1815,
+     "in": -348,
+     "out": 1852,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -21459,8 +21481,8 @@
     {
      "slot": "up",
      "index": 1,
-     "in": -1423,
-     "out": 1703,
+     "in": -1386,
+     "out": 1740,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -21486,12 +21508,12 @@
    "seat": "seat2",
    "card": 4,
    "part": 2,
-   "still": 0
+   "still": 25
   },
   "seat2_card4_wait": {
    "file": "clips/hits/seat2_card4_wait.mp4",
    "kind": "wait",
-   "frames": 144,
+   "frames": 133,
    "sourceStart": 7719,
    "cards": [
     {
@@ -21863,21 +21885,23 @@
    "card": 4,
    "part": 2,
    "loop": "loops/seat2_card4_wait_loop.mp4",
-   "loopFrames": 286,
+   "loopFrames": 92,
+   "loopFrom": 0,
+   "loopTo": 47,
    "still": 38
   },
   "seat2_card5_deal": {
    "file": "clips/hits/seat2_card5_deal.mp4",
    "kind": "hit",
-   "frames": 76,
-   "sourceStart": 7863,
+   "frames": 87,
+   "sourceStart": 7852,
    "cards": [
     {
      "slot": "hole",
      "index": 2,
-     "in": -1510,
-     "out": 1476,
-     "flip": 1375,
+     "in": -1499,
+     "out": 1487,
+     "flip": 1386,
      "faceDown": true,
      "quad": [
       [
@@ -21901,8 +21925,8 @@
     {
      "slot": "seat1",
      "index": 1,
-     "in": -1693,
-     "out": 1517,
+     "in": -1682,
+     "out": 1528,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -21927,8 +21951,8 @@
     {
      "slot": "seat1",
      "index": 2,
-     "in": -1558,
-     "out": 1520,
+     "in": -1547,
+     "out": 1531,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -21953,8 +21977,8 @@
     {
      "slot": "seat2",
      "index": 1,
-     "in": -1722,
-     "out": 1561,
+     "in": -1711,
+     "out": 1572,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -21979,8 +22003,8 @@
     {
      "slot": "seat2",
      "index": 2,
-     "in": -1590,
-     "out": 1567,
+     "in": -1579,
+     "out": 1578,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -22005,8 +22029,8 @@
     {
      "slot": "seat2",
      "index": 3,
-     "in": -399,
-     "out": 1573,
+     "in": -388,
+     "out": 1584,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -22031,8 +22055,8 @@
     {
      "slot": "seat2",
      "index": 4,
-     "in": -176,
-     "out": 1549,
+     "in": -165,
+     "out": 1560,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -22057,8 +22081,8 @@
     {
      "slot": "seat2",
      "index": 5,
-     "in": 37,
-     "out": 1546,
+     "in": 48,
+     "out": 1557,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -22080,7 +22104,7 @@
       ]
      ],
      "path": {
-      "from": 33,
+      "from": 44,
       "quads": [
        [
         [
@@ -22160,8 +22184,8 @@
     {
      "slot": "seat3",
      "index": 1,
-     "in": -1757,
-     "out": 1590,
+     "in": -1746,
+     "out": 1601,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -22186,8 +22210,8 @@
     {
      "slot": "seat3",
      "index": 2,
-     "in": -1620,
-     "out": 1593,
+     "in": -1609,
+     "out": 1604,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -22212,8 +22236,8 @@
     {
      "slot": "seat3",
      "index": 3,
-     "in": -1290,
-     "out": 1592,
+     "in": -1279,
+     "out": 1603,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -22238,8 +22262,8 @@
     {
      "slot": "seat3",
      "index": 4,
-     "in": -1069,
-     "out": 1590,
+     "in": -1058,
+     "out": 1601,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -22264,8 +22288,8 @@
     {
      "slot": "seat3",
      "index": 5,
-     "in": -846,
-     "out": 1587,
+     "in": -835,
+     "out": 1598,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -22290,8 +22314,8 @@
     {
      "slot": "seat3",
      "index": 6,
-     "in": -617,
-     "out": 1583,
+     "in": -606,
+     "out": 1594,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -22316,8 +22340,8 @@
     {
      "slot": "up",
      "index": 1,
-     "in": -1655,
-     "out": 1471,
+     "in": -1644,
+     "out": 1482,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -22343,7 +22367,7 @@
    "seat": "seat2",
    "card": 5,
    "part": 2,
-   "still": 42
+   "still": 53
   },
   "seat2_card5_wait": {
    "file": "clips/hits/seat2_card5_wait.mp4",
@@ -22746,7 +22770,9 @@
    "card": 5,
    "part": 2,
    "loop": "loops/seat2_card5_wait_loop.mp4",
-   "loopFrames": 282,
+   "loopFrames": 92,
+   "loopFrom": 0,
+   "loopTo": 47,
    "still": 139
   },
   "seat2_card6_deal": {
@@ -23681,7 +23707,9 @@
    "card": 6,
    "part": 2,
    "loop": "loops/seat2_card6_wait_loop.mp4",
-   "loopFrames": 228,
+   "loopFrames": 92,
+   "loopFrom": 0,
+   "loopTo": 47,
    "still": 112
   },
   "seat1_card3_deal": {
@@ -24272,7 +24300,7 @@
   "seat1_card3_wait": {
    "file": "clips/hits/seat1_card3_wait.mp4",
    "kind": "wait",
-   "frames": 93,
+   "frames": 91,
    "sourceStart": 8415,
    "cards": [
     {
@@ -24722,21 +24750,23 @@
    "card": 3,
    "part": 2,
    "loop": "loops/seat1_card3_wait_loop.mp4",
-   "loopFrames": 184,
+   "loopFrames": 92,
+   "loopFrom": 0,
+   "loopTo": 47,
    "still": 84
   },
   "seat1_card4_deal": {
    "file": "clips/hits/seat1_card4_deal.mp4",
    "kind": "hit",
-   "frames": 100,
-   "sourceStart": 8508,
+   "frames": 102,
+   "sourceStart": 8506,
    "cards": [
     {
      "slot": "hole",
      "index": 2,
-     "in": -2155,
-     "out": 831,
-     "flip": 730,
+     "in": -2153,
+     "out": 833,
+     "flip": 732,
      "faceDown": true,
      "quad": [
       [
@@ -24760,8 +24790,8 @@
     {
      "slot": "seat1",
      "index": 1,
-     "in": -2338,
-     "out": 872,
+     "in": -2336,
+     "out": 874,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -24786,8 +24816,8 @@
     {
      "slot": "seat1",
      "index": 2,
-     "in": -2203,
-     "out": 875,
+     "in": -2201,
+     "out": 877,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -24812,8 +24842,8 @@
     {
      "slot": "seat1",
      "index": 3,
-     "in": -165,
-     "out": 878,
+     "in": -163,
+     "out": 880,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -24838,8 +24868,8 @@
     {
      "slot": "seat1",
      "index": 4,
-     "in": 56,
-     "out": 891,
+     "in": 58,
+     "out": 893,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -24861,7 +24891,7 @@
       ]
      ],
      "path": {
-      "from": 50,
+      "from": 52,
       "quads": [
        [
         [
@@ -24977,8 +25007,8 @@
     {
      "slot": "seat2",
      "index": 1,
-     "in": -2367,
-     "out": 916,
+     "in": -2365,
+     "out": 918,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -25003,8 +25033,8 @@
     {
      "slot": "seat2",
      "index": 2,
-     "in": -2235,
-     "out": 922,
+     "in": -2233,
+     "out": 924,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -25029,8 +25059,8 @@
     {
      "slot": "seat2",
      "index": 3,
-     "in": -1044,
-     "out": 928,
+     "in": -1042,
+     "out": 930,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -25055,8 +25085,8 @@
     {
      "slot": "seat2",
      "index": 4,
-     "in": -821,
-     "out": 904,
+     "in": -819,
+     "out": 906,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -25081,8 +25111,8 @@
     {
      "slot": "seat2",
      "index": 5,
-     "in": -608,
-     "out": 901,
+     "in": -606,
+     "out": 903,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -25107,8 +25137,8 @@
     {
      "slot": "seat2",
      "index": 6,
-     "in": -375,
-     "out": 897,
+     "in": -373,
+     "out": 899,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -25133,8 +25163,8 @@
     {
      "slot": "seat3",
      "index": 1,
-     "in": -2402,
-     "out": 945,
+     "in": -2400,
+     "out": 947,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -25159,8 +25189,8 @@
     {
      "slot": "seat3",
      "index": 2,
-     "in": -2265,
-     "out": 948,
+     "in": -2263,
+     "out": 950,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -25185,8 +25215,8 @@
     {
      "slot": "seat3",
      "index": 3,
-     "in": -1935,
-     "out": 947,
+     "in": -1933,
+     "out": 949,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -25211,8 +25241,8 @@
     {
      "slot": "seat3",
      "index": 4,
-     "in": -1714,
-     "out": 945,
+     "in": -1712,
+     "out": 947,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -25237,8 +25267,8 @@
     {
      "slot": "seat3",
      "index": 5,
-     "in": -1491,
-     "out": 942,
+     "in": -1489,
+     "out": 944,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -25263,8 +25293,8 @@
     {
      "slot": "seat3",
      "index": 6,
-     "in": -1262,
-     "out": 938,
+     "in": -1260,
+     "out": 940,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -25289,8 +25319,8 @@
     {
      "slot": "up",
      "index": 1,
-     "in": -2300,
-     "out": 826,
+     "in": -2298,
+     "out": 828,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -25321,7 +25351,7 @@
   "seat1_card4_wait": {
    "file": "clips/hits/seat1_card4_wait.mp4",
    "kind": "wait",
-   "frames": 108,
+   "frames": 106,
    "sourceStart": 8608,
    "cards": [
     {
@@ -25797,21 +25827,23 @@
    "card": 4,
    "part": 2,
    "loop": "loops/seat1_card4_wait_loop.mp4",
-   "loopFrames": 214,
+   "loopFrames": 92,
+   "loopFrom": 0,
+   "loopTo": 47,
    "still": 43
   },
   "seat1_card5_deal": {
    "file": "clips/hits/seat1_card5_deal.mp4",
    "kind": "hit",
-   "frames": 107,
-   "sourceStart": 8716,
+   "frames": 109,
+   "sourceStart": 8714,
    "cards": [
     {
      "slot": "hole",
      "index": 2,
-     "in": -2363,
-     "out": 623,
-     "flip": 522,
+     "in": -2361,
+     "out": 625,
+     "flip": 524,
      "faceDown": true,
      "quad": [
       [
@@ -25835,8 +25867,8 @@
     {
      "slot": "seat1",
      "index": 1,
-     "in": -2546,
-     "out": 664,
+     "in": -2544,
+     "out": 666,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -25861,8 +25893,8 @@
     {
      "slot": "seat1",
      "index": 2,
-     "in": -2411,
-     "out": 667,
+     "in": -2409,
+     "out": 669,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -25887,8 +25919,8 @@
     {
      "slot": "seat1",
      "index": 3,
-     "in": -373,
-     "out": 670,
+     "in": -371,
+     "out": 672,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -25913,8 +25945,8 @@
     {
      "slot": "seat1",
      "index": 4,
-     "in": -152,
-     "out": 683,
+     "in": -150,
+     "out": 685,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -25939,8 +25971,8 @@
     {
      "slot": "seat1",
      "index": 5,
-     "in": 61,
-     "out": 678,
+     "in": 63,
+     "out": 680,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -25962,7 +25994,7 @@
       ]
      ],
      "path": {
-      "from": 56,
+      "from": 58,
       "quads": [
        [
         [
@@ -26060,8 +26092,8 @@
     {
      "slot": "seat2",
      "index": 1,
-     "in": -2575,
-     "out": 708,
+     "in": -2573,
+     "out": 710,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -26086,8 +26118,8 @@
     {
      "slot": "seat2",
      "index": 2,
-     "in": -2443,
-     "out": 714,
+     "in": -2441,
+     "out": 716,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -26112,8 +26144,8 @@
     {
      "slot": "seat2",
      "index": 3,
-     "in": -1252,
-     "out": 720,
+     "in": -1250,
+     "out": 722,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -26138,8 +26170,8 @@
     {
      "slot": "seat2",
      "index": 4,
-     "in": -1029,
-     "out": 696,
+     "in": -1027,
+     "out": 698,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -26164,8 +26196,8 @@
     {
      "slot": "seat2",
      "index": 5,
-     "in": -816,
-     "out": 693,
+     "in": -814,
+     "out": 695,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -26190,8 +26222,8 @@
     {
      "slot": "seat2",
      "index": 6,
-     "in": -583,
-     "out": 689,
+     "in": -581,
+     "out": 691,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -26216,8 +26248,8 @@
     {
      "slot": "seat3",
      "index": 1,
-     "in": -2610,
-     "out": 737,
+     "in": -2608,
+     "out": 739,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -26242,8 +26274,8 @@
     {
      "slot": "seat3",
      "index": 2,
-     "in": -2473,
-     "out": 740,
+     "in": -2471,
+     "out": 742,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -26268,8 +26300,8 @@
     {
      "slot": "seat3",
      "index": 3,
-     "in": -2143,
-     "out": 739,
+     "in": -2141,
+     "out": 741,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -26294,8 +26326,8 @@
     {
      "slot": "seat3",
      "index": 4,
-     "in": -1922,
-     "out": 737,
+     "in": -1920,
+     "out": 739,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -26320,8 +26352,8 @@
     {
      "slot": "seat3",
      "index": 5,
-     "in": -1699,
-     "out": 734,
+     "in": -1697,
+     "out": 736,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -26346,8 +26378,8 @@
     {
      "slot": "seat3",
      "index": 6,
-     "in": -1470,
-     "out": 730,
+     "in": -1468,
+     "out": 732,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -26372,8 +26404,8 @@
     {
      "slot": "up",
      "index": 1,
-     "in": -2508,
-     "out": 618,
+     "in": -2506,
+     "out": 620,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -26399,12 +26431,12 @@
    "seat": "seat1",
    "card": 5,
    "part": 2,
-   "still": 69
+   "still": 71
   },
   "seat1_card5_wait": {
    "file": "clips/hits/seat1_card5_wait.mp4",
    "kind": "wait",
-   "frames": 155,
+   "frames": 73,
    "sourceStart": 8823,
    "cards": [
     {
@@ -26906,21 +26938,23 @@
    "card": 5,
    "part": 2,
    "loop": "loops/seat1_card5_wait_loop.mp4",
-   "loopFrames": 308,
+   "loopFrames": 92,
+   "loopFrom": 0,
+   "loopTo": 47,
    "still": 26
   },
   "seat1_card6_deal": {
    "file": "clips/hits/seat1_card6_deal.mp4",
    "kind": "hit",
-   "frames": 67,
-   "sourceStart": 8978,
+   "frames": 149,
+   "sourceStart": 8896,
    "cards": [
     {
      "slot": "hole",
      "index": 2,
-     "in": -2625,
-     "out": 361,
-     "flip": 260,
+     "in": -2543,
+     "out": 443,
+     "flip": 342,
      "faceDown": true,
      "quad": [
       [
@@ -26944,8 +26978,8 @@
     {
      "slot": "seat1",
      "index": 1,
-     "in": -2808,
-     "out": 402,
+     "in": -2726,
+     "out": 484,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -26970,8 +27004,8 @@
     {
      "slot": "seat1",
      "index": 2,
-     "in": -2673,
-     "out": 405,
+     "in": -2591,
+     "out": 487,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -26996,8 +27030,8 @@
     {
      "slot": "seat1",
      "index": 3,
-     "in": -635,
-     "out": 408,
+     "in": -553,
+     "out": 490,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -27022,8 +27056,8 @@
     {
      "slot": "seat1",
      "index": 4,
-     "in": -414,
-     "out": 421,
+     "in": -332,
+     "out": 503,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -27048,8 +27082,8 @@
     {
      "slot": "seat1",
      "index": 5,
-     "in": -201,
-     "out": 416,
+     "in": -119,
+     "out": 498,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -27074,8 +27108,8 @@
     {
      "slot": "seat1",
      "index": 6,
-     "in": 26,
-     "out": 385,
+     "in": 108,
+     "out": 467,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -27097,7 +27131,7 @@
       ]
      ],
      "path": {
-      "from": 22,
+      "from": 104,
       "quads": [
        [
         [
@@ -27177,8 +27211,8 @@
     {
      "slot": "seat2",
      "index": 1,
-     "in": -2837,
-     "out": 446,
+     "in": -2755,
+     "out": 528,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -27203,8 +27237,8 @@
     {
      "slot": "seat2",
      "index": 2,
-     "in": -2705,
-     "out": 452,
+     "in": -2623,
+     "out": 534,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -27229,8 +27263,8 @@
     {
      "slot": "seat2",
      "index": 3,
-     "in": -1514,
-     "out": 458,
+     "in": -1432,
+     "out": 540,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -27255,8 +27289,8 @@
     {
      "slot": "seat2",
      "index": 4,
-     "in": -1291,
-     "out": 434,
+     "in": -1209,
+     "out": 516,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -27281,8 +27315,8 @@
     {
      "slot": "seat2",
      "index": 5,
-     "in": -1078,
-     "out": 431,
+     "in": -996,
+     "out": 513,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -27307,8 +27341,8 @@
     {
      "slot": "seat2",
      "index": 6,
-     "in": -845,
-     "out": 427,
+     "in": -763,
+     "out": 509,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -27333,8 +27367,8 @@
     {
      "slot": "seat3",
      "index": 1,
-     "in": -2872,
-     "out": 475,
+     "in": -2790,
+     "out": 557,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -27359,8 +27393,8 @@
     {
      "slot": "seat3",
      "index": 2,
-     "in": -2735,
-     "out": 478,
+     "in": -2653,
+     "out": 560,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -27385,8 +27419,8 @@
     {
      "slot": "seat3",
      "index": 3,
-     "in": -2405,
-     "out": 477,
+     "in": -2323,
+     "out": 559,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -27411,8 +27445,8 @@
     {
      "slot": "seat3",
      "index": 4,
-     "in": -2184,
-     "out": 475,
+     "in": -2102,
+     "out": 557,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -27437,8 +27471,8 @@
     {
      "slot": "seat3",
      "index": 5,
-     "in": -1961,
-     "out": 472,
+     "in": -1879,
+     "out": 554,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -27463,8 +27497,8 @@
     {
      "slot": "seat3",
      "index": 6,
-     "in": -1732,
-     "out": 468,
+     "in": -1650,
+     "out": 550,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -27489,8 +27523,8 @@
     {
      "slot": "up",
      "index": 1,
-     "in": -2770,
-     "out": 356,
+     "in": -2688,
+     "out": 438,
      "flip": null,
      "faceDown": false,
      "quad": [
@@ -27516,7 +27550,7 @@
    "seat": "seat1",
    "card": 6,
    "part": 2,
-   "still": 30
+   "still": 0
   },
   "seat1_card6_wait": {
    "file": "clips/hits/seat1_card6_wait.mp4",
@@ -28049,7 +28083,9 @@
    "card": 6,
    "part": 2,
    "loop": "loops/seat1_card6_wait_loop.mp4",
-   "loopFrames": 274,
+   "loopFrames": 92,
+   "loopFrom": 0,
+   "loopTo": 47,
    "still": 30
   },
   "full_table_reveal": {

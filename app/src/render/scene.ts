@@ -41,6 +41,7 @@ export class Scene {
   ) {}
 
   compute(s: PlayingState, view: TableView, now: number): SceneResult {
+    if (s.clip.bridge) return this.bridge(s.clip, s.frame, view);
     const { clip, frame: f } = s;
     const plates: (PlateDraw | null)[] = [];
     const cards: CardDraw[] = [];
@@ -122,6 +123,56 @@ export class Scene {
     visible.dealer = dealerShown;
     return { plates, cards, visible, plateUse };
   }
+
+  /**
+   * A bridge is generated from frames whose seats were cleared to bare felt (the pipeline's
+   * SeatCleaner): the two clips it joins hold different cards there, and interpolated cards
+   * would morph and drift. So every seat shows a plate of the game's hand for the whole move.
+   * The dealer's own two cards are in the bridge; their faces glide from where they lay on
+   * the exit frame to where they lie on the entry frame.
+   */
+  bridge(clip: ClipInfo, f: number, view: TableView): SceneResult {
+    const { from, at, to } = clip.bridge!;
+    const A = this.m.clips[from];
+    const B = this.m.clips[to];
+    const t = (f + 1) / (clip.frames + 1);
+    const tPrev = f / (clip.frames + 1);
+    const plates: (PlateDraw | null)[] = [];
+    const cards: CardDraw[] = [];
+    const visible = { seat1: 0, seat2: 0, seat3: 0, dealer: 0 } as SceneResult["visible"];
+    const plateUse = { seat1: null, seat2: null, seat3: null } as SceneResult["plateUse"];
+    for (const seat of this.m.seats) {
+      const hand = view.seats[seat];
+      const plate = this.plates[seat][hand.length];
+      visible[seat] = hand.length;
+      plates.push(plate ? { tex: this.plateTex[seat][hand.length], rect: plate.rect, alpha: 1 } : null);
+      plateUse[seat] = plate ? hand.length : null;
+      plate?.cards.forEach((q, i) => {
+        if (hand[i]) cards.push({ quad: q, cell: faceIndex(hand[i]), alpha: 1, mode: "footage" });
+      });
+    }
+    for (const slot of ["up", "hole"] as const) {
+      const card = view.dealer[slot === "up" ? 0 : 1];
+      const a = lying(A, at, slot).get(slot === "up" ? 1 : 2);
+      const b = lying(B, 0, slot).get(slot === "up" ? 1 : 2);
+      if (card && a && b) {
+        cards.push({ quad: lerpQuad(a, b, t), prev: lerpQuad(a, b, tPrev), cell: faceIndex(card), alpha: 1, mode: "footage" });
+        visible.dealer++;
+      }
+    }
+    return { plates, cards, visible, plateUse };
+  }
+}
+
+/** Where each slot's cards lie on a clip frame, by their place in the hand. */
+function lying(clip: ClipInfo, frame: number, slot: string): Map<number, Quad> {
+  const out = new Map<number, Quad>();
+  for (const c of clip.cards) {
+    if (c.slot !== slot || frame < c.in || frame >= c.out) continue;
+    if (c.slot === "hole" && (c.flip === null || frame < c.flip)) continue;
+    out.set(c.index, c.quad);
+  }
+  return out;
 }
 
 /** A face on a physical card, fading in from the frame it first shows face up (`from`) and out

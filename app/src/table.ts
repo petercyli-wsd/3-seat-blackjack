@@ -1,7 +1,7 @@
 import { Director } from "./director/Director";
 import { Store } from "./director/store";
 import { ClipPlayer } from "./media/ClipPlayer";
-import { ASSET_BASE, type SeatId, loadManifest } from "./media/manifest";
+import { ASSET_BASE, type SeatId, loadBridges, loadManifest } from "./media/manifest";
 import { grabPlates, maskRects } from "./media/plates";
 import { ClipLoader, loadImage } from "./media/preload";
 import { Compositor } from "./render/Compositor";
@@ -27,6 +27,12 @@ export async function bootTable(canvas: HTMLCanvasElement, host: HTMLElement, st
   const setLoading = (label: string, done = 0, total = 1) => store.set({ loading: { label, done, total } });
   setLoading("Reading manifest");
   const m = await loadManifest();
+  const bridges = await loadBridges(m);
+  {
+    const all = [...bridges.values()].flat();
+    const tool = all.filter((b) => b.source === "tool").length;
+    store.set((s) => ({ debug: { ...s.debug, bridges: { tool, local: all.length - tool } } }));
+  }
   const files = new ClipLoader(
     m,
     (done, total) => {
@@ -49,7 +55,7 @@ export async function bootTable(canvas: HTMLCanvasElement, host: HTMLElement, st
   }
   const scene = new Scene(m, plates, plateTex);
   const player = new ClipPlayer(m, files, host);
-  const director = new Director(m, player, store);
+  const director = new Director(m, player, store, bridges);
 
   let raf = 0;
   let lastDebug = 0;

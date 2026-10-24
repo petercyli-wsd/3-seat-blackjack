@@ -4,7 +4,7 @@ import { settle } from "../engine/settle";
 import { Shoe } from "../engine/shoe";
 import { autoHit } from "../engine/strategy";
 import type { ClipPlayer, Handoff } from "../media/ClipPlayer";
-import { type Manifest, type SeatId, clipName, loopSpan, naturalNext } from "../media/manifest";
+import { type Bridge, type Manifest, type SeatId, clipName, loopSpan, naturalNext } from "../media/manifest";
 import type { TableView } from "../render/scene";
 import { SCENARIOS, stack } from "./scenarios";
 import type { Mode, RoundRecord, SeatStatus, Store } from "./store";
@@ -31,11 +31,14 @@ export class Director {
   /** Bumped by a table reset so an in-flight round script stops at its next await. */
   private epoch = 0;
   private mask = "000";
+  private cutGen = 0;
 
   constructor(
     private m: Manifest,
     private player: ClipPlayer,
     readonly store: Store,
+    /** Interpolated moves between clips not filmed back to back, by the clip they leave. */
+    private bridges: Map<string, Bridge[]> = new Map(),
   ) {}
 
   get shoeStats() {
@@ -163,29 +166,88 @@ export class Director {
     if (epoch !== this.epoch) throw new Abort();
   }
 
-  /** Hand the screen to `target`: seamlessly if it follows the current clip in the take, else a cut. */
+  /**
+   * Hand the screen to `target`, as smoothly as the footage allows:
+   *
+   * 1. seamless, where `target` is the next shot of the take (a clip playing to its end, or a
+   *    loop whose window runs to its clip's end reaching its anchor in time);
+   * 2. through a bridge: leave on the bridge's exit frame, play the generated move, land on
+   *    `target`'s first frame — the bridge whose exit comes round soonest;
+   * 3. if the clip on screen has no bridge to `target` but is about to give way to one that
+   *    may (a discard running into its idle, an idle's lead-in into its loop), wait for it;
+   * 4. otherwise a hard cut.
+   */
   private async cutTo(target: string, opts: { loop?: boolean; patience?: number } = {}) {
-    const cur = this.player.state();
-    let handoff: Handoff = "now";
-    if (cur && naturalNext(this.m, cur.name) === target) {
-      const span = loopSpan(cur.clip);
-      // a player is waiting on a hit, so only hold out for the seamless point if it is close;
-      // a loop over only part of its clip (a calm idle) never meets the next clip seamlessly
-      if (!cur.loop) handoff = "end";
-      else if (span.from + span.n === cur.clip.frames && this.player.framesToAnchor() < (opts.patience ?? 0.75) * this.m.fps) handoff = "anchor";
+    this.cutGen++; // a lead-in still on its way to its loop (settleInto) must not queue over this cut
+    // a table reset mid-cut must not let the rest of this cut queue its clips over the fresh table
+    const epoch = this.epoch;
+    for (;;) {
+      const cur = this.player.state();
+      if (!cur) break;
+      if (naturalNext(this.m, cur.name) === target) {
+        const span = loopSpan(cur.clip);
+        const windowToEnd = span.from + span.n === cur.clip.frames;
+        if (!cur.loop || (windowToEnd && this.player.framesToAnchor() < (opts.patience ?? 0.75) * this.m.fps)) {
+          this.log(`${cur.name} → ${target} (seamless)`);
+          await this.play(target, { loop: opts.loop, handoff: cur.loop ? "anchor" : "end" });
+          return;
+        }
+      }
+      const options = (this.bridges.get(cur.name) ?? []).filter((b) => b.to === target);
+      const best = options
+        .map((b) => ({ b, wait: this.player.framesUntil(b.at) }))
+        .filter((o) => Number.isFinite(o.wait))
+        .sort((x, y) => x.wait - y.wait)[0];
+      if (best) {
+        const b = best.b;
+        this.log(`${cur.name}@${b.at} → ${target} (${b.frames ? `${b.class} bridge, ${b.frames} fr` : "matched cut"}${b.source === "local" ? ", stand-in" : ""}; exit in ${best.wait} fr)`);
+        if (b.frames > 0) {
+          await this.play(b.name, { handoff: { exitAt: b.at } });
+          this.guard(epoch);
+          await this.play(target, { loop: opts.loop, handoff: "end" });
+        } else {
+          await this.play(target, { loop: opts.loop, handoff: { exitAt: b.at } });
+        }
+        return;
+      }
+      if (!cur.loop && this.player.hasPending) {
+        await this.player.whenNextStart();
+        this.guard(epoch);
+        continue;
+      }
+      break;
     }
-    this.log(`${cur?.name ?? "-"} → ${target} (${handoff === "now" ? "cut" : "seamless"})`);
-    // footage still downloading (it loads after the table opens): say why the table is waiting
+    this.log(`${this.player.state()?.name ?? "-"} → ${target} (cut)`);
+    await this.play(target, { loop: opts.loop, handoff: "now" });
+  }
+
+  /** player.play, saying so if the footage is still downloading (it loads after the table opens). */
+  private async play(name: string, opts: { loop?: boolean; handoff: Handoff }) {
     const before = this.store.get().message;
-    const buffering = !this.player.loaded(target, opts.loop);
+    const buffering = !this.player.loaded(name, opts.loop);
     if (buffering) this.store.set({ message: "Loading footage…" });
-    await this.player.play(target, { loop: opts.loop, handoff });
+    await this.player.play(name, opts);
     if (buffering && this.store.get().message === "Loading footage…") this.store.set({ message: before });
   }
 
   /** Queue a clip to follow the current one with no seam (it is the next shot of the take). */
   private follow(target: string, loop = false) {
     return this.player.play(target, { loop, handoff: "end" });
+  }
+
+  /**
+   * Follow the current clip with `name` and settle into its loop. A loop whose window starts
+   * later than the clip (an idle's calm stretch) first plays its lead-in from the clip itself,
+   * so the dealer comes to rest as filmed instead of jumping into the window.
+   */
+  private async settleInto(name: string) {
+    const from = loopSpan(this.m.clips[name]).from;
+    if (from <= 0) return this.follow(name, true);
+    const gen = this.cutGen;
+    const epoch = this.epoch;
+    await this.follow(name);
+    if (gen !== this.cutGen || epoch !== this.epoch || this.player.state()?.name !== name) return;
+    await this.player.play(name, { loop: true, handoff: { exitAt: from - 1 } });
   }
 
   private landing(clip: string, slot: SeatId | "up" | "hole", index: number) {
@@ -290,8 +352,8 @@ export class Director {
           this.guard(epoch);
           break;
         }
-        await this.player.whenEnded(hit);
-        this.guard(epoch);
+        // the next call opens as soon as the card is down, as at a real table; the next cut
+        // waits for her to come back to rest (cutTo) if the player answers that fast
       }
     }
     this.store.set({ activeSeat: null, decision: null });
@@ -350,7 +412,7 @@ export class Director {
     const discard = clipName.discard(this.mask);
     await this.cutTo(discard, { patience: 2.5 });
     this.guard(epoch);
-    void this.follow(clipName.idle(this.mask), true);
+    void this.settleInto(clipName.idle(this.mask));
     // Betting reopens once the last card is in the tray (and its plate has faded), not at the
     // clip's end: the 2-5 s after that are her squaring the tray, and a Deal can cut them short.
     const dc = this.m.clips[discard];
