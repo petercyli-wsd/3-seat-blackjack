@@ -1,4 +1,5 @@
 import type { Manifest, Plate, Quad, SeatId } from "./manifest";
+import type { ClipLoader } from "./preload";
 
 export interface SeatPlate {
   n: number;
@@ -75,7 +76,7 @@ function whenLoaded(el: HTMLVideoElement): Promise<void> {
  */
 export async function grabPlates(
   m: Manifest,
-  urls: Map<string, string>,
+  files: ClipLoader,
   rects: Record<SeatId, [number, number, number, number]>,
   host: HTMLElement,
 ): Promise<PlateSet> {
@@ -95,7 +96,7 @@ export async function grabPlates(
     }
   }
   for (const [clip, list] of byClip) {
-    el.src = urls.get(m.clips[clip].file)!;
+    el.src = await files.get(m.clips[clip].file);
     el.load();
     await whenLoaded(el);
     for (const { seat, n, plate } of list) {

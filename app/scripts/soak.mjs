@@ -8,7 +8,7 @@ const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
-await page.goto("http://localhost:5183/");
+await page.goto(process.env.BASE_URL ?? "http://localhost:5183/");
 await page.waitForSelector(".betbar", { timeout: 240_000 });
 const taken = async () => page.$$eval(".seat-toggle", (b) => b.map((x) => x.classList.contains("is-on")));
 let ok = 0;

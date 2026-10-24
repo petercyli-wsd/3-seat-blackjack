@@ -23,7 +23,7 @@ import numpy as np
 
 from bj3 import settle
 from bj3.edl import clusters
-from bj3.export import clip_path, loop_path, STATIC
+from bj3.export import clip_path, loop_path, loop_window, STATIC
 from bj3.geometry import PLAY_ORDER, SEATS
 
 W, H = 1440, 810
@@ -66,7 +66,9 @@ def write_index(segs: list[dict], clips: dict, fps: float, path: Path) -> None:
         "The dealer deals and plays seats right to left (seat 3 first).",
         "",
         "Every *wait*, *hold* and *idle* clip also has a ping-pong loop in `loops/` (forward then",
-        "reversed, so it can run for any decision time without a visible jump).",
+        "reversed, so it can run for any decision time without a visible jump). An idle's loop covers",
+        "only its calm stretch (in → out given in the Loop column), so she isn't seen fiddling with the",
+        "discard tray while bets are open.",
         "",
     ]
     groups = [
@@ -85,6 +87,8 @@ def write_index(segs: list[dict], clips: dict, fps: float, path: Path) -> None:
             elif s.get("mask"):
                 what = f"seats `{s['mask']}`: " + what
             loop = f"`{c['loop']}`" if c.get("loop") else ""
+            if "loop_in" in s:
+                loop += f" ({tc(s['loop_in'])} → {tc(s['loop_out'])})"
             lines.append(f"| `{c['file']}` | {what} | {tc(s['start'])} → {tc(s['end'])} | {s['seconds']:.2f}s | {loop} |")
         lines.append("")
     path.write_text("\n".join(lines), encoding="utf-8")
@@ -143,8 +147,12 @@ def build(cards_json: str, edl_json: str, pose_npz: str, out_dir: str,
             if k in s:
                 entry[k] = s[k]
         if s["kind"] in STATIC and s["frames"] >= 3:
+            la, lb = loop_window(s)
             entry["loop"] = loop_path(s)
-            entry["loopFrames"] = 2 * s["frames"] - 2
+            entry["loopFrames"] = 2 * (lb - la) - 2
+            if la or lb != s["frames"]:
+                # the loop plays clip frames la..lb-1 only
+                entry["loopFrom"], entry["loopTo"] = la, lb
         # the stillest frame: where plates are grabbed and where a still is shown if needed
         entry["still"] = int(np.argmin(motion[a:b]))
         clips[s["name"]] = entry

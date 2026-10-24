@@ -28,6 +28,9 @@ export interface ClipInfo {
   cards: FootageCard[];
   loop?: string;
   loopFrames?: number;
+  /** The loop plays only clip frames loopFrom..loopTo-1 (an idle's calm stretch); absent = the whole clip. */
+  loopFrom?: number;
+  loopTo?: number;
   still: number;
   mask?: string;
   seat?: SeatId;
@@ -76,6 +79,12 @@ export function faceQuadAt(c: FootageCard, frame: number): Quad | null {
   const i = c.path ? frame - c.path.from : -1;
   return c.path && i >= 0 && i < c.path.quads.length ? c.path.quads[i] : null;
 }
+
+/** The clip frames a loop file ping-pongs over: from, from + 1, ..., from + n - 1 and back. */
+export const loopSpan = (c: ClipInfo) => {
+  const from = c.loopFrom ?? 0;
+  return { from, n: (c.loopTo ?? c.frames) - from };
+};
 
 /** Clip names, by the conventions the pipeline writes. */
 export const clipName = {

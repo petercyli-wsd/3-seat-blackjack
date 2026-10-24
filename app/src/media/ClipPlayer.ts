@@ -1,13 +1,22 @@
-import type { ClipInfo, Manifest } from "./manifest";
+import { type ClipInfo, type Manifest, loopSpan } from "./manifest";
+import type { ClipLoader } from "./preload";
 
 /** How the next clip takes over from the current one. */
 export type Handoff =
   /** At the current clip's last frame (non-loop) — seamless when the clips are contiguous in the take. */
   | "end"
-  /** Loops: at the end of the forward pass, whose last frame is the clip's last frame — seamless too. */
+  /** Loops: at the end of the forward pass — seamless too when the loop runs to the clip's last frame. */
   | "anchor"
-  /** Immediately, crossfading from wherever the current clip is. */
+  /** Immediately, cutting from wherever the current clip is. */
   | "now";
+
+/**
+ * Frames of crossfade on a "now" handoff. A hard cut: the scene lays plates
+ * in for one clip at a time, so a blend of two clips shows the other clip's
+ * cards through (ghost cards at seats that should be bare). Generated
+ * bridges between the cut poses are meant to replace these cuts.
+ */
+const CUT_FADE = 0;
 
 export interface Deck {
   el: HTMLVideoElement;
@@ -16,6 +25,8 @@ export interface Deck {
   /** Last presented frame of the file (loop files count the ping-pong frames). */
   fileFrame: number;
   ready: Promise<void> | null;
+  /** Bumped by every prepare(), so a file that arrives for a deck since re-prepared is dropped. */
+  token: number;
 }
 
 export interface PlayingState {
@@ -55,7 +66,7 @@ export class ClipPlayer {
 
   constructor(
     private m: Manifest,
-    private urls: Map<string, string>,
+    private files: ClipLoader,
     host: HTMLElement,
   ) {
     for (let i = 0; i < DECKS; i++) {
@@ -67,7 +78,7 @@ export class ClipPlayer {
       // kept in the DOM (invisibly) so every browser keeps decoding and firing frame callbacks
       el.style.cssText = "position:absolute;width:2px;height:2px;opacity:0.001;pointer-events:none;left:0;top:0";
       host.appendChild(el);
-      const deck: Deck = { el, name: null, loop: false, fileFrame: 0, ready: null };
+      const deck: Deck = { el, name: null, loop: false, fileFrame: 0, ready: null, token: 0 };
       this.decks.push(deck);
       this.watch(deck);
     }
@@ -86,10 +97,11 @@ export class ClipPlayer {
     const clip = this.m.clips[deck.name];
     let f = deck.fileFrame;
     if (deck.loop) {
-      const n = clip.frames;
+      const { from, n } = loopSpan(clip);
       const period = 2 * n - 2;
       f = ((f % period) + period) % period;
       if (f >= n) f = period - f;
+      f += from;
     }
     return { name: deck.name, clip, frame: Math.min(Math.max(f, 0), clip.frames - 1), loop: deck.loop, deck };
   }
@@ -98,7 +110,12 @@ export class ClipPlayer {
     const c = this.m.clips[name];
     const f = loop ? c.loop : c.file;
     if (!f) throw new Error(`clip ${name} has no ${loop ? "loop" : "file"}`);
-    return this.urls.get(f)!;
+    return f;
+  }
+
+  /** Whether the clip's footage is in memory yet (else playing it waits on the download). */
+  loaded(name: string, loop = false) {
+    return this.files.has(this.fileOf(name, loop));
   }
 
   /** Load a clip into an idle deck so a later handoff starts without a decoder stall. */
@@ -112,15 +129,16 @@ export class ClipPlayer {
     deck.loop = loop;
     deck.fileFrame = 0;
     deck.el.loop = loop;
-    deck.el.src = this.fileOf(name, loop);
-    deck.ready = new Promise<void>((res) => {
-      const done = () => {
-        deck.el.removeEventListener("canplay", done);
-        res();
-      };
-      deck.el.addEventListener("canplay", done);
-    });
-    deck.el.load();
+    const token = ++deck.token;
+    deck.ready = this.files.get(this.fileOf(name, loop)).then(
+      (url) =>
+        new Promise<void>((res) => {
+          if (deck.token !== token) return res();
+          deck.el.addEventListener("canplay", () => res(), { once: true });
+          deck.el.src = url;
+          deck.el.load();
+        }),
+    );
     return deck;
   }
 
@@ -131,7 +149,7 @@ export class ClipPlayer {
   play(name: string, opts: { loop?: boolean; handoff?: Handoff; fade?: number } = {}): Promise<void> {
     const loop = opts.loop ?? false;
     const handoff = opts.handoff ?? (this.active ? "end" : "now");
-    const fade = opts.fade ?? (handoff === "now" && this.active ? 6 : 0);
+    const fade = opts.fade ?? (handoff === "now" && this.active ? CUT_FADE : 0);
     const deck = this.prepare(name, loop);
     if (this.pending) this.pending.resolve();
     return new Promise<void>((resolve) => {
@@ -157,7 +175,9 @@ export class ClipPlayer {
     if (!p) return;
     this.pending = null;
     await p.deck.ready;
-    p.deck.el.currentTime = 0;
+    // A deck reused for a clip it already played sits on that clip's last frame; drawn before
+    // the seek lands, the end of the clip (cards already dealt) would show for a frame.
+    if (p.deck.el.currentTime > 0) await seekToStart(p.deck.el);
     const prev = this.active;
     this.handoffAt = performance.now();
     try {
@@ -226,9 +246,9 @@ export class ClipPlayer {
     });
     const p = this.pending;
     if (!p) return;
-    const n = s.clip.frames;
-    if (p.handoff === "end" && !deck.loop && deck.fileFrame >= n - 1) void this.takeOver();
+    if (p.handoff === "end" && !deck.loop && deck.fileFrame >= s.clip.frames - 1) void this.takeOver();
     if (p.handoff === "anchor" && deck.loop) {
+      const { n } = loopSpan(s.clip);
       const period = 2 * n - 2;
       const a = ((prevFrame % period) + period) % period;
       const b = ((deck.fileFrame % period) + period) % period;
@@ -238,11 +258,11 @@ export class ClipPlayer {
     if (p.handoff === "end" && deck.loop) void this.takeOver();
   }
 
-  /** Frames until the current loop reaches its forward anchor (for deciding between waiting and fading). */
+  /** Frames until the current loop reaches its forward anchor (for deciding between waiting and cutting). */
   framesToAnchor(): number {
     const d = this.active;
     if (!d || !d.loop || !d.name) return 0;
-    const n = this.m.clips[d.name].frames;
+    const { n } = loopSpan(this.m.clips[d.name]);
     const period = 2 * n - 2;
     const f = ((d.fileFrame % period) + period) % period;
     return f <= n - 1 ? n - 1 - f : period - f + n - 1;
@@ -257,4 +277,11 @@ export class ClipPlayer {
     this.active = null;
     this.fadingFrom = null;
   }
+}
+
+function seekToStart(el: HTMLVideoElement): Promise<void> {
+  return new Promise((res) => {
+    el.addEventListener("seeked", () => res(), { once: true });
+    el.currentTime = 0;
+  });
 }

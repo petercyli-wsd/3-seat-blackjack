@@ -163,6 +163,8 @@ kbd {
 .stage-live-sep { width: 1px; height: 12px; background: var(--border); }
 .stage-live-table { font-weight: 600; letter-spacing: 0.4px; color: var(--text-body); }
 .stage-live-round { font-weight: 500; letter-spacing: 0.4px; color: var(--gold-light); }
+.stage-live-load { font-weight: 500; letter-spacing: 0.4px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.stage-live-load.is-error { color: var(--lose); }
 
 .seat-marker, .dealer-marker {
   position: absolute;
@@ -217,8 +219,9 @@ kbd {
 .dealer-marker-label { font-size: 0.75em; letter-spacing: 1.4px; text-transform: uppercase; color: var(--gold-light); }
 .dealer-marker-total { font-weight: 800; font-size: 1.15em; font-variant-numeric: tabular-nums; }
 
+/* below the table, over the studio floor: anywhere higher sits on the dealer's face */
 .stage-toast {
-  position: absolute; left: 50%; top: 9%;
+  position: absolute; left: 50%; bottom: 7%;
   transform: translateX(-50%);
   display: flex; align-items: baseline; gap: 14px;
   padding: 0.35em 1.1em;
@@ -378,6 +381,7 @@ kbd {
 .betbar-total { display: flex; flex-direction: column; align-items: flex-end; margin-right: 6px; }
 .betbar-total span { font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-faint); }
 .betbar-total strong { font-size: 16px; font-variant-numeric: tabular-nums; }
+.betbar-blocker { font-style: normal; font-size: 11px; color: var(--gold-light); white-space: nowrap; }
 .btn-deal { min-width: 140px; height: 46px; font-size: 16px; }
 
 .round-status {
@@ -413,6 +417,10 @@ kbd {
 .pc-pip { position: absolute; right: 3px; bottom: 1px; font-size: 20px; line-height: 1; }
 .pc-back { background: linear-gradient(160deg, #1e1e1e, #0a0a0a); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(212, 175, 55, 0.35); }
 .pc-back svg { width: 100%; height: 100%; display: block; }
+/* five or more cards fan out over each other (rank corners stay visible) rather than overflow the panel */
+.seat-cards:has(.pc:nth-child(5)) .pc + .pc,
+.dealer-strip-cards:has(.pc:nth-child(5)) .pc + .pc { margin-left: -14px; }
+.seat-cards:has(.pc:nth-child(5)), .dealer-strip-cards:has(.pc:nth-child(5)) { gap: 0; }
 
 /* ---------- director panel ---------- */
 .director {

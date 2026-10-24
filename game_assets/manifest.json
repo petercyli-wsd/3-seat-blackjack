@@ -1263,7 +1263,9 @@
    "cards": [],
    "part": 0,
    "loop": "loops/opening_idle_loop.mp4",
-   "loopFrames": 188,
+   "loopFrames": 52,
+   "loopFrom": 68,
+   "loopTo": 95,
    "still": 0
   },
   "001_deal": {
@@ -3819,7 +3821,9 @@
    "mask": "001",
    "part": 1,
    "loop": "loops/001_idle_loop.mp4",
-   "loopFrames": 304,
+   "loopFrames": 136,
+   "loopFrom": 68,
+   "loopTo": 137,
    "still": 129
   },
   "010_deal": {
@@ -12135,7 +12139,9 @@
    "mask": "010",
    "part": 1,
    "loop": "loops/010_idle_loop.mp4",
-   "loopFrames": 204,
+   "loopFrames": 92,
+   "loopFrom": 0,
+   "loopTo": 47,
    "still": 38
   },
   "011_deal": {
@@ -18457,7 +18463,9 @@
    "mask": "100",
    "part": 1,
    "loop": "loops/100_idle_loop.mp4",
-   "loopFrames": 302,
+   "loopFrames": 88,
+   "loopFrom": 23,
+   "loopTo": 68,
    "still": 44
   },
   "101_deal": {
@@ -21773,7 +21781,9 @@
    "mask": "101",
    "part": 1,
    "loop": "loops/101_idle_loop.mp4",
-   "loopFrames": 226,
+   "loopFrames": 134,
+   "loopFrom": 34,
+   "loopTo": 102,
    "still": 70
   },
   "110_deal": {
@@ -31029,7 +31039,9 @@
    "mask": "110",
    "part": 1,
    "loop": "loops/110_idle_loop.mp4",
-   "loopFrames": 358,
+   "loopFrames": 160,
+   "loopFrom": 99,
+   "loopTo": 180,
    "still": 166
   },
   "111_deal": {
@@ -36095,7 +36107,9 @@
    "mask": "111",
    "part": 1,
    "loop": "loops/111_idle_loop.mp4",
-   "loopFrames": 338,
+   "loopFrames": 148,
+   "loopFrom": 95,
+   "loopTo": 170,
    "still": 146
   },
   "full_table_deal": {
@@ -83960,7 +83974,9 @@
    "mask": "111",
    "part": 2,
    "loop": "loops/full_table_idle_loop.mp4",
-   "loopFrames": 326,
+   "loopFrames": 230,
+   "loopFrom": 48,
+   "loopTo": 164,
    "still": 122
   }
  }

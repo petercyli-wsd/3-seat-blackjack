@@ -15,7 +15,7 @@ page.on("console", (m) => logs.push(`[${m.type()}] ${m.text()}`));
 page.on("pageerror", (e) => logs.push(`[pageerror] ${e.message}`));
 const file = (n) => new URL(n, dir).pathname.replace(/^\/([A-Z]:)/, "$1");
 try {
-  await page.goto("http://localhost:5183/");
+  await page.goto(process.env.BASE_URL ?? "http://localhost:5183/");
   await page.waitForSelector(".betbar", { timeout: 240_000 });
   await page.click(".icon-btn:has-text('Director')");
   await page.selectOption(".dp-select", scenario);

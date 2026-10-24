@@ -86,6 +86,15 @@ function DealerMarker({ store }: { store: Store }) {
   );
 }
 
+/** Most footage loads after the table opens; say so while it does, or if it fails. */
+function FootageStatus({ store }: { store: Store }) {
+  const footage = useGame(store, (s) => s.footage);
+  const error = useGame(store, (s) => s.error);
+  if (error) return <span className="stage-live-load is-error" title={error}>Footage error — reload</span>;
+  if (!footage.total || footage.done >= footage.total) return null;
+  return <span className="stage-live-load">Loading footage {Math.round((footage.done / footage.total) * 100)}%</span>;
+}
+
 function Toast({ store }: { store: Store }) {
   const message = useGame(store, (s) => s.message);
   const phase = useGame(store, (s) => s.phase);
@@ -119,6 +128,7 @@ export function Stage({ store, canvasRef, hostRef }: {
             <span className="stage-live-sep" />
             <span className="stage-live-table">Blackjack · 3 Seat</span>
             {round > 0 && <span className="stage-live-round">Round {round}</span>}
+            <FootageStatus store={store} />
           </div>
           <DealerMarker store={store} />
           {(["seat1", "seat2", "seat3"] as SeatId[]).map((id) => (

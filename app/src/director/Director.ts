@@ -4,13 +4,15 @@ import { settle } from "../engine/settle";
 import { Shoe } from "../engine/shoe";
 import { autoHit } from "../engine/strategy";
 import type { ClipPlayer, Handoff } from "../media/ClipPlayer";
-import { type Manifest, type SeatId, clipName, naturalNext } from "../media/manifest";
+import { type Manifest, type SeatId, clipName, loopSpan, naturalNext } from "../media/manifest";
 import type { TableView } from "../render/scene";
 import { SCENARIOS, stack } from "./scenarios";
 import type { Mode, RoundRecord, SeatStatus, Store } from "./store";
 
 export const DECISION_SECONDS: Record<Mode, number> = { speed: 7, regular: 14 };
 const DEFAULT_BET = 10;
+/** Frames after the last pickup of a discard before the table counts as clear (the scene's plate fade-out). */
+const CLEARED_FRAMES = 6;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 type Decision = "hit" | "stand";
@@ -103,9 +105,18 @@ export class Director {
   }
 
   canDeal() {
+    return this.store.get().phase === "betting" && !this.dealBlocker();
+  }
+
+  /** Why Deal is unavailable during betting, for the bet bar; null when it is available. */
+  dealBlocker(): string | null {
     const s = this.store.get();
     const taken = this.m.seats.filter((k) => s.seats[k].taken);
-    return s.phase === "betting" && taken.length > 0 && taken.every((k) => s.seats[k].bet >= RULES.minBet) && this.committed() <= s.balance;
+    if (!taken.length) return "Take a seat to play";
+    const unbet = taken.filter((k) => s.seats[k].bet < RULES.minBet);
+    if (unbet.length) return `Bet on seat ${unbet.map((k) => k.slice(-1)).join(" & ")}, or leave it`;
+    if (this.committed() > s.balance) return "Bets are more than your balance";
+    return null;
   }
 
   // ---- player-turn commands ------------------------------------------------------------------
@@ -152,17 +163,24 @@ export class Director {
     if (epoch !== this.epoch) throw new Abort();
   }
 
-  /** Hand the screen to `target`: seamlessly if it follows the current clip in the take, else a short crossfade. */
+  /** Hand the screen to `target`: seamlessly if it follows the current clip in the take, else a cut. */
   private async cutTo(target: string, opts: { loop?: boolean; patience?: number } = {}) {
     const cur = this.player.state();
     let handoff: Handoff = "now";
     if (cur && naturalNext(this.m, cur.name) === target) {
-      // a player is waiting on a hit, so only hold out for the seamless point if it is close
+      const span = loopSpan(cur.clip);
+      // a player is waiting on a hit, so only hold out for the seamless point if it is close;
+      // a loop over only part of its clip (a calm idle) never meets the next clip seamlessly
       if (!cur.loop) handoff = "end";
-      else if (this.player.framesToAnchor() < (opts.patience ?? 0.75) * this.m.fps) handoff = "anchor";
+      else if (span.from + span.n === cur.clip.frames && this.player.framesToAnchor() < (opts.patience ?? 0.75) * this.m.fps) handoff = "anchor";
     }
-    this.log(`${cur?.name ?? "-"} → ${target} (${handoff === "now" ? "crossfade" : "seamless"})`);
+    this.log(`${cur?.name ?? "-"} → ${target} (${handoff === "now" ? "cut" : "seamless"})`);
+    // footage still downloading (it loads after the table opens): say why the table is waiting
+    const before = this.store.get().message;
+    const buffering = !this.player.loaded(target, opts.loop);
+    if (buffering) this.store.set({ message: "Loading footage…" });
     await this.player.play(target, { loop: opts.loop, handoff });
+    if (buffering && this.store.get().message === "Loading footage…") this.store.set({ message: before });
   }
 
   /** Queue a clip to follow the current one with no seam (it is the next shot of the take). */
@@ -195,12 +213,11 @@ export class Director {
     if (scenario) this.shoe.force(stack(scenario, order));
 
     // the deal, in the order the dealer deals it on film: each seat right to left, then the dealer; twice
-    this.view.seats = { seat1: [], seat2: [], seat3: [] };
-    this.view.dealer = [];
-    this.view.dealerDrawAt = [];
+    const hands: TableView["seats"] = { seat1: [], seat2: [], seat3: [] };
+    const dealer: Card[] = [];
     for (let r = 0; r < 2; r++) {
-      for (const k of order) this.view.seats[k].push(this.shoe.draw());
-      this.view.dealer.push(this.shoe.draw());
+      for (const k of order) hands[k].push(this.shoe.draw());
+      dealer.push(this.shoe.draw());
     }
     this.store.set((s) => ({
       phase: "dealing",
@@ -208,9 +225,9 @@ export class Director {
       round: s.round + 1,
       lastNet: null,
       message: "Dealing",
-      dealer: [...this.view.dealer],
+      dealer: [...dealer],
       seats: Object.fromEntries(seats.map((k) => [k, {
-        ...s.seats[k], cards: [...this.view.seats[k]], result: null,
+        ...s.seats[k], cards: [...hands[k]], result: null,
         status: (s.seats[k].taken ? "waiting" : "empty") as SeatStatus,
       }])) as unknown as typeof s.seats,
     }));
@@ -219,6 +236,12 @@ export class Director {
     const deal = clipName.deal(this.mask);
     await this.cutTo(deal);
     this.guard(epoch);
+    // Cards go into the view only now the clip dealing them is on screen. In the view any
+    // earlier, the idle still playing would get the dealt hands' plates: the result for a moment,
+    // then the deal from the start.
+    this.view.seats = hands;
+    this.view.dealer = dealer;
+    this.view.dealerDrawAt = [];
     void this.follow(clipName.wait(this.mask), true);
     await this.player.whenEnded(deal);
     this.guard(epoch);
@@ -244,13 +267,14 @@ export class Director {
           break;
         }
         const card = this.shoe.draw();
-        hand.push(card);
-        this.store.setSeat(id, { cards: [...hand], status: "waiting" });
         this.store.set({ message: `Seat ${id.slice(-1)} hits` });
-        const k = hand.length;
+        const k = hand.length + 1;
         const hit = clipName.hit(id, k);
         await this.cutTo(hit);
         this.guard(epoch);
+        // on the table only once the hit clip is on screen (see the deal)
+        hand.push(card);
+        this.store.setSeat(id, { cards: [...hand], status: "waiting" });
         void this.follow(clipName.hitWait(id, k), true);
         await this.player.whenFrame(hit, this.landing(hit, id, k) + 2);
         this.guard(epoch);
@@ -327,21 +351,30 @@ export class Director {
     await this.cutTo(discard, { patience: 2.5 });
     this.guard(epoch);
     void this.follow(clipName.idle(this.mask), true);
-    await this.player.whenEnded(discard);
+    // Betting reopens once the last card is in the tray (and its plate has faded), not at the
+    // clip's end: the 2-5 s after that are her squaring the tray, and a Deal can cut them short.
+    const dc = this.m.clips[discard];
+    await this.player.whenFrame(discard, Math.min(dc.frames - 1, Math.max(0, ...dc.cards.map((c) => c.out)) + CLEARED_FRAMES));
     this.guard(epoch);
     this.view.seats = { seat1: [], seat2: [], seat3: [] };
     this.view.dealer = [];
     this.view.dealerDrawAt = [];
     const s = this.store.get();
+    // re-bet: keep the stakes, seat by seat, as far as the balance still covers them all together
+    let left = Math.max(0, s.balance);
+    const rebet = (k: SeatId) => {
+      const bet = s.seats[k].taken ? Math.min(s.seats[k].bet, left) : 0;
+      left -= bet;
+      return bet;
+    };
     this.store.set({
       phase: "betting",
       dealer: [],
-      message: "Place your bets",
+      message: s.balance < RULES.minBet ? "Out of chips — Reset to play again" : "Place your bets",
       seats: Object.fromEntries(seats.map((k) => [k, {
         ...s.seats[k], cards: [], result: null,
         status: (s.seats[k].taken ? "seated" : "empty") as SeatStatus,
-        // re-bet: keep each stake if the balance still covers it
-        bet: s.seats[k].taken ? Math.min(s.seats[k].bet, Math.max(0, s.balance)) : 0,
+        bet: rebet(k),
       }])) as unknown as typeof s.seats,
     });
   }
