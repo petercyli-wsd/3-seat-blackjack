@@ -29,8 +29,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from bj3.rigid import posed, sample, soft_card, table_map
-from bj3.settle import apply
+from bj3.rigid import depth_scale, posed, sample, soft_card, table_map
+from bj3.settle import apply, edge_contrast
 from bj3.video import Frames
 
 MAX_BACK = 240
@@ -77,15 +77,30 @@ def score(moving: np.ndarray, free: np.ndarray, quads: np.ndarray) -> tuple[np.n
     return fill - 1.2 * spill, fill
 
 
-def _search(moving, free, frame, p0, reach, turn, scales, step, turn_step):
+# fine search: score lost per px / degree away from the predicted pose, so a card whose edges
+# are mostly under her fingers holds its pose instead of drifting where the evidence is weak
+PRIOR_PX, PRIOR_DEG = 0.03, 0.03
+
+
+def _search(moving, free, frame, p0, reach, turn, step, turn_step, edges=False, expect=None):
+    """Best pose near p0 as (pose, score, fill). Scale isn't searched: on the table it follows
+    from how far up or down the image the card has moved (`depth_scale`). With `edges`, the
+    card's edge contrast joins the score, which pins it to a fraction of a pixel, and poses pay
+    for straying from the predicted pose `expect` (default p0)."""
     d = np.arange(-reach, reach + 1e-6, step, dtype=np.float32)
     a = np.deg2rad(np.arange(-turn, turn + 1e-6, turn_step, dtype=np.float32))
-    s = np.asarray(scales, np.float32)
-    g = np.stack(np.meshgrid(d, d, a, s, indexing="ij"), -1).reshape(-1, 4)
-    p = g + np.array([p0[0], p0[1], p0[2], 0], np.float32)
-    p[:, 3] *= p0[3]
-    sc, fill = score(moving, free, posed(*frame, p))
-    i = int(np.argmax(sc))
+    g = np.stack(np.meshgrid(d, d, a, indexing="ij"), -1).reshape(-1, 3)
+    p = np.concatenate([g + p0[:3], np.ones((len(g), 1), np.float32)], 1)
+    y0 = float(frame[2][1])
+    p[:, 3] = depth_scale(y0, y0 + p[:, 1])
+    quads = posed(*frame, p)
+    sc, fill = score(moving, free, quads)
+    rank = sc
+    if edges:
+        e = p0 if expect is None else expect
+        rank = (sc + edge_contrast(moving, quads) - PRIOR_PX * np.hypot(*(p[:, :2] - e[:2]).T)
+                - PRIOR_DEG * np.abs(np.rad2deg(p[:, 2] - e[2])))
+    i = int(np.argmax(rank))
     return p[i], float(sc[i]), float(fill[i])
 
 
@@ -106,45 +121,106 @@ def _window(fr: Frames, q: np.ndarray):
     return (lambda img: img[y0:y1, x0:x1]), np.array([x0, y0], np.float32), (y1 - y0, x1 - x0)
 
 
+REST = np.array([0, 0, 0, 1], np.float32)
+# a card lying still can be hidden this long (her arm passing over it) and still be there after
+MAX_HIDDEN = 36
+# poses this close are the same place: a card lying still (STILL_RUN frames or more) is drawn
+# at one pose there, the resting pose itself if it is that close to it
+STILL_PX, STILL_DEG, STILL_SCALE = 1.0, 1.0, 0.012
+STILL_RUN = 4
+STEADY = np.array([1, 4, 6, 4, 1], np.float32) / 16
+
+
+def _near(a: np.ndarray, b: np.ndarray) -> bool:
+    return (np.hypot(a[0] - b[0], a[1] - b[1]) < STILL_PX and abs(np.rad2deg(a[2] - b[2])) < STILL_DEG
+            and abs(a[3] - b[3]) < STILL_SCALE)
+
+
+def _was_still(seen: list) -> bool:
+    """Whether the card lay still just now: STILL_RUN poses in one place among the last few. By
+    position only: as a hand arrives over a card its turn is the first thing to be fitted askew."""
+    # the still stretch must reach to within the last couple of fits, or it is history
+    recent = seen[-(STILL_RUN + 2):]
+    return any(all(np.hypot(*(x[:2] - recent[i][:2])) < STILL_PX for x in recent[i:i + STILL_RUN])
+               for i in range(len(recent) - STILL_RUN + 1))
+
+
+def _steady(poses: list) -> np.ndarray:
+    """Per-frame fits jitter by a fraction of a pixel and degree, which shows as the face wobbling
+    on its card wherever the card moves slowly or not at all. Gaps (frames the card was hidden)
+    are interpolated; each stretch of the card lying still is drawn at one pose (its median, or
+    the resting pose when next to rest and that close to it); the moving frames are smoothed in
+    time, continuing from rest."""
+    P = np.array([REST * np.nan if p is None else p for p in poses], np.float32).reshape(-1, 4)
+    n = len(P)
+    if not n:
+        return P
+    idx = np.arange(n)
+    for k in range(4):
+        known = ~np.isnan(P[:, k])
+        P[:, k] = np.interp(idx, np.concatenate([[-1], idx[known]]), np.concatenate([[REST[k]], P[known, k]]))
+    held = np.zeros(n, bool)
+    i = 0
+    while i < n:
+        j = i + 1
+        while j < n and _near(P[j], np.median(P[i:j], 0)):
+            j += 1
+        if j - i >= STILL_RUN or (i == 0 and _near(P[0], REST)):
+            at = np.median(P[i:j], 0)
+            P[i:j] = REST if i == 0 and _near(at, REST) else at
+            held[i:j] = True
+            i = j
+        else:
+            i += 1
+    padded = np.concatenate([np.repeat(REST[None], 2, 0), P, np.repeat(P[-1:], 2, 0)])
+    smooth = np.stack([np.convolve(padded[:, k], STEADY, "valid") for k in range(4)], 1)
+    P[~held] = smooth[~held]
+    return P
+
+
 def _follow(fr: Frames, frames, q: np.ndarray, crop, off, bg: np.ndarray):
     """Follow the card from its resting outline q through `frames` (walking away from rest) while
-    its outline keeps finding moving card stock. Returns (quads nearest rest first, last pose)."""
+    its outline keeps finding moving card stock. Returns (quads nearest rest first, last pose, model)."""
     free = 1 - bg
     M = table_map(q)
     centre = (q - off).mean(0)
     frame = (((q - off) - centre) @ np.linalg.inv(M).T, M, centre)
-    pose = np.array([0, 0, 0, 1], np.float32)
+    pose = REST.copy()
     vel = np.zeros(4, np.float32)
-    quads, misses = [], 0
+    poses, misses = [], 0
+    seen = [REST] * STILL_RUN  # fitted poses, latest last; it starts lying at rest
     for f in frames:
         moving = np.clip(soft_card(crop(fr.get(f))) - bg, 0, 1)
         guess = pose + vel
-        guess[3] = np.clip(guess[3], 0.8, 1.15)
-        p, sc, fill = _search(moving, free, frame, guess, reach=12, turn=10,
-                              scales=(0.96, 1.0, 1.04), step=2, turn_step=2.5)
-        p, sc, fill = _search(moving, free, frame, p, reach=2, turn=2.5,
-                              scales=(0.985, 1.0, 1.015), step=0.5, turn_step=0.625)
+        p, sc, fill = _search(moving, free, frame, guess, reach=12, turn=10, step=2, turn_step=2.5)
+        p, sc, fill = _search(moving, free, frame, p, reach=2, turn=2.5, step=0.25, turn_step=0.5,
+                              edges=True, expect=guess)
         if fill < MIN_FILL or sc < MIN_SCORE:
             misses += 1
-            if misses >= 2:
+            # lying still it is only hidden (her arm over it): wait for it to show again there;
+            # on the move, one bad frame (a blur, a finger across most of it) holds the motion
+            still = _was_still(seen)
+            if misses >= (MAX_HIDDEN if still else 2):
                 break
-            # one bad frame (a blur, a finger across most of it): hold the motion
-            quads.append(None)
+            if still:
+                vel[:] = 0
+            poses.append(None)
             pose = guess
             continue
         misses = 0
-        vel = 0.5 * vel + 0.5 * (p - pose)
+        step = p - pose
+        # a move this small is fitting noise, not motion: don't carry it on to the next frame
+        if np.hypot(step[0], step[1]) < 0.5 and abs(np.rad2deg(step[2])) < 0.5:
+            step[:] = 0
+        vel = 0.5 * vel + 0.5 * step
         vel[3] = 0
         pose = p
-        quads.append(posed(*frame, p) + off)
-    while quads and quads[-1] is None:
-        quads.pop()
-    # fill single dropped frames from their neighbours; the first neighbours the resting outline
-    # (trailing misses were popped, so every gap has a traced frame further on)
-    for i, v in enumerate(quads):
-        if v is None:
-            quads[i] = ((quads[i - 1] if i else q) + quads[i + 1]) / 2
-    return quads, pose, frame
+        poses.append(p)
+        seen.append(p)
+    while poses and poses[-1] is None:
+        poses.pop()
+    quads = [posed(*frame, p) + off for p in _steady(poses)]
+    return quads, pose, frame, _was_still(seen)
 
 
 def trace(fr: Frames, card: dict, before: int) -> tuple[int, list]:
@@ -158,7 +234,7 @@ def trace(fr: Frames, card: dict, before: int) -> tuple[int, list]:
     own = _poly(shape, q - off, grow=5)
     bg_after = soft_card(crop(fr.median(card["sample"]))) * (1 - own)
     bg = cv2.dilate(np.maximum(bg_before, bg_after), np.ones((5, 5), np.uint8))
-    quads, pose, frame = _follow(fr, range(land - 1, max(-1, land - 1 - MAX_BACK), -1), q, crop, off, bg)
+    quads, pose, frame, _ = _follow(fr, range(land - 1, max(-1, land - 1 - MAX_BACK), -1), q, crop, off, bg)
     # before it lay flat, the card was coming down out of her hand face up: tilted up off the table
     if quads:
         for f in range(land - 1 - len(quads), max(-1, land - 1 - len(quads) - TILT_BACK), -1):
@@ -182,12 +258,14 @@ def trace_away(fr: Frames, card: dict) -> tuple[int, list]:
     own = _poly(shape, q - off, grow=5)
     bg = cv2.dilate(soft_card(crop(fr.median(leave - 4))) * (1 - own), np.ones((5, 5), np.uint8))
     # until the pickup (an early `leave` just follows it lying still) and a little past it
-    quads, _, _ = _follow(fr, range(leave, min(fr.count, card["death"] + AWAY_PAST)), q, crop, off, bg)
+    quads, _, _, _ = _follow(fr, range(leave, min(fr.count, card["death"] + AWAY_PAST)), q, crop, off, bg)
     return leave, quads
 
 
 TILT_BACK = 3
-TILTS = np.arange(10, 76, 5, dtype=np.float32)
+TILT_FILL = 0.5  # a tilted fit has more freedom, so it must find more of the card to count
+# beyond this the card is near edge on: little face shows, and a sliver fits anything white
+TILTS = np.arange(10, 56, 5, dtype=np.float32)
 
 
 def tilted(frame, p: np.ndarray, edge: int, theta: float) -> np.ndarray:
@@ -229,17 +307,7 @@ def _search_tilt(moving, free, frame, p0) -> np.ndarray | None:
             if sc[i] > best[0]:
                 best = (float(sc[i]), float(fill[i]), qs[i])
     sc, fill, quad = best
-    return quad if fill >= MIN_FILL and sc >= MIN_SCORE else None
-
-
-def _smooth(quads: list, end: np.ndarray) -> list:
-    """Light [1 2 1] smoothing in time, pinned to the landing outline so the hand-off is exact."""
-    if len(quads) < 3:
-        return quads
-    a = np.stack(quads + [end])
-    s = a.copy()
-    s[1:-1] = (a[:-2] + 2 * a[1:-1] + a[2:]) / 4
-    return list(s[:-1])
+    return quad if fill >= TILT_FILL and sc >= MIN_SCORE else None
 
 
 SLIDE_APART = 3.0  # px two overlapping cards may shift against each other before their faces end
@@ -300,7 +368,6 @@ def run(video: str, cards_json: str, out: str, rest_json: str | None = None) -> 
         if not c["face_down"]:
             before = next(int(n.split("=")[1]) for n in c["notes"] if n.startswith("before="))
             start, quads = trace(fr, c, before)
-            quads = _smooth(quads, np.asarray(c["quad"], np.float32))
             entry.update({"from": start, "quads": _rounded(quads)})
             said.append(f"traced {len(quads)} frames back")
         if "leave" in c and (not c["face_down"] or c["flip"] is not None):

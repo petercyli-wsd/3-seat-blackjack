@@ -57,8 +57,13 @@ export class Scene {
         // this clip is putting cards down on this seat: the footage leads
         want = footage;
       } else if (clip.kind === "discard") {
-        const lastOut = Math.max(-1, ...clip.cards.filter((c) => c.slot === seat).map((c) => c.out));
-        if (footage === 0 && f >= lastOut) {
+        const filmed = clip.cards.filter((c) => c.slot === seat);
+        const lastOut = Math.max(-1, ...filmed.map((c) => c.out));
+        if (filmed.length === hand.length) {
+          // the take holds this very hand: it is swept up as filmed (a plate would lay a still
+          // of the resting cards back in under her hand as each one leaves)
+          want = footage;
+        } else if (footage === 0 && f >= lastOut) {
           plateAlpha = 1 - (f - lastOut) / DISCARD_FADE;
           if (plateAlpha <= 0) want = 0;
         }

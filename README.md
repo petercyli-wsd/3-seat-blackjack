@@ -98,7 +98,11 @@ make it consistent:
      pose. One frame with a hand beside the card can no longer put its face off the card.
    - `bj3/flight.py` follows each face-up card backward from where it lands, frame by frame,
      while she slides it in under her fingers. Poses are rigid moves of the card's own outline,
-     turned in table space (`bj3/rigid.py`). Where it stops lying flat, a few more frames are
+     turned in table space (`bj3/rigid.py`), at the scale its height in the image gives it, and
+     pinned to its edges with a pull toward the predicted pose. A card lying still is followed
+     through her arm passing over it (the dealer's up card often lies a moment before she
+     squares it up). Stretches where it lies still are drawn at one pose and the moving frames
+     are smoothed, so the face doesn't wobble on its card. Where it stops lying flat, a few more frames are
      fitted with the card swung up about one edge, as it comes down out of her hand; it stops
      where the card is still face down or edge on.
    - At the discard, `settle` finds the frame each card starts to move, and `flight` follows

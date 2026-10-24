@@ -55,3 +55,13 @@ def sample(m: np.ndarray, pts: np.ndarray) -> np.ndarray:
         ok = (xi >= 0) & (xi < w) & (yi >= 0) & (yi < h)
         out += np.where(ok, m[np.clip(yi, 0, h - 1), np.clip(xi, 0, w - 1)], 0) * wt
     return out
+
+
+# A card's image scale on the table depends only on its depth, i.e. its image height: px/mm
+# across the table, fitted on every settled card, is ~DEPTH_K * y + DEPTH_B (residual ~2%).
+DEPTH_K, DEPTH_B = 0.00071, 0.134
+
+
+def depth_scale(y_from: float, y_to) -> np.ndarray:
+    """How much larger a card looks with its centre at image height y_to than at y_from."""
+    return (DEPTH_K * np.asarray(y_to, np.float32) + DEPTH_B) / (DEPTH_K * y_from + DEPTH_B)
