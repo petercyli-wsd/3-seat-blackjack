@@ -243,10 +243,23 @@ def choose_samples(cards: list[dict], calm: np.ndarray) -> None:
         c["prev_mid"] = a + int(np.argmin(calm[a:b])) if b > a + 2 else max(0, c["birth"][0] - 2)
 
 
+def _card_like(q: np.ndarray) -> bool:
+    """A card's outline is a parallelogram: opposite sides within 15% of each other.
+    A finger or a neighbour merged into the blob drags one corner off and breaks this."""
+    e = [float(np.linalg.norm(q[(i + 1) % 4] - q[i])) for i in range(4)]
+    return all(abs(e[i] - e[i + 2]) <= 0.15 * max(e[i], e[i + 2]) for i in (0, 1))
+
+
 def refit(fr: Frames, cards: list[dict]) -> None:
-    """Sub-pixel outlines: isolated cards measured, overlapped cards fitted from their seat's template."""
-    templates: dict[str, np.ndarray] = {}
+    """Sub-pixel outlines: isolated cards measured, overlapped cards fitted from their seat's template.
+
+    The template is the seat's latest clean isolated card. A card that needs one
+    before its seat has any (its own measurement was rejected, say) waits until
+    every card has been measured, then takes the seat's clean card nearest in time.
+    """
+    templates: dict[str, list[tuple[int, np.ndarray]]] = {}
     up = cardfit.UP
+    waiting = []
     for c in sorted(cards, key=lambda c: c["t_birth"]):
         cx, cy = c["rough"].mean(0)
         x0, y0 = int(cx) - 45, int(cy) - 40
@@ -275,20 +288,38 @@ def refit(fr: Frames, cards: list[dict]) -> None:
             blob = (lab == k).astype(np.float32)
             if k and blob.sum() <= 1.2 * (added > 0.5).sum():
                 q = cardfit.corners_from_mask(blob)
+                if q is not None and not _card_like(q):
+                    c["notes"].append("isolated outline rejected (not card-shaped)")
+                    q = None
                 c["isolated"] = q is not None
         tmpl_key = c["region"] if not dealer else "dealer"
+        fit = (x0, y0, added, sup_a, tmpl_key)
         if q is None:
             if tmpl_key in templates:
-                q = cardfit.fit_template(templates[tmpl_key] - (x0 * up, y0 * up), added, sup_a)
+                q = cardfit.fit_template(templates[tmpl_key][-1][1] - (x0 * up, y0 * up), added, sup_a)
                 c["notes"].append("fitted from seat template")
             else:
-                q = (c["rough"] - (x0, y0)) * up
-                c["notes"].append("rough outline (no template yet)")
-        q = cardfit.orient(np.asarray(q, np.float32))
-        src_q = q / up + (x0, y0)
-        if c.get("isolated"):
-            templates[tmpl_key] = src_q * up
-        c["quad"] = src_q
+                waiting.append((c, fit))
+                continue
+        _place(c, q, x0, y0, templates, tmpl_key)
+    for c, (x0, y0, added, sup_a, tmpl_key) in waiting:
+        if tmpl_key in templates:
+            _, t = min(templates[tmpl_key], key=lambda bt: abs(bt[0] - c["t_birth"]))
+            q = cardfit.fit_template(t - (x0 * up, y0 * up), added, sup_a)
+            c["notes"].append("fitted from seat template (nearest clean card)")
+        else:
+            q = (c["rough"] - (x0, y0)) * up
+            c["notes"].append("rough outline (no template)")
+        _place(c, q, x0, y0, templates, tmpl_key)
+
+
+def _place(c: dict, q, x0: int, y0: int, templates: dict, tmpl_key: str) -> None:
+    up = cardfit.UP
+    q = cardfit.orient(np.asarray(q, np.float32))
+    src_q = q / up + (x0, y0)
+    if c.get("isolated"):
+        templates.setdefault(tmpl_key, []).append((c["t_birth"], src_q * up))
+    c["quad"] = src_q
 
 
 def _rectangular(q: np.ndarray) -> bool:

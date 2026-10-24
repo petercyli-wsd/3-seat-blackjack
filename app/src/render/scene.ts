@@ -1,6 +1,6 @@
 import { type Card, faceIndex } from "../engine/cards";
 import type { PlayingState } from "../media/ClipPlayer";
-import { type ClipInfo, type Manifest, type Quad, type SeatId, cardsAt } from "../media/manifest";
+import { type ClipInfo, type FootageCard, type Manifest, type Quad, type SeatId, cardsAt, faceFrom, faceQuadAt } from "../media/manifest";
 import type { PlateSet } from "../media/plates";
 import type { CardDraw, PlateDraw } from "./Compositor";
 import { centre, lerpQuad, rotateQuad, scaleQuad, translateQuad } from "./homography";
@@ -49,8 +49,8 @@ export class Scene {
 
     for (const seat of this.m.seats) {
       const hand = view.seats[seat];
-      const onTable = cardsAt(clip, seat, f);
-      const footage = onTable.length;
+      // cards lying in the seat on this frame (one still sliding in doesn't count yet)
+      const footage = cardsAt(clip, seat, f).length;
       let want = hand.length;
       let plateAlpha = 1;
       if (dealsTo(clip, seat)) {
@@ -73,27 +73,28 @@ export class Scene {
         visible[seat] = plateAlpha > 0.5 ? want : 0;
       } else {
         plates.push(null);
-        for (const c of onTable) {
-          const card = hand[c.index - 1];
-          if (!card) continue;
-          const alpha = c.in >= 0 ? Math.min(1, (f - c.in + 1) / LAND_FADE) : 1;
-          cards.push({ quad: c.quad, cell: faceIndex(card), alpha, mode: "footage" });
+        // every card of this seat that is face up on screen: lying, or still sliding in under her fingers
+        for (const c of clip.cards) {
+          const card = c.slot === seat ? hand[c.index - 1] : undefined;
+          const quad = card && faceQuadAt(c, f);
+          if (!card || !quad) continue;
+          cards.push(footageFace(c, quad, f, faceIndex(card), faceFrom(c)));
         }
         visible[seat] = Math.min(footage, hand.length);
       }
     }
 
-    // dealer: the up card and the hole card are real; the hole shows its face once flipped
-    const dealerOnTable = clip.cards.filter((c) => (c.slot === "up" || c.slot === "hole") && c.in <= f && f < c.out);
+    // dealer: the up card and the hole card are real; the up card's face rides in with it,
+    // the hole shows its face once flipped
     let dealerShown = 0;
-    for (const c of dealerOnTable) {
-      const card = view.dealer[c.index - 1];
+    for (const c of clip.cards) {
+      const card = c.slot === "up" || c.slot === "hole" ? view.dealer[c.index - 1] : undefined;
       if (!card) continue;
-      if (c.slot === "hole" && (c.flip === null || f < c.flip)) continue;
-      const from = c.slot === "hole" ? (c.flip as number) : c.in;
-      const alpha = from >= 0 ? Math.min(1, (f - from + 1) / LAND_FADE) : 1;
-      cards.push({ quad: c.quad, cell: faceIndex(card), alpha, mode: "footage" });
-      dealerShown++;
+      const hole = c.slot === "hole";
+      const quad = hole ? (c.flip !== null && c.flip <= f && c.in <= f && f < c.out ? c.quad : null) : faceQuadAt(c, f);
+      if (!quad) continue;
+      cards.push(footageFace(c, quad, f, faceIndex(card), hole ? (c.flip as number) : faceFrom(c)));
+      if (f >= c.in) dealerShown++;
     }
     // graphic draws: on the table from when they leave the shoe until the real cards are swept
     const upCard = clip.cards.find((c) => c.slot === "up");
@@ -116,6 +117,14 @@ export class Scene {
     visible.dealer = dealerShown;
     return { plates, cards, visible, plateUse };
   }
+}
+
+/** A face on a physical card, fading in from the frame it first shows face up (`from`). */
+function footageFace(c: FootageCard, quad: Quad, f: number, cell: number, from: number): CardDraw {
+  const alpha = from >= 0 ? Math.min(1, (f - from + 1) / LAND_FADE) : 1;
+  // where the card was a frame ago, so a moving face gets the footage's motion blur
+  const prev = f > from ? (faceQuadAt(c, f - 1) ?? quad) : quad;
+  return { quad, prev, cell, alpha, mode: "footage" };
 }
 
 /** Whether this clip is the one placing cards on `seat` (its footage is then the truth). */

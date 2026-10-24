@@ -3,7 +3,9 @@
 For every clip: the physical cards visible during it (clip-relative frames
 for landing, flip and pickup; outline quads; which seat and which card of
 that seat's hand), so the app can put a face on every card and knows how
-many cards each seat shows at any moment.
+many cards each seat shows at any moment. A card the dealer slides in also
+carries its per-frame outline from the frame its face turns up to the frame
+before it lands (`path`), so the face rides along with it.
 
 Plates: for each seat and each hand size the game can need (0, 2-6), a clip
 frame where that seat shows exactly that many cards and nothing covers it.
@@ -19,6 +21,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from bj3 import settle
 from bj3.edl import clusters
 from bj3.export import clip_path, loop_path, STATIC
 from bj3.geometry import PLAY_ORDER, SEATS
@@ -87,9 +90,11 @@ def write_index(segs: list[dict], clips: dict, fps: float, path: Path) -> None:
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
-def build(cards_json: str, edl_json: str, pose_npz: str, out_dir: str) -> None:
+def build(cards_json: str, edl_json: str, pose_npz: str, out_dir: str,
+          flights_json: str | None = None, rest_json: str | None = None) -> None:
     out = Path(out_dir)
-    cards = json.load(open(cards_json))["cards"]
+    cards = settle.apply(json.load(open(cards_json))["cards"], rest_json)
+    flights = json.load(open(flights_json))["paths"] if flights_json and Path(flights_json).exists() else {}
     edl = json.load(open(edl_json))
     fps = edl["fps"]
     segs = edl["segments"]
@@ -116,14 +121,19 @@ def build(cards_json: str, edl_json: str, pose_npz: str, out_dir: str) -> None:
         a, b = s["start"], s["end"]
         visible = []
         for c in cards:
-            if c["birth"] < b and c["death"] > a:
-                visible.append({
+            fl = flights.get(c["id"])
+            start = fl["from"] if fl and fl["quads"] else c["birth"]
+            if start < b and c["death"] > a:
+                v = {
                     "slot": c["region"], "index": c["index"],
                     "in": c["birth"] - a, "out": c["death"] - a,
                     "flip": None if c["flip"] is None else c["flip"] - a,
                     "faceDown": c["face_down"],
                     "quad": c["quad"],
-                })
+                }
+                if fl and fl["quads"]:
+                    v["path"] = {"from": fl["from"] - a, "quads": fl["quads"]}
+                visible.append(v)
         visible.sort(key=lambda v: (v["slot"], v["index"]))
         entry = {
             "file": clip_path(s), "kind": s["kind"], "frames": s["frames"],

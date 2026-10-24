@@ -90,6 +90,13 @@ make it consistent:
    - Isolated cards are measured directly from line-fitted edges.
    - Hit cards overlap the card before them, so they are fitted as that seat's template card,
      searched over position, rotation and scale.
+   - `bj3/settle.py` then refits every card's resting outline on ~24 frames of its stay, from
+     edge contrast (card stock just inside each side, none just outside), and keeps the median
+     pose. One frame with a hand beside the card can no longer put its face off the card.
+   - `bj3/flight.py` follows each face-up card backward from where it lands, frame by frame,
+     while she slides it in under her fingers. It stops where the card is still face down,
+     edge on or lifted in her hand. Poses are rigid moves of the card's own outline, turned in
+     table space (`bj3/rigid.py`).
 2. **Seat plates.** For each seat and each hand size (0, 2–6) there is a still of that seat from
    the take. The browser grabs it from the clips at load time with the same decoder that plays
    the footage, so the colours match exactly.
@@ -103,8 +110,9 @@ make it consistent:
    onto its outline through a homography.
    - The face takes on the blank card's own luminance, so it keeps the real lighting.
    - It only shows where the pixel really is card stock, so a hand passing over hides the face.
-   - Faces appear on the frame the card lands, and the hole card's face appears on the frame it
-     flips. The HUD reveals a card only once the footage has shown it.
+   - Faces appear on the first frame the card shows face up in her hand and ride along its
+     slide-in path (`path` in the manifest), motion-blurred along its movement. The hole card's
+     face appears on the frame it flips. The HUD reveals a card only once it has landed.
 
 Clips that follow each other in the take hand over on the exact frame. Cuts between clips that
 weren't filmed back to back (for example, any idle into a different combination's deal, or a

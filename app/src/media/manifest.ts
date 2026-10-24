@@ -16,6 +16,8 @@ export interface FootageCard {
   flip: number | null;
   faceDown: boolean;
   quad: Quad;
+  /** Outline per frame while the dealer slides it in face up: quads[i] is frame from + i, up to `in`. */
+  path?: { from: number; quads: Quad[] };
 }
 
 export interface ClipInfo {
@@ -63,6 +65,17 @@ export async function loadManifest(): Promise<Manifest> {
 /** Footage cards of one slot that are on the table at a clip frame. */
 export const cardsAt = (clip: ClipInfo, slot: Slot, frame: number) =>
   clip.cards.filter((c) => c.slot === slot && c.in <= frame && frame < c.out);
+
+/** First clip frame the card shows its face up: where its slide-in path starts, else where it lands. */
+export const faceFrom = (c: FootageCard) => (c.path?.quads.length ? c.path.from : c.in);
+
+/** The card's outline at a clip frame while it is face up on screen (sliding in or lying), else null. */
+export function faceQuadAt(c: FootageCard, frame: number): Quad | null {
+  if (frame >= c.out) return null;
+  if (frame >= c.in) return c.quad;
+  const i = c.path ? frame - c.path.from : -1;
+  return c.path && i >= 0 && i < c.path.quads.length ? c.path.quads[i] : null;
+}
 
 /** Clip names, by the conventions the pipeline writes. */
 export const clipName = {

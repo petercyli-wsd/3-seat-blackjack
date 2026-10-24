@@ -12,6 +12,8 @@ export interface PlateDraw {
 
 export interface CardDraw {
   quad: Quad;
+  /** The card's outline a frame earlier, when it is moving: the face is motion-blurred along that move. */
+  prev?: Quad;
   /** Atlas cell: faceIndex(card), or BACK_INDEX. */
   cell: number;
   alpha: number;
@@ -216,6 +218,7 @@ export class Compositor {
     gl.uniform1f(u.uAlpha, c.alpha);
     if (mode >= 0) {
       this.bind(1, this.atlas, u.uAtlas);
+      gl.uniformMatrix3fv(u.uInvHPrev, false, c.prev ? toColumnMajor(invert3(squareToQuad(c.prev))) : invH);
       gl.uniform4fv(u.uCell, cellUV(c.cell));
       gl.uniform1i(u.uMode, mode);
       gl.uniform1f(u.uRefWhite, 0.9);

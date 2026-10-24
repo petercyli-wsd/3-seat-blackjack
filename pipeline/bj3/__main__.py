@@ -4,17 +4,19 @@ Passes (each cached in work/ and skipped when its output exists, unless --force)
   1. signals   per-frame card / motion signals over table regions
   2. pose      per-frame fingerprint of the dealer's arms and the discard tray
   3. tracker   every physical card: outline, land / flip / pickup frames
-  4. edl       the take cut into named segments
-  5. review    contact sheets of every cut (work/review/)
-  6. export    trimmed clips + ping-pong loops into game_assets/
-  7. manifest  manifest.json, seat masks and CLIPS.md
+  4. settle    every card's resting outline, refitted over its whole stay
+  5. flight    every face-up card's outline per frame while it is slid in
+  6. edl       the take cut into named segments
+  7. review    contact sheets of every cut (work/review/)
+  8. export    trimmed clips + ping-pong loops into game_assets/
+  9. manifest  manifest.json, seat masks and CLIPS.md
 """
 
 import argparse
 import time
 from pathlib import Path
 
-from bj3 import edl, export, manifest, pose, review, signals, tracker
+from bj3 import edl, export, flight, manifest, pose, review, settle, signals, tracker
 
 
 def main() -> None:
@@ -40,10 +42,12 @@ def main() -> None:
     step("signals", work / "signals.npz", lambda: signals.run(a.video, work / "signals.npz"))
     step("pose", work / "pose.npz", lambda: pose.run(a.video, str(work / "pose.npz")))
     step("tracker", work / "cards.json", lambda: tracker.track(a.video, str(work / "signals.npz"), str(work / "cards.json")))
+    step("settle", work / "rest.json", lambda: settle.run(a.video, str(work / "cards.json"), str(work / "rest.json")))
+    step("flight", work / "flights.json", lambda: flight.run(a.video, str(work / "cards.json"), str(work / "flights.json"), str(work / "rest.json")))
     step("edl", work / "edl.json", lambda: edl.build(str(work / "cards.json"), str(work / "signals.npz"), str(work / "edl.json"), str(work / "pose.npz")))
     step("review", work / "review" / "edl_00.jpg", lambda: review.main(a.video, str(work / "edl.json"), str(work / "review")))
     step("export", out / "clips", lambda: export.run(a.video, str(work / "edl.json"), str(out)))
-    step("manifest", out / "manifest.json", lambda: manifest.build(str(work / "cards.json"), str(work / "edl.json"), str(work / "pose.npz"), str(out)))
+    step("manifest", out / "manifest.json", lambda: manifest.build(str(work / "cards.json"), str(work / "edl.json"), str(work / "pose.npz"), str(out), str(work / "flights.json"), str(work / "rest.json")))
 
 
 if __name__ == "__main__":

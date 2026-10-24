@@ -92,11 +92,23 @@ void main() {
   outColor = vec4(texelFetch(uComp, ivec2(gl_FragCoord.xy), 0).rgb, 1.0);
 }`;
 
+/**
+ * Quads are in the pipeline's (OpenCV's) pixel coordinates, where pixel (i, j)
+ * is centred on (i, j). GL centres it on (i + 0.5, j + 0.5), so both the
+ * vertices and the fragment positions are shifted by half a pixel to match.
+ */
+const PIXEL = /* glsl */ `
+vec2 videoPixel() {
+  return vec2(gl_FragCoord.x, uSize.y - gl_FragCoord.y) - 0.5;
+}
+`;
+
 export const CARD_VS = /* glsl */ `#version 300 es
 in vec2 aPos;
 uniform vec2 uSize;
 void main() {
-  gl_Position = vec4(aPos.x / uSize.x * 2.0 - 1.0, 1.0 - aPos.y / uSize.y * 2.0, 0.0, 1.0);
+  vec2 p = aPos + 0.5;
+  gl_Position = vec4(p.x / uSize.x * 2.0 - 1.0, 1.0 - p.y / uSize.y * 2.0, 0.0, 1.0);
 }`;
 
 /**
@@ -107,6 +119,10 @@ void main() {
  * so the real lighting, motion blur and any occluding hand carry over.
  * Mode 1 (graphic card, no physical card under it): drawn opaque with a
  * rounded outline, hidden only where something that isn't felt covers it.
+ *
+ * A moving card (uInvHPrev is last frame's outline) is blurred in the footage,
+ * so its face is too: averaged along the card's own motion over half a frame,
+ * centred on this frame, as a 180-degree shutter would see it.
  */
 export const CARD_FS = /* glsl */ `#version 300 es
 precision highp float;
@@ -114,23 +130,33 @@ out vec4 outColor;
 uniform sampler2D uComp;
 uniform sampler2D uAtlas;
 uniform mat3 uInvH;
+uniform mat3 uInvHPrev;
 uniform vec4 uCell;
 uniform float uAlpha;
 uniform int uMode;
 uniform vec2 uSize;
 uniform float uRefWhite;
 ${KEYS}
+${PIXEL}
+const int BLUR_TAPS = 7;
 void main() {
-  vec2 px = vec2(gl_FragCoord.x, uSize.y - gl_FragCoord.y);
+  vec2 px = videoPixel();
   vec3 h = uInvH * vec3(px, 1.0);
   vec2 uv = h.xy / h.z;
+  vec3 hp = uInvHPrev * vec3(px, 1.0);
+  // the face point under this pixel a frame ago, minus now: the face's motion here, in UV
+  vec2 duv = hp.xy / hp.z - uv;
   vec3 base = texelFetch(uComp, ivec2(gl_FragCoord.xy), 0).rgb;
   vec2 g = fwidth(uv);
   vec2 edge = min(uv, 1.0 - uv) / max(g, vec2(1e-5));
   float inside = clamp(min(edge.x, edge.y), 0.0, 1.0);
   if (inside <= 0.0) discard;
-  vec2 auv = mix(uCell.xy, uCell.zw, clamp(uv, 0.0, 1.0));
-  vec3 face = texture(uAtlas, auv).rgb;
+  vec3 face = vec3(0.0);
+  for (int i = 0; i < BLUR_TAPS; i++) {
+    float t = (float(i) / float(BLUR_TAPS - 1) - 0.5) * 0.5;
+    face += texture(uAtlas, mix(uCell.xy, uCell.zw, clamp(uv + duv * t, 0.0, 1.0))).rgb;
+  }
+  face /= float(BLUR_TAPS);
   if (uMode == 0) {
     float lum = dot(base, vec3(0.299, 0.587, 0.114));
     float shade = clamp(lum / uRefWhite, 0.55, 1.08);
@@ -155,9 +181,9 @@ uniform mat3 uInvH;
 uniform float uAlpha;
 uniform vec2 uSize;
 ${KEYS}
+${PIXEL}
 void main() {
-  vec2 px = vec2(gl_FragCoord.x, uSize.y - gl_FragCoord.y);
-  vec3 h = uInvH * vec3(px, 1.0);
+  vec3 h = uInvH * vec3(videoPixel(), 1.0);
   vec2 uv = h.xy / h.z;
   vec3 base = texelFetch(uComp, ivec2(gl_FragCoord.xy), 0).rgb;
   vec2 d = max(abs(uv - 0.5) - 0.38, 0.0);
