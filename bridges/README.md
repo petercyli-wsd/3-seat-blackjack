@@ -44,9 +44,10 @@ There are **168 rows**, over 136 (loop → clip) transitions.
 
 | File | Use |
 |---|---|
+| `bridges_onejob.csv` | All 168 rows with per-row `method` (`film` / `kling-fal`) and `duration`, to run as **one job** once the app reads those columns |
 | `bridges.csv` | All 168 rows, in the tool's three-column format |
 | `bridges_short.csv`, `bridges_long.csv`, `bridges_generative.csv` | The same rows split by suggested method, so each can be one batch with one setting |
-| `bridges_full.csv` | The planning columns too: `max_seconds`, `critical`, `class`, `method`, `seconds`, `flow_px`, `unexplained_pct`, `src`, `dst` |
+| `bridges_full.csv` | The one-job columns plus the planning ones: `max_seconds`, `critical`, `class`, `flow_px`, `unexplained_pct`, `src`, `dst` |
 | `stubs/exit/*.mp4`, `stubs/entry/*.mp4` | The 8-frame first and second halves; select `stubs/` as the source folder |
 | `plan.json` | Everything above, for the pipeline |
 
@@ -94,5 +95,7 @@ that works best:
 - **Report:** write the chosen method, length and the two scores back into the row report, so
   failures can be re-run with a different method.
 
-`bridges_full.csv` already carries `max_seconds` and a suggested `method`/`seconds` for every
-row, so a tool that reads extra columns can use them directly.
+`bridges_onejob.csv` carries a `method` (the app's own method ids) and `duration` for every row,
+so a tool that reads those columns runs the whole set as one job. `bridges_full.csv` adds
+`max_seconds` and the scores. `python -m bj3.bridges csvs` rewrites all the CSVs from
+`plan.json`.

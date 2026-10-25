@@ -2,6 +2,7 @@
 not filmed back to back.
 
     python -m bj3.bridges plan   <full_footage.mp4>   # exits, gap scores, stubs, CSVs
+    python -m bj3.bridges csvs                        # rewrite the CSVs from plan.json only
     python -m bj3.bridges local  <full_footage.mp4>   # stand-in bridges by optical flow, into game_assets
     python -m bj3.bridges ingest <tool output dir>    # the interpolation tool's bridges, into game_assets
 
@@ -52,7 +53,8 @@ CLASSES = [
 ]
 # seconds of bridge per class; a generative bridge is as long as the models allow
 SECONDS = {"cut": 0.0, "short": 0.33, "long": 0.67, "generative": 3.0}
-METHOD = {"cut": "none", "short": "FILM", "long": "FILM", "generative": "Kling"}
+# method ids as the interpolation app names them (its src/models.js)
+METHOD = {"cut": "none", "short": "film", "long": "film", "generative": "kling-fal"}
 # the longest a bridge may be where a player is waiting on it
 CRITICAL_MAX_S = 0.75
 
@@ -163,34 +165,54 @@ def plan(video: str, work: str = "work", out_dir: str | None = None) -> None:
         s = segs[dst]["start"]
         write_stub([clean(fr.get(i)) for i in range(s, s + STUB)], stubs / "entry" / f"{dst}.mp4")
 
-    gen = [r for r in rows if r["class"] != "cut"]
-    bdir.mkdir(parents=True, exist_ok=True)
-
-    def tool_csv(path: Path, rs):
-        with open(path, "w", newline="", encoding="utf-8") as fh:
-            w = csv.writer(fh)
-            w.writerow(["first_half", "second_half", "output"])
-            for r in rs:
-                w.writerow([f"exit/{r['exit']}.mp4", f"entry/{r['dst']}.mp4", r["output"]])
-
-    tool_csv(bdir / "bridges.csv", gen)
-    for cls in ("short", "long", "generative"):
-        tool_csv(bdir / f"bridges_{cls}.csv", [r for r in gen if r["class"] == cls])
-    cols = ["first_half", "second_half", "output", "max_seconds", "critical", "class", "method", "seconds",
-            "flow_px", "unexplained_pct", "src", "dst"]
-    with open(bdir / "bridges_full.csv", "w", newline="", encoding="utf-8") as fh:
-        w = csv.writer(fh)
-        w.writerow(cols)
-        for r in rows:
-            w.writerow([f"exit/{r['exit']}.mp4", f"entry/{r['dst']}.mp4", r["output"], r["max_seconds"],
-                        int(r["critical"]), r["class"], r["method"], r["seconds"], r["flow_px"], r["unexplained_pct"],
-                        r["src"], r["dst"]])
+    write_csvs(rows, bdir)
     (bdir / "plan.json").write_text(json.dumps({"stub": STUB, "fps": FPS, "rows": rows}, indent=1))
     for old in ("plan.prev.json",):
         (bdir / old).unlink(missing_ok=True)
     count = {c: sum(r["class"] == c for r in rows) for c in ("cut", "short", "long", "generative")}
     print(f"{len(rows)} exits over {len({(r['src'], r['dst']) for r in rows})} loop->clip pairs: {count}")
     print(f"critical (hit) rows: {sum(r['critical'] for r in rows)}; to generate: {len(gen)}")
+
+
+def write_csvs(rows: list[dict], bdir: Path = BRIDGE_DIR) -> None:
+    """The interpolation app's batch CSVs.
+
+    * bridges.csv and bridges_{short,long,generative}.csv: the plain three columns, one
+      method and length per batch;
+    * bridges_onejob.csv: adds the optional per-row `method` and `duration` columns, so
+      every row runs in one job with its own method and length;
+    * bridges_full.csv: the same plus the planning columns, for reading.
+    """
+    gen = [r for r in rows if r["class"] != "cut"]
+    bdir.mkdir(parents=True, exist_ok=True)
+    halves = lambda r: [f"exit/{r['exit']}.mp4", f"entry/{r['dst']}.mp4", r["output"]]
+
+    def write(path: Path, header: list[str], rs, extra=lambda r: []):
+        with open(path, "w", newline="", encoding="utf-8") as fh:
+            w = csv.writer(fh)
+            w.writerow(header)
+            for r in rs:
+                w.writerow(halves(r) + extra(r))
+
+    base = ["first_half", "second_half", "output"]
+    write(bdir / "bridges.csv", base, gen)
+    for cls in ("short", "long", "generative"):
+        write(bdir / f"bridges_{cls}.csv", base, [r for r in gen if r["class"] == cls])
+    write(bdir / "bridges_onejob.csv", base + ["method", "duration"], gen,
+          lambda r: [METHOD[r["class"]], f"{r['seconds']:g}"])
+    write(bdir / "bridges_full.csv",
+          base + ["method", "duration", "max_seconds", "critical", "class", "flow_px", "unexplained_pct", "src", "dst"],
+          rows, lambda r: [METHOD[r["class"]], f"{r['seconds']:g}", r["max_seconds"], int(r["critical"]), r["class"],
+                           r["flow_px"], r["unexplained_pct"], r["src"], r["dst"]])
+
+
+def csvs() -> None:
+    """Rewrite the CSVs from plan.json, without re-planning or re-writing stubs."""
+    rows = json.load(open(BRIDGE_DIR / "plan.json"))["rows"]
+    for r in rows:
+        r["method"] = METHOD[r["class"]]
+    write_csvs(rows)
+    print(f"CSVs rewritten for {len(rows)} rows")
 
 
 # ---------------------------------------------------------------- bridges into the game
@@ -332,4 +354,4 @@ def ingest(tool_dir: str, video: str | None = None) -> None:
 
 if __name__ == "__main__":
     cmd, *args = sys.argv[1:]
-    {"plan": plan, "local": local, "ingest": ingest}[cmd](*args)
+    {"plan": plan, "csvs": csvs, "local": local, "ingest": ingest}[cmd](*args)
