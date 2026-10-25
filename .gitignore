@@ -7,3 +7,4 @@ __pycache__/
 bridges/stubs/
 bridges/generated/
 .vite/
+bridges/review.html

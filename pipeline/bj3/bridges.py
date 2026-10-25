@@ -3,17 +3,22 @@ not filmed back to back.
 
     python -m bj3.bridges plan   <full_footage.mp4>   # exits, gap scores, stubs, CSVs
     python -m bj3.bridges csvs                        # rewrite the CSVs from plan.json only
-    python -m bj3.bridges local  <full_footage.mp4>   # stand-in bridges by optical flow, into game_assets
-    python -m bj3.bridges ingest <tool output dir>    # the interpolation tool's bridges, into game_assets
+    python -m bj3.bridges local  <full_footage.mp4>   # optical-flow stand-ins for every row
+    python -m bj3.bridges ingest <folders/files...>   # generated bridges in; a new output replaces the old
+    python -m bj3.bridges verdict <name> reject|ok [note]  # drop / restore a generated bridge
+    python -m bj3.bridges review                      # bridges/review.html: watch and judge them all
+    python -m bj3.bridges resolve                     # rewrite what the game plays
 
 The game leaves the take's order only from a loop (see graph.py) and always
 enters a clip at its first frame (which edl.recut_entries has placed on the
 pose that best matches its sources). Per (loop, target) pair the planner
 picks the exit frame in the loop that is closest to the target's entry:
 
-* a cut a player waits on (a hit) gets two exits, the best in each half of
-  the loop, so the dealer is never more than about a second from one;
-* any other cut gets the single best exit (the loop comes round to it).
+* every cut gets two exits, the best in each half of the loop, so the dealer
+  is never more than about one loop-length (1-3 s) from a way out — about a
+  second for the 2 s decision loops a player hits from;
+* a cut the take already makes seamlessly (the loop's last frame is followed
+  by the target) gets one exit in the first half, so it isn't a full loop away.
 
 Each exit is scored by optical flow (how far the dealer moves, and what
 warping can't explain) into a class that sets the method and length:
@@ -66,11 +71,15 @@ def classify(motion: float, resid: float) -> str:
     return "generative"
 
 
-def exits_for(window: list[int], d: np.ndarray, critical: bool) -> list[int]:
-    if not critical or len(window) < 12:
-        return [window[int(np.argmin(d))]]
+def exits_for(window: list[int], d: np.ndarray, seamless: bool) -> list[int]:
+    """The best-matching exit in each half of the loop (or, for a cut that is seamless at the
+    loop's end, in the first half only). The overall best is always one of them, so adding the
+    second exit never moves an exit a bridge was already generated for."""
+    if len(window) < 12:
+        return [] if seamless else [window[int(np.argmin(d))]]
     h = len(window) // 2
-    return [window[int(np.argmin(d[:h]))], window[h + int(np.argmin(d[h:]))]]
+    first = window[int(np.argmin(d[:h]))]
+    return [first] if seamless else [first, window[h + int(np.argmin(d[h:]))]]
 
 
 def _smooth(e0: float, e1: float, x: np.ndarray) -> np.ndarray:
@@ -130,12 +139,10 @@ def plan(video: str, work: str = "work", out_dir: str | None = None) -> None:
         a, b = graph.loop_window(segs[src])
         window = list(range(a, b))
         for dst in sorted(targets):
-            if graph.seamless(segs, src, dst):
-                continue
             entry = segs[dst]["start"]
             d = G.matrix(window, [entry])[:, 0]
             crit = graph.critical(dst)
-            for x in exits_for(window, d, crit):
+            for x in exits_for(window, d, graph.seamless(segs, src, dst)):
                 motion, resid = flow(fr.get(x), fr.get(entry))
                 cls = classify(motion, resid)
                 if crit and cls == "generative":
@@ -171,7 +178,8 @@ def plan(video: str, work: str = "work", out_dir: str | None = None) -> None:
         (bdir / old).unlink(missing_ok=True)
     count = {c: sum(r["class"] == c for r in rows) for c in ("cut", "short", "long", "generative")}
     print(f"{len(rows)} exits over {len({(r['src'], r['dst']) for r in rows})} loop->clip pairs: {count}")
-    print(f"critical (hit) rows: {sum(r['critical'] for r in rows)}; to generate: {len(gen)}")
+    print(f"critical (hit) rows: {sum(r['critical'] for r in rows)}; "
+          f"to generate: {sum(r['class'] != 'cut' for r in rows)}")
 
 
 def write_csvs(rows: list[dict], bdir: Path = BRIDGE_DIR) -> None:
@@ -204,6 +212,16 @@ def write_csvs(rows: list[dict], bdir: Path = BRIDGE_DIR) -> None:
           base + ["method", "duration", "max_seconds", "critical", "class", "flow_px", "unexplained_pct", "src", "dst"],
           rows, lambda r: [METHOD[r["class"]], f"{r['seconds']:g}", r["max_seconds"], int(r["critical"]), r["class"],
                            r["flow_px"], r["unexplained_pct"], r["src"], r["dst"]])
+
+
+def write_todo(rows: list[dict], bdir: Path = BRIDGE_DIR) -> None:
+    """bridges_todo.csv: the rows still playing a stand-in, in the one-job format."""
+    with open(bdir / "bridges_todo.csv", "w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        w.writerow(["first_half", "second_half", "output", "method", "duration"])
+        for r in rows:
+            w.writerow([f"exit/{r['exit']}.mp4", f"entry/{r['dst']}.mp4", r["output"],
+                        METHOD[r["class"]], f"{r['seconds']:g}"])
 
 
 def csvs() -> None:
@@ -243,55 +261,6 @@ def encode(frames: list[np.ndarray], path: Path) -> None:
     write_stub(frames, path)
 
 
-def registry_path() -> Path:
-    return ASSETS / "bridges.json"
-
-
-def load_registry() -> dict:
-    p = registry_path()
-    return json.loads(p.read_text()) if p.exists() else {"fps": FPS, "bridges": []}
-
-
-def save_registry(reg: dict, rows: list[dict]) -> None:
-    order = {r["output"]: i for i, r in enumerate(rows)}
-    reg["bridges"].sort(key=lambda b: order.get(b["name"], 1 << 30))
-    registry_path().write_text(json.dumps(reg, indent=1))
-
-
-def put(reg: dict, row: dict, frames: int, source: str) -> None:
-    reg["bridges"] = [b for b in reg["bridges"] if b["name"] != row["output"]]
-    reg["bridges"].append({
-        "name": row["output"], "from": row["src"], "at": row["frame"], "to": row["dst"],
-        "file": f"bridges/{row['output']}" if frames else None, "frames": frames,
-        "class": row["class"], "critical": row["critical"], "source": source,
-    })
-
-
-def local(video: str, work: str = "work") -> None:
-    """Stand-in bridges for every planned row, so the game plays bridges before the tool's arrive.
-    A row already filled from the tool is left alone."""
-    rows = json.load(open(BRIDGE_DIR / "plan.json"))["rows"]
-    reg = load_registry()
-    have_tool = {b["name"] for b in reg["bridges"] if b["source"] == "tool"}
-    fr = Frames(video)
-    segs = {s["name"]: s for s in json.load(open(Path(work) / "edl.json"))["segments"]}
-    clean = SeatCleaner(fr, segs)
-    out = ASSETS / "bridges"
-    out.mkdir(parents=True, exist_ok=True)
-    for r in rows:
-        if r["output"] in have_tool:
-            continue
-        # a generated move can't be stood in for by flow; a long flow bridge is the closest stand-in
-        seconds = min(r["seconds"], SECONDS["long"])
-        n = int(round(seconds * FPS))
-        if n:
-            frames = interpolate(clean(fr.get(r["exit_source_frame"])), clean(fr.get(r["entry_source_frame"])), n)
-            encode(frames, out / r["output"])
-        put(reg, r, n, "local")
-    save_registry(reg, rows)
-    print(f"{len(rows)} bridges registered ({sum(1 for b in reg['bridges'] if b['source'] == 'local')} stand-ins)")
-
-
 def read_all(path: Path) -> list[np.ndarray]:
     cap = cv2.VideoCapture(str(path))
     out = []
@@ -302,56 +271,247 @@ def read_all(path: Path) -> list[np.ndarray]:
         out.append(f)
 
 
-def ingest(tool_dir: str, video: str | None = None) -> None:
-    """The tool's outputs (exit stub + bridge + entry stub) -> just the bridge, into the game.
+# Where things live. Both kinds of bridge are kept side by side so either can be
+# played for any row, and a bad generated one can be dropped without losing it:
+#
+#   bridges/generated/<name>        the tool's outputs as delivered (stub + bridge + stub; not in git)
+#   bridges/state.json              per row: the ingested output's provenance and quality checks
+#   bridges/verdicts.json           human verdicts on generated bridges
+#   game_assets/bridges/tool/<name> the generated bridge, cut out of the tool's output
+#   game_assets/bridges/flow/<name> the optical-flow stand-in
+#   game_assets/bridges.json        what the game plays for every row (written by resolve)
+GENERATED = BRIDGE_DIR / "generated"
+STATE = BRIDGE_DIR / "state.json"
+VERDICTS = BRIDGE_DIR / "verdicts.json"
+TOOL_DIR = "bridges/tool"
+FLOW_DIR = "bridges/flow"
 
-    The bridge is found by locating the two known stubs in the output, not by counting, so a
-    tool that pads or trims around them still yields exactly the frames between them."""
-    rows = json.load(open(BRIDGE_DIR / "plan.json"))["rows"]
-    reg = load_registry()
-    out = ASSETS / "bridges"
+
+def plan_rows() -> list[dict]:
+    return json.load(open(BRIDGE_DIR / "plan.json"))["rows"]
+
+
+def _load(path: Path, empty):
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else empty
+
+
+def _save(path: Path, data) -> None:
+    path.write_text(json.dumps(data, indent=1) + "\n", encoding="utf-8")
+
+
+def sha1(path: Path) -> str:
+    import hashlib
+
+    return hashlib.sha1(path.read_bytes()).hexdigest()[:16]
+
+
+def flow_frames(r: dict) -> int:
+    # a generated move can't be stood in for by flow; a long flow bridge is the closest stand-in
+    return int(round(min(r["seconds"], SECONDS["long"]) * FPS))
+
+
+def local(video: str, work: str = "work", force: str = "") -> None:
+    """Optical-flow stand-ins for every planned row that lacks one (all of them with `force`),
+    so every cut has a bridge before (and whenever) a generated one is missing or rejected."""
+    rows = plan_rows()
+    fr = Frames(video)
+    segs = {s["name"]: s for s in json.load(open(Path(work) / "edl.json"))["segments"]}
+    clean = SeatCleaner(fr, segs)
+    out = ASSETS / FLOW_DIR
     out.mkdir(parents=True, exist_ok=True)
-    stubs = BRIDGE_DIR / "stubs"
-    done = missing = bad = 0
+    made = 0
     for r in rows:
-        if r["class"] == "cut":
-            put(reg, r, 0, "tool")
-            continue
-        src = Path(tool_dir) / r["output"]
-        if not src.exists():
-            hits = list(Path(tool_dir).rglob(r["output"]))
-            src = hits[0] if hits else src
-        if not src.exists():
-            missing += 1
-            continue
-        frames = [f.astype(np.float32) for f in read_all(src)]
-        A = [f.astype(np.float32) for f in read_all(stubs / "exit" / f"{r['exit']}.mp4")]
-        Bs = [f.astype(np.float32) for f in read_all(stubs / "entry" / f"{r['dst']}.mp4")]
-        # Align each stub as a whole sequence (its frames carry the dealer's own motion, so it
-        # fits in one place only); the bridge is what lies between them. Single-frame matching
-        # is ambiguous: a bridge between two close poses looks like its ends all the way through.
-        n = len(frames)
+        if flow_frames(r) and (force or not (out / r["output"]).exists()):
+            a, b = clean(fr.get(r["exit_source_frame"])), clean(fr.get(r["entry_source_frame"]))
+            encode(interpolate(a, b, flow_frames(r)), out / r["output"])
+            made += 1
+    print(f"{made} stand-ins made")
+    resolve()
 
-        def fit(stub, lo, hi):
-            costs = [np.mean([np.abs(frames[o + k] - stub[k]).mean() for k in range(len(stub))])
-                     for o in range(lo, hi + 1)]
-            o = int(np.argmin(costs))
-            return lo + o, costs[o]
 
-        oa, ca = fit(A, 0, max(0, n - len(A) - len(Bs)))
-        ob, cb = fit(Bs, oa + len(A), n - len(Bs))
-        bridge = [f.round().astype(np.uint8) for f in frames[oa + len(A):ob]]
-        if not bridge or ca > 8 or cb > 8:
-            print(f"  ! {r['output']}: stubs not found (exit {ca:.1f}, entry {cb:.1f}, {len(bridge)} frames between)")
-            bad += 1
+def _outputs(paths: list[str]) -> dict[str, Path]:
+    """Tool outputs by file name, from folders (searched recursively) and single files."""
+    found: dict[str, Path] = {}
+    for p in map(Path, paths):
+        for f in ([p] if p.is_file() else sorted(p.rglob("*.mp4"))):
+            found[f.name] = f
+    return found
+
+
+def _reports(paths: list[str]) -> dict[str, dict]:
+    """The tool's row reports (batch-report*.csv) next to its outputs, by output name."""
+    rows: dict[str, dict] = {}
+    for p in map(Path, paths):
+        for f in ([] if p.is_file() else sorted(p.rglob("batch-report*.csv"))):
+            with open(f, encoding="utf-8-sig") as fh:
+                for r in csv.DictReader(fh):
+                    if r.get("output"):
+                        rows[Path(r["output"]).name] = r
+    return rows
+
+
+def cut_out(frames: list[np.ndarray], A: list[np.ndarray], B: list[np.ndarray]):
+    """Locate the two stubs in a tool output; the bridge is what lies between them.
+
+    Each stub is aligned as a whole sequence: its frames carry the dealer's own motion, so it
+    fits in one place only, where single-frame matching is ambiguous (a bridge between two close
+    poses looks like its ends all the way through). A tool that pads or trims around the stubs
+    still yields exactly the frames between them. Returns (bridge, exit fit, entry fit); a fit
+    is the mean pixel difference of the aligned stub, a few units for a re-encode."""
+    # quarter-resolution grey is plenty to place an 8-frame sequence, and fast
+    small = lambda f: cv2.resize(cv2.cvtColor(f, cv2.COLOR_BGR2GRAY), None, fx=0.25, fy=0.25,
+                                 interpolation=cv2.INTER_AREA).astype(np.float32)
+    F = [small(f) for f in frames]
+    A = [small(f) for f in A]
+    B = [small(f) for f in B]
+    n = len(F)
+    if n < len(A) + len(B) + 1:
+        return [], 99.0, 99.0
+
+    def fit(stub, lo, hi):
+        costs = [np.mean([np.abs(F[o + k] - stub[k]).mean() for k in range(len(stub))]) for o in range(lo, hi + 1)]
+        o = int(np.argmin(costs))
+        return lo + o, float(costs[o])
+
+    oa, ca = fit(A, 0, n - len(A) - len(B) - 1)
+    ob, cb = fit(B, oa + len(A) + 1, n - len(B))
+    return frames[oa + len(A):ob], ca, cb
+
+
+def ingest(*paths: str) -> None:
+    """Bring generated bridges into the game: any folders and/or files of the tool's outputs,
+    named as in the CSV. An output for a row that already has one replaces it; rows not given
+    are left as they are. Each output is archived in bridges/generated, cut down to its bridge,
+    quality-checked (bridgeqa), and what the game plays is re-resolved."""
+    import shutil
+
+    from bj3.bridgeqa import assess
+
+    if not paths:
+        raise SystemExit("usage: python -m bj3.bridges ingest <folders and/or files>")
+    rows = {r["output"]: r for r in plan_rows()}
+    outputs = _outputs(list(paths))
+    reports = _reports(list(paths))
+    state = _load(STATE, {})
+    stubs = BRIDGE_DIR / "stubs"
+    (ASSETS / TOOL_DIR).mkdir(parents=True, exist_ok=True)
+    GENERATED.mkdir(parents=True, exist_ok=True)
+    done, bad, unknown = [], [], []
+    for name, src in outputs.items():
+        r = rows.get(name)
+        if r is None:
+            unknown.append(name)
             continue
-        encode(bridge, out / r["output"])
-        put(reg, r, len(bridge), "tool")
-        done += 1
-    save_registry(reg, rows)
-    print(f"ingested {done}; missing {missing}; unreadable {bad}")
+        try:
+            A = read_all(stubs / "exit" / f"{r['exit']}.mp4")
+            B = read_all(stubs / "entry" / f"{r['dst']}.mp4")
+            bridge, ca, cb = cut_out(read_all(src), A, B)
+            if not bridge or ca > 8 or cb > 8:
+                bad.append(f"{name}: stubs not found (exit {ca:.1f}, entry {cb:.1f})")
+                continue
+            q = assess(A, bridge, B)
+            if src.resolve() != (GENERATED / name).resolve():
+                shutil.copyfile(src, GENERATED / name)
+            encode(bridge, ASSETS / TOOL_DIR / name)
+        except Exception as e:  # one bad file (wrong size, truncated) mustn't stop the rest
+            bad.append(f"{name}: {type(e).__name__}: {e}")
+            continue
+        rep = reports.get(name, {})
+        state[name] = {
+            "frames": len(bridge), "sha1": sha1(GENERATED / name),
+            # the frames it joins: a re-plan that moves either makes this bridge stale
+            "exit_source_frame": r["exit_source_frame"], "entry_source_frame": r["entry_source_frame"],
+            "method": rep.get("method") or METHOD[r["class"]], "duration": rep.get("duration") or r["seconds"],
+            "request_id": rep.get("provider_request_id") or None,
+            "quality": {k: v for k, v in q.__dict__.items() if k != "flags"}, "flags": q.flags,
+        }
+        # saved row by row, so files on disk and their record never disagree if a run stops
+        _save(STATE, dict(sorted(state.items())))
+        done.append(name)
+    for line in bad:
+        print("  !", line)
+    if unknown:
+        print(f"  ({len(unknown)} files not in the plan, ignored: {', '.join(unknown[:5])}{' ...' if len(unknown) > 5 else ''})")
+    flagged = [n for n in done if state[n]["flags"]]
+    print(f"ingested {len(done)}; unreadable {len(bad)}; flagged by the checks {len(flagged)}")
+    for n in flagged:
+        print(f"  ? {n}: {', '.join(state[n]['flags'])}")
+    resolve()
+
+
+def verdict(name: str, value: str, *note: str) -> None:
+    """Record a verdict on a generated bridge: `reject` (the game plays its stand-in instead)
+    or `ok`. The verdict holds for this exact output; ingesting a new one for the row clears it."""
+    if value not in ("ok", "reject"):
+        raise SystemExit("verdict is ok or reject")
+    state = _load(STATE, {})
+    if name not in state:
+        raise SystemExit(f"{name}: no generated bridge ingested for this row")
+    v = _load(VERDICTS, {})
+    import datetime
+
+    v[name] = {"verdict": value, "note": " ".join(note), "sha1": state[name]["sha1"],
+               "t": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")}
+    _save(VERDICTS, dict(sorted(v.items())))
+    resolve()
+
+
+def resolve() -> None:
+    """Decide what the game plays for every planned row and write game_assets/bridges.json:
+    the generated bridge unless it is missing or rejected, else the optical-flow stand-in."""
+    rows = plan_rows()
+    state = _load(STATE, {})
+    verdicts = _load(VERDICTS, {})
+    stale = [n for n, v in verdicts.items() if n in state and v.get("sha1") != state[n]["sha1"]]
+    for n in stale:
+        print(f"  verdict on {n} was for a previous output; cleared")
+        del verdicts[n]
+    if stale:
+        _save(VERDICTS, dict(sorted(verdicts.items())))
+    out = []
+    counts = {"tool": 0, "flow": 0, "rejected": 0}
+    for r in rows:
+        name = r["output"]
+        entry = {"name": name, "from": r["src"], "at": r["frame"], "to": r["dst"],
+                 "class": r["class"], "critical": r["critical"]}
+        tool = state.get(name)
+        rejected = verdicts.get(name, {}).get("verdict") == "reject"
+        if tool and (tool.get("exit_source_frame"), tool.get("entry_source_frame")) != (
+                r["exit_source_frame"], r["entry_source_frame"]):
+            print(f"  {name}: generated for frames the plan has since moved; playing its stand-in")
+            tool = None
+        if tool and not rejected and (ASSETS / TOOL_DIR / name).exists():
+            entry.update(file=f"{TOOL_DIR}/{name}", frames=tool["frames"], source="tool")
+        elif not flow_frames(r):
+            entry.update(file=None, frames=0, source="flow")
+        else:
+            entry.update(file=f"{FLOW_DIR}/{name}", frames=flow_frames(r), source="flow")
+        if rejected:
+            entry["rejected"] = verdicts[name].get("note") or True
+            counts["rejected"] += 1
+        counts[entry["source"]] += 1
+        out.append(entry)
+    missing = [e["file"] for e in out if e["file"] and not (ASSETS / e["file"]).exists()]
+    if missing:
+        raise SystemExit(f"{len(missing)} bridge files missing, e.g. {missing[0]} (run `bridges local` first)")
+    _save(registry_path(), {"fps": FPS, "bridges": out})
+    # what is still to generate (never generated, rejected, or stale), ready to run as one job
+    todo = {e["name"] for e in out if e["source"] != "tool" and e["file"]}
+    write_todo([r for r in rows if r["output"] in todo])
+    print(f"bridges.json: {counts['tool']} generated, {counts['flow']} stand-ins ({counts['rejected']} rejected)")
+
+
+def registry_path() -> Path:
+    return ASSETS / "bridges.json"
+
+
+def review() -> None:
+    from bj3.review_page import build
+
+    build()
 
 
 if __name__ == "__main__":
     cmd, *args = sys.argv[1:]
-    {"plan": plan, "csvs": csvs, "local": local, "ingest": ingest}[cmd](*args)
+    {"plan": plan, "csvs": csvs, "local": local, "ingest": ingest, "verdict": verdict,
+     "resolve": resolve, "review": review}[cmd](*args)

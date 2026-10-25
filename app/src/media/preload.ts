@@ -117,6 +117,8 @@ function loadOrder(m: Manifest): { files: string[]; boot: number } {
   }
   bridgesInto("hit");
   bridgesInto("reveal");
+  // and any other bridge, so nothing the director may choose is ever missing from the loader
+  for (const [name, c] of Object.entries(m.clips)) if (c.bridge) add(name);
   for (const seat of m.playOrder) {
     for (let k = 3; k <= 6; k++) {
       add(clipName.hit(seat, k));

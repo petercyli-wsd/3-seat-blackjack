@@ -31,6 +31,8 @@ export interface Deck {
   /** Last presented frame of the file (loop files count the ping-pong frames). */
   fileFrame: number;
   ready: Promise<void> | null;
+  /** The deck's file is loaded and can start playing at once (its `ready` has settled). */
+  isReady: boolean;
   /** Bumped by every prepare(), so a file that arrives for a deck since re-prepared is dropped. */
   token: number;
 }
@@ -50,7 +52,8 @@ interface Pending {
   loop: boolean;
   handoff: Handoff;
   fade: number;
-  resolve: () => void;
+  /** true once the clip is on screen; false if it never will be (replaced, superseded, or its file failed). */
+  resolve: (started: boolean) => void;
 }
 
 const DECKS = 4;
@@ -88,7 +91,7 @@ export class ClipPlayer {
       // kept in the DOM (invisibly) so every browser keeps decoding and firing frame callbacks
       el.style.cssText = "position:absolute;width:2px;height:2px;opacity:0.001;pointer-events:none;left:0;top:0";
       host.appendChild(el);
-      const deck: Deck = { el, name: null, loop: false, fileFrame: 0, ready: null, token: 0 };
+      const deck: Deck = { el, name: null, loop: false, fileFrame: 0, ready: null, isReady: false, token: 0 };
       this.decks.push(deck);
       this.watch(deck);
     }
@@ -143,12 +146,16 @@ export class ClipPlayer {
     deck.loop = loop;
     deck.fileFrame = 0;
     deck.el.loop = loop;
+    deck.isReady = false;
     const token = ++deck.token;
     deck.ready = this.files.get(this.fileOf(name, loop)).then(
       (url) =>
         new Promise<void>((res) => {
           if (deck.token !== token) return res();
-          deck.el.addEventListener("canplay", () => res(), { once: true });
+          deck.el.addEventListener("canplay", () => {
+            if (deck.token === token) deck.isReady = true;
+            res();
+          }, { once: true });
           deck.el.src = url;
           deck.el.load();
         }),
@@ -160,15 +167,17 @@ export class ClipPlayer {
    * Queue `name` to take over the screen. Resolves when it is on screen.
    * Only one handoff can be pending; a new one replaces it.
    */
-  play(name: string, opts: { loop?: boolean; handoff?: Handoff; fade?: number } = {}): Promise<void> {
+  play(name: string, opts: { loop?: boolean; handoff?: Handoff; fade?: number } = {}): Promise<boolean> {
     const loop = opts.loop ?? false;
     let handoff = opts.handoff ?? (this.active ? "end" : "now");
-    // the exit frame is on screen right now: go
-    if (typeof handoff === "object" && this.framesUntil(handoff.exitAt) === 0) handoff = "now";
-    const fade = opts.fade ?? (handoff === "now" && this.active ? CUT_FADE : 0);
     const deck = this.prepare(name, loop);
-    if (this.pending) this.pending.resolve();
-    return new Promise<void>((resolve) => {
+    // the exit frame is on screen right now and the clip can start at once: go
+    if (typeof handoff === "object" && deck.isReady && this.framesUntil(handoff.exitAt) === 0) handoff = "now";
+    // a clip that has already ended won't end again (nor fire another frame): its end is now
+    if (handoff === "end" && this.active && !this.active.loop && this.active.el.ended) handoff = "now";
+    const fade = opts.fade ?? (handoff === "now" && this.active ? CUT_FADE : 0);
+    if (this.pending) this.pending.resolve(false);
+    return new Promise<boolean>((resolve) => {
       this.pending = { deck, name, loop, handoff, fade, resolve };
       if (handoff === "now" || !this.active) void this.takeOver();
     });
@@ -179,7 +188,24 @@ export class ClipPlayer {
     return !!this.pending || !!this.taking;
   }
 
-  /** Resolves when the next clip takes the screen. */
+  /** A takeover has begun and its clip isn't on screen yet: what's playing is about to change. */
+  get inFlight() {
+    return !!this.taking;
+  }
+
+  /** Whether a deck holds this clip, loaded and able to start at once. */
+  isReady(name: string, loop = false) {
+    return this.decks.some((d) => d.name === name && d.loop === loop && d.isReady);
+  }
+
+  /** Frames for the active loop to come back round to where it is now (Infinity for a clip that plays once). */
+  period(): number {
+    const d = this.active;
+    if (!d?.name || !d.loop) return Infinity;
+    return 2 * loopSpan(this.m.clips[d.name]).n - 2;
+  }
+
+  /** Resolves when the next clip takes the screen, or with "" when a takeover fails. */
   whenNextStart(): Promise<string> {
     return new Promise((resolve) => this.nextStartWaiters.push(resolve));
   }
@@ -228,14 +254,18 @@ export class ClipPlayer {
     // `taking` then belongs to the newer takeover, so it is left alone
     const superseded = () => {
       if (gen === this.takeoverGen) return false;
-      p.resolve();
+      p.resolve(false);
       return true;
     };
     try {
       await p.deck.ready;
     } catch {
-      // the file failed to download: the table shows a footage error, and this clip can't play
+      // The file failed to download: the table shows a footage error and this clip can't play.
+      // Say so to whoever waits on it, so a round carries on another way instead of hanging.
       if (gen === this.takeoverGen) this.taking = null;
+      p.deck.name = null;
+      p.resolve(false);
+      this.notifyNextStart("");
       return;
     }
     if (superseded()) return;
@@ -267,10 +297,14 @@ export class ClipPlayer {
     this.active = p.deck;
     p.deck.fileFrame = 0;
     for (const fn of this.startListeners) fn(p.name);
+    this.notifyNextStart(p.name);
+    p.resolve(true);
+  }
+
+  private notifyNextStart(name: string) {
     const waiting = this.nextStartWaiters;
     this.nextStartWaiters = [];
-    for (const fn of waiting) fn(p.name);
-    p.resolve();
+    for (const fn of waiting) fn(name);
   }
 
   /** Called every animation frame by the renderer. */
@@ -300,7 +334,18 @@ export class ClipPlayer {
     };
     el.requestVideoFrameCallback(onFrame);
     el.addEventListener("ended", () => {
-      if (deck === this.active && this.pending?.handoff === "end") void this.takeOver();
+      if (deck !== this.active) return;
+      const h = this.pending?.handoff;
+      // an exit on a clip's last frame must not depend on a frame callback reporting that frame
+      if (h === "end" || (typeof h === "object" && h.exitAt >= deck.fileFrame)) void this.takeOver();
+      else if (typeof h === "object" && this.pending) {
+        // A clip that plays once went past its exit (the incoming clip wasn't loaded in time) and
+        // has ended: that exit won't come again. Give the handoff up so its caller can choose again.
+        const p = this.pending;
+        this.pending = null;
+        p.resolve(false);
+        this.notifyNextStart("");
+      }
     });
   }
 
@@ -317,7 +362,10 @@ export class ClipPlayer {
     const p = this.pending;
     if (!p) return;
     if (typeof p.handoff === "object") {
-      if (this.crossed(deck, prevFrame, p.handoff.exitAt)) void this.takeOver();
+      // Leave on the exit frame only if the incoming clip can start at once: a takeover that
+      // still had to load would start late, from wherever the loop had got to. Not ready:
+      // stay armed for the next time round.
+      if (this.crossed(deck, prevFrame, p.handoff.exitAt) && p.deck.isReady) void this.takeOver();
       return;
     }
     if (p.handoff === "end" && !deck.loop && deck.fileFrame >= s.clip.frames - 1) void this.takeOver();
@@ -359,6 +407,7 @@ export class ClipPlayer {
   }
 
   stopAll() {
+    this.pending?.resolve(false);
     this.pending = null;
     this.taking = null;
     this.takeoverGen++;

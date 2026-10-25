@@ -1,5 +1,10 @@
 first_half,second_half,output
+exit/011_idle@0021.mp4,entry/010_deal.mp4,011_idle@0021__010_deal.mp4
 exit/011_idle@0044.mp4,entry/010_deal.mp4,011_idle@0044__010_deal.mp4
+exit/011_idle@0021.mp4,entry/110_deal.mp4,011_idle@0021__110_deal.mp4
 exit/101_idle@0064.mp4,entry/100_deal.mp4,101_idle@0064__100_deal.mp4
+exit/101_idle@0100.mp4,entry/100_deal.mp4,101_idle@0100__100_deal.mp4
+exit/110_idle@0157.mp4,entry/100_deal.mp4,110_idle@0157__100_deal.mp4
 exit/111_idle@0098.mp4,entry/100_deal.mp4,111_idle@0098__100_deal.mp4
+exit/111_idle@0143.mp4,entry/100_deal.mp4,111_idle@0143__100_deal.mp4
 exit/opening_idle@0068.mp4,entry/100_deal.mp4,opening_idle@0068__100_deal.mp4

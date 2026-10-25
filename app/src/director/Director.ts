@@ -13,6 +13,8 @@ export const DECISION_SECONDS: Record<Mode, number> = { speed: 7, regular: 14 };
 const DEFAULT_BET = 10;
 /** Frames after the last pickup of a discard before the table counts as clear (the scene's plate fade-out). */
 const CLEARED_FRAMES = 6;
+/** Frames of notice a bridge whose clip isn't loaded yet needs to start exactly on its exit frame. */
+const BRIDGE_NOTICE = 8;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 type Decision = "hit" | "stand";
@@ -167,46 +169,73 @@ export class Director {
   }
 
   /**
-   * Hand the screen to `target`, as smoothly as the footage allows:
+   * Hand the screen to `target`, as smoothly as the footage allows. The ways to get there:
    *
-   * 1. seamless, where `target` is the next shot of the take (a clip playing to its end, or a
-   *    loop whose window runs to its clip's end reaching its anchor in time);
-   * 2. through a bridge: leave on the bridge's exit frame, play the generated move, land on
-   *    `target`'s first frame — the bridge whose exit comes round soonest;
-   * 3. if the clip on screen has no bridge to `target` but is about to give way to one that
-   *    may (a discard running into its idle, an idle's lead-in into its loop), wait for it;
-   * 4. otherwise a hard cut.
+   * - seamless, where `target` is the next shot of the take: at the end of a clip playing out,
+   *   or where a loop whose window runs to its clip's end comes round to that last frame;
+   * - through a bridge (a generated move from one of the clip's exit frames to `target`'s
+   *   first frame), when the loop comes round to that exit frame.
+   *
+   * Whichever comes round soonest is taken. A bridge whose clip isn't loaded yet needs a few
+   * frames' notice to start on its exit frame, so an exit closer than that counts from the next
+   * time round. A clip with no way to `target` that is about to give way to one that may have
+   * (a discard running into its idle, an idle's lead-in into its loop) is waited out, as is a
+   * takeover already under way. Only with no way at all is it a hard cut.
    */
-  private async cutTo(target: string, opts: { loop?: boolean; patience?: number } = {}) {
+  private async cutTo(target: string, opts: { loop?: boolean } = {}) {
     this.cutGen++; // a lead-in still on its way to its loop (settleInto) must not queue over this cut
     // a table reset mid-cut must not let the rest of this cut queue its clips over the fresh table
     const epoch = this.epoch;
+    const failed = new Set<string>(); // bridges that couldn't start: not chosen again in this cut
     for (;;) {
+      // a clip is taking over right now: what is on screen is about to change, choose after it
+      if (this.player.inFlight) {
+        await this.player.whenNextStart();
+        this.guard(epoch);
+        continue;
+      }
       const cur = this.player.state();
       if (!cur) break;
+      type Way = { wait: number; bridge?: Bridge };
+      const ways: Way[] = [];
       if (naturalNext(this.m, cur.name) === target) {
         const span = loopSpan(cur.clip);
-        const windowToEnd = span.from + span.n === cur.clip.frames;
-        if (!cur.loop || (windowToEnd && this.player.framesToAnchor() < (opts.patience ?? 0.75) * this.m.fps)) {
-          this.log(`${cur.name} → ${target} (seamless)`);
-          await this.play(target, { loop: opts.loop, handoff: cur.loop ? "anchor" : "end" });
-          return;
-        }
+        if (!cur.loop) ways.push({ wait: Math.max(0, cur.clip.frames - 1 - cur.frame) });
+        else if (span.from + span.n === cur.clip.frames) ways.push({ wait: this.player.framesToAnchor() });
       }
-      const options = (this.bridges.get(cur.name) ?? []).filter((b) => b.to === target);
-      const best = options
-        .map((b) => ({ b, wait: this.player.framesUntil(b.at) }))
-        .filter((o) => Number.isFinite(o.wait))
-        .sort((x, y) => x.wait - y.wait)[0];
-      if (best) {
-        const b = best.b;
-        this.log(`${cur.name}@${b.at} → ${target} (${b.frames ? `${b.class} bridge, ${b.frames} fr` : "matched cut"}${b.source === "local" ? ", stand-in" : ""}; exit in ${best.wait} fr)`);
+      for (const b of this.bridges.get(cur.name) ?? []) {
+        if (b.to !== target || failed.has(b.name)) continue;
+        let wait = this.player.framesUntil(b.at);
+        if (wait < BRIDGE_NOTICE && !(b.frames === 0 || this.player.isReady(b.name))) wait += this.player.period();
+        if (Number.isFinite(wait)) ways.push({ wait, bridge: b });
+      }
+      // soonest first; on a tie the take's own continuation beats a generated one
+      const best = ways.sort((x, y) => x.wait - y.wait || Number(!!x.bridge) - Number(!!y.bridge))[0];
+      if (best && !best.bridge) {
+        this.log(`${cur.name} → ${target} (seamless; in ${best.wait} fr)`);
+        await this.play(target, { loop: opts.loop, handoff: cur.loop ? "anchor" : "end" });
+        return;
+      }
+      if (best?.bridge) {
+        const b = best.bridge;
+        const what = b.frames ? `${b.source === "tool" ? "generated" : "stand-in"} ${b.class} bridge, ${b.frames} fr` : "matched cut";
+        this.log(`${cur.name}@${b.at} → ${target} (${what}; exit in ${best.wait} fr)`);
         if (b.frames > 0) {
-          await this.play(b.name, { handoff: { exitAt: b.at } });
+          const starting = this.play(b.name, { handoff: { exitAt: b.at } });
+          // load the target alongside (after the bridge has its deck), ready the moment the bridge ends
+          this.player.prepare(target, opts.loop);
+          const started = await starting;
           this.guard(epoch);
+          // couldn't start (its file failed, or the clip ended past the exit): choose again
+          if (!started) {
+            failed.add(b.name);
+            continue;
+          }
           await this.play(target, { loop: opts.loop, handoff: "end" });
-        } else {
-          await this.play(target, { loop: opts.loop, handoff: { exitAt: b.at } });
+        } else if (!(await this.play(target, { loop: opts.loop, handoff: { exitAt: b.at } }))) {
+          this.guard(epoch);
+          failed.add(b.name);
+          continue;
         }
         return;
       }
@@ -222,12 +251,13 @@ export class Director {
   }
 
   /** player.play, saying so if the footage is still downloading (it loads after the table opens). */
-  private async play(name: string, opts: { loop?: boolean; handoff: Handoff }) {
+  private async play(name: string, opts: { loop?: boolean; handoff: Handoff }): Promise<boolean> {
     const before = this.store.get().message;
     const buffering = !this.player.loaded(name, opts.loop);
     if (buffering) this.store.set({ message: "Loading footage…" });
-    await this.player.play(name, opts);
+    const started = await this.player.play(name, opts);
     if (buffering && this.store.get().message === "Loading footage…") this.store.set({ message: before });
+    return started;
   }
 
   /** Queue a clip to follow the current one with no seam (it is the next shot of the take). */
@@ -247,7 +277,11 @@ export class Director {
     const epoch = this.epoch;
     await this.follow(name);
     if (gen !== this.cutGen || epoch !== this.epoch || this.player.state()?.name !== name) return;
-    await this.player.play(name, { loop: true, handoff: { exitAt: from - 1 } });
+    const settled = await this.player.play(name, { loop: true, handoff: { exitAt: from - 1 } });
+    // the loop wasn't loaded by the time the lead-in got there: start it rather than freeze
+    if (!settled && gen === this.cutGen && epoch === this.epoch && this.player.state()?.name === name) {
+      await this.player.play(name, { loop: true, handoff: "now" });
+    }
   }
 
   private landing(clip: string, slot: SeatId | "up" | "hole", index: number) {
@@ -361,7 +395,7 @@ export class Director {
     // dealer: real reveal of the hole card, then graphic draws over the hold loop
     this.store.set({ phase: "dealer", message: "Dealer reveals" });
     const reveal = clipName.reveal(this.mask);
-    await this.cutTo(reveal, { patience: 2.5 });
+    await this.cutTo(reveal);
     this.guard(epoch);
     void this.follow(clipName.hold(this.mask), true);
     const hole = this.m.clips[reveal].cards.find((c) => c.slot === "hole");
@@ -404,14 +438,16 @@ export class Director {
       message: isBlackjack(this.view.dealer) ? "Dealer has Blackjack" : d > 21 ? `Dealer busts with ${d}` : `Dealer stands on ${d}`,
     }));
     this.log(`settled: net ${record.net >= 0 ? "+" : ""}${record.net}`);
-    await sleep(2800);
+    // The discard can only start where the hold loop comes round to the take's own next frame
+    // (up to a loop's length away), so ask for it after a short read of the results, not after a
+    // fixed pause plus that wait. The results stay up while she clears.
+    await sleep(1500);
     this.guard(epoch);
-
+    const discard = clipName.discard(this.mask);
+    await Promise.all([this.cutTo(discard), sleep(1300)]);
+    this.guard(epoch);
     // clear the table, back to betting over the idle that follows this discard in the take
     this.store.set({ phase: "clearing", message: "" });
-    const discard = clipName.discard(this.mask);
-    await this.cutTo(discard, { patience: 2.5 });
-    this.guard(epoch);
     void this.settleInto(clipName.idle(this.mask));
     // Betting reopens once the last card is in the tray (and its plate has faded), not at the
     // clip's end: the 2-5 s after that are her squaring the tray, and a Deal can cut them short.

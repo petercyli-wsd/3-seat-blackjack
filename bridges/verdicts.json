@@ -1,0 +1,22 @@
+{
+ "011_idle@0044__010_deal.mp4": {
+  "verdict": "reject",
+  "note": "Kling: arms jump between frames 24-25 inside an overacted arms-wide reach",
+  "sha1": "968c4013b6d200cc"
+ },
+ "101_idle@0064__100_deal.mp4": {
+  "verdict": "ok",
+  "note": "Kling: seams flagged for sweater texture re-rendered, pose continuous; motion clean",
+  "sha1": "2f65b45a579f2684"
+ },
+ "111_idle@0098__100_deal.mp4": {
+  "verdict": "reject",
+  "note": "Kling: a card appears in her hand and she mimes dealing it",
+  "sha1": "74c51dd254b01571"
+ },
+ "opening_idle@0068__100_deal.mp4": {
+  "verdict": "reject",
+  "note": "Kling: hands jump between frames 36-37",
+  "sha1": "b84b359fff05014d"
+ }
+}

@@ -8,26 +8,59 @@ Everything here is produced by `pipeline/bj3/bridges.py`:
 
 ```bash
 cd pipeline
-uv run python -m bj3.bridges plan  "<full_footage.mp4>"   # this folder: stubs + CSVs
-uv run python -m bj3.bridges local "<full_footage.mp4>"   # flow stand-ins into game_assets (already done)
-uv run python -m bj3.bridges ingest "<tool output folder>" # your generated bridges into the game
+uv run python -m bj3.bridges plan  "<full_footage.mp4>"        # this folder: stubs + CSVs
+uv run python -m bj3.bridges local "<full_footage.mp4>"        # flow stand-ins (already done)
+uv run python -m bj3.bridges ingest "<folders and/or files>"   # generated bridges into the game
+uv run python -m bj3.bridges review                            # review.html: watch and judge them
+uv run python -m bj3.bridges verdict "<name>.mp4" reject "why" # drop one (or `ok` to restore)
+uv run python -m bj3.bridges resolve                           # rewrite what the game plays
 ```
+
+## Status
+
+There are **280 rows** over 144 transitions. Each transition has two exit points, so the dealer
+is never more than about one loop from a way out.
+
+- **165 play generated bridges.** These are all from the second batch, which covered the first 168 rows.
+- **114 rows are to generate:** the 111 new rows plus the 3 rejects. They're listed in
+  **`bridges_todo.csv`** (29 × FILM 0.33 s, 77 × FILM 0.67 s, 8 × Kling 3 s), ready to run as one
+  job. Until then they play optical-flow stand-ins.
+- **1 row needs nothing generated.** Its two frames already match, so it's a plain cut.
+
+From the second batch:
+
+- **3 rejected Kling bridges** play their optical-flow stand-ins until they're regenerated:
+
+  | Bridge | Problem |
+  |---|---|
+  | `011_idle@0044__010_deal` | Arms jump mid-move |
+  | `111_idle@0098__100_deal` | Mimes dealing a card that appears from nowhere |
+  | `opening_idle@0068__100_deal` | Hands jump |
+
+- **The fourth Kling bridge (`101_idle@0064__100_deal`) is kept.** It's flagged by the checks only
+  because Kling re-renders her sweater's texture at the seams.
+- **All 164 FILM bridges pass every check.**
+
+Verdicts and their reasons are in `verdicts.json`.
 
 ## The numbers
 
-There are **168 rows**, over 136 (loop → clip) transitions.
+There are **280 rows** over 144 (loop → clip) transitions.
 
 | Class | Rows | Suggested | Notes |
 |---|---:|---|---|
-| short | 41 | FILM / RIFE, 0.33 s | Same shot or slight sway |
-| long | 123 | FILM / RIFE, 0.67 s | Posture differs: sway, head tilt, hand placement |
-| generative | 4 | Kling (or Seedance), ~3 s | All four are betting → deal, where nobody is waiting |
+| cut | 1 | none | The frames already match |
+| short | 70 | FILM / RIFE, 0.33 s | Same shot or slight sway |
+| long | 200 | FILM / RIFE, 0.67 s | Posture differs: sway, head tilt, hand placement |
+| generative | 9 | Kling (or Seedance), ~3 s | All betting → deal, where nobody is waiting |
 
-- **64 rows are time-critical.** A player pressed Hit, so none of them may run longer than 0.75 s,
+- **65 rows are time-critical.** A player pressed Hit, so none of them may run longer than 0.75 s,
   and none needs to.
-- **Hit transitions get two exit frames.** One is the best match in each half of the dealer's
-  pause loop, so she is never more than about a second from a way out. Every other transition
-  has one exit frame, the best match in the loop.
+- **Every transition has two exit frames,** the best match in each half of the dealer's loop.
+  - For a Hit, from the 2 s decision loops, that means she's never more than about a second from a
+    way out.
+  - The 8 transitions the take already makes seamlessly, at the loop's last frame, get one more
+    exit in the first half.
 - **Classes come from optical flow, measured on the pixels that change.** How far the dealer
   moves, and what share of the frame warping can't explain:
 
@@ -44,8 +77,9 @@ There are **168 rows**, over 136 (loop → clip) transitions.
 
 | File | Use |
 |---|---|
-| `bridges_onejob.csv` | All 168 rows with per-row `method` (`film` / `kling-fal`) and `duration`, to run as **one job** once the app reads those columns |
-| `bridges.csv` | All 168 rows, in the tool's three-column format |
+| `bridges_todo.csv` | **The rows still to generate** (never generated, rejected, or stale), with per-row `method` and `duration`. Rewritten by every `ingest` / `verdict` / `resolve`. |
+| `bridges_onejob.csv` | All 279 rows to generate with per-row `method` (`film` / `kling-fal`) and `duration`, to run as **one job** |
+| `bridges.csv` | The same rows, in the tool's three-column format |
 | `bridges_short.csv`, `bridges_long.csv`, `bridges_generative.csv` | The same rows split by suggested method, so each can be one batch with one setting |
 | `bridges_full.csv` | The one-job columns plus the planning ones: `max_seconds`, `critical`, `class`, `flow_px`, `unexplained_pct`, `src`, `dst` |
 | `stubs/exit/*.mp4`, `stubs/entry/*.mp4` | The 8-frame first and second halves; select `stubs/` as the source folder |
@@ -67,14 +101,41 @@ seats as they are.
    - Check that her face, hair and the dealer's cards stay consistent.
 4. **Output folder:** `bridges\generated`, or anywhere you like. It's ignored by git.
 
-Then point me at the output folder, or run `ingest` yourself:
+Then point me at the output folder, or run `ingest` yourself.
 
-- **Ingest checks each output.** It finds the bridge by matching the two known end frames, so a
-  tool that re-times or pads its output still lands exactly. It then writes the bridge-only clip to
-  `game_assets/bridges/` and swaps it in for the stand-in.
-- **The Director panel shows the switch** under "Bridges": *N generated · M stand-in*.
-- **Rows still missing** keep their optical-flow stand-in, so a partial batch is always safe to
-  ingest.
+## Replacing a bridge
+
+1. **Regenerate the rows** you want to replace, with the same output names. Any subset works: one
+   file, a folder, several folders.
+2. **Run `ingest` on them.** A new output for a row replaces the old one, and rows you don't give
+   are left alone. A verdict on the old output is cleared automatically, since a verdict is tied
+   to the exact file it judged (its `sha1`).
+3. **Check the result.** Run `review`, open `bridges/review.html`, filter to *Flagged* or by kind,
+   and watch each output (the footage it leaves, the bridge, the footage it lands in) at full
+   speed or a quarter.
+   - Mark **Reject** or **OK** on any card, with a note, then **Download verdicts.json**.
+   - Save it over `bridges/verdicts.json` and run `resolve`, or use `verdict` from the command line.
+4. **Commit `game_assets/`, `bridges/state.json` and `bridges/verdicts.json`.**
+
+**What ingest does with each output:**
+- Finds the bridge by aligning the two 8-frame stubs as whole sequences, so padding or trimming
+  by the tool can't shift it.
+- Writes the bridge-only clip to `game_assets/bridges/tool/`.
+- Archives the delivered file in `bridges/generated/` (not in git).
+- Records its provenance (method, length, provider request id from the tool's `batch-report.csv`)
+  and quality checks in `state.json`.
+
+**What the checks look for:**
+- a pop at either seam, measured against how much the dealer moves per frame;
+- a glitch frame or lurch mid-bridge;
+- held frames;
+- a brightness drift.
+
+They flag; the verdict is a person's.
+
+**What the game plays:** the generated bridge for every row, unless it's missing or rejected.
+Then it plays the optical-flow stand-in from `game_assets/bridges/flow/`. Nothing is ever without
+a bridge, and the Director panel shows *N generated · M stand-in (K rejected)*.
 
 ## Suggestions for the interpolation tool
 
