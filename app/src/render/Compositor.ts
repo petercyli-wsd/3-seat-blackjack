@@ -1,14 +1,32 @@
 import type { Quad } from "../media/manifest";
 import { cellUV } from "./faceAtlas";
-import { invert3, squareToQuad, toColumnMajor } from "./homography";
+import { type Similarity, invert3, invertSimilarity, squareToQuad, toColumnMajor } from "./homography";
 import { BLIT_FS, CARD_FS, CARD_VS, COMPOSITE_FS, FULLSCREEN_VS, SHADOW_FS, STAGE_FS } from "./shaders";
 import type { Rect, TableArt } from "./stageArt";
 
 export interface PlateDraw {
   tex: WebGLTexture;
-  /** x, y, w, h in video pixels. */
+  /** Its matte (plates.ts): red where its cards lie, green where its third card on lies. */
+  matte: WebGLTexture;
+  /** x, y, w, h in video pixels: where the still was grabbed from. */
   rect: [number, number, number, number];
+  /** Where it goes: still pixels -> video pixels. */
+  place: Similarity;
+  /** Lay in only its cards from the third on (over a take holding the hand's first two), not the whole seat. */
+  extrasOnly: boolean;
   alpha: number;
+}
+
+/** Video pixel (GL's, edges on integers) -> the plate's texture UV, back through its placing. */
+function plateUV(p: PlateDraw): number[] {
+  const s = invertSimilarity(p.place);
+  const [rx, ry, rw, rh] = p.rect;
+  // the placing is in the pipeline's pixel-centre coordinates: half a pixel off GL's (shaders.ts)
+  return toColumnMajor([
+    s.ar / rw, -s.ai / rw, (s.bx - 0.5 * s.ar + 0.5 * s.ai + 0.5 - rx) / rw,
+    s.ai / rh, s.ar / rh, (s.by - 0.5 * s.ai - 0.5 * s.ar + 0.5 - ry) / rh,
+    0, 0, 1,
+  ]);
 }
 
 export interface CardDraw {
@@ -243,18 +261,22 @@ export class Compositor {
     gl.uniform1i(u.uPackB, packB ? 1 : 0);
     gl.uniform1f(u.uMix, f.b ? f.mix : 0);
     this.bind(2, this.mask, u.uMask);
-    const rects = new Float32Array(12);
+    const uv = new Float32Array(27);
     const on = new Float32Array(3);
+    const extras = new Float32Array(3);
     for (let i = 0; i < 3; i++) {
       const p = f.plates[i];
       this.bind(3 + i, p ? p.tex : this.black, u[`uPlate${i}`]);
+      this.bind(6 + i, p ? p.matte : this.black, u[`uMatte${i}`]);
       if (p) {
-        rects.set(p.rect, i * 4);
+        uv.set(plateUV(p), i * 9);
         on[i] = p.alpha;
+        extras[i] = p.extrasOnly ? 1 : 0;
       }
     }
-    gl.uniform4fv(u["uPlateRect[0]"], rects);
+    gl.uniformMatrix3fv(u["uPlateUV[0]"], false, uv);
     gl.uniform1fv(u["uPlateOn[0]"], on);
+    gl.uniform1fv(u["uPlateExtras[0]"], extras);
     gl.uniform2f(u.uSize, w, h);
     gl.uniform1i(u.uShowMasks, f.showMasks ? 1 : 0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);

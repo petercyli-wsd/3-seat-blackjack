@@ -1,9 +1,9 @@
 import { type Card, faceIndex } from "../engine/cards";
 import type { PlayingState } from "../media/ClipPlayer";
 import { type ClipInfo, type FootageCard, type Manifest, type Quad, type SeatId, cardsAt, faceFrom, faceQuadAt, faceUntil } from "../media/manifest";
-import type { PlateSet } from "../media/plates";
+import type { PlateSet, SeatPlate } from "../media/plates";
 import type { CardDraw, PlateDraw } from "./Compositor";
-import { centre, lerpQuad, rotateQuad, scaleQuad, translateQuad } from "./homography";
+import { IDENTITY, type Similarity, centre, fitSimilarity, lerpQuad, lerpSimilarity, moveQuad, rotateQuad, scaleQuad, translateQuad } from "./homography";
 
 /** What the game says is on the table; the scene decides how to show it on the current frame. */
 export interface TableView {
@@ -22,11 +22,16 @@ export interface SceneResult {
   plateUse: Record<SeatId, number | null>;
 }
 
+/** Each plate's still and matte, as textures. */
+export type PlateTextures = Record<SeatId, Record<number, { image: WebGLTexture; matte: WebGLTexture }>>;
+
 const LAND_FADE = 3;
 const DRAW_MS = 520;
 const DISCARD_FADE = 5;
+/** Frames a laid-in card takes to fade out of a discard, ending as her hand comes over its hand. */
+const EXTRAS_FADE = 6;
 
-/** Graphic dealer cards go in a second row just in front of the two real ones. */
+/** Graphic dealer cards go in a second row just in front of the two real ones (the pipeline's discard.dealer_draw_quad). */
 export function dealerExtraQuad(m: Manifest, i: number): Quad {
   const up = m.dealer.up;
   const c = centre(up);
@@ -37,7 +42,7 @@ export class Scene {
   constructor(
     private m: Manifest,
     private plates: PlateSet,
-    private plateTex: Record<SeatId, Record<number, WebGLTexture>>,
+    private plateTex: PlateTextures,
   ) {}
 
   compute(s: PlayingState, view: TableView, now: number): SceneResult {
@@ -52,15 +57,39 @@ export class Scene {
       const hand = view.seats[seat];
       // cards lying in the seat on this frame (one still sliding in doesn't count yet)
       const footage = cardsAt(clip, seat, f).length;
+      const own = clip.cards.filter((c) => c.slot === seat);
+
+      if (!dealsTo(clip, seat) && hand.length >= 2 && own.length === 2 && own.every((c) => c.index <= 2)) {
+        // The take holds this hand's first two cards: they are the real ones, as filmed (and swept
+        // up as filmed in a discard). A bigger hand's other cards are laid in from its plate, moved
+        // onto these two; she can't pick those up, so in a discard they fade out just before her
+        // hand comes over the hand.
+        footageFaces(clip, seat, hand, f, cards);
+        visible[seat] = Math.min(footage, hand.length);
+        const plate = hand.length > 2 ? this.plates[seat][hand.length] : undefined;
+        const alpha = plate ? extrasAlpha(clip, seat, hand.length, f, Math.min(...own.map((c) => c.out))) : 0;
+        if (plate && alpha > 0) {
+          const place = placing(clip, seat, plate);
+          plates.push(this.plateDraw(seat, plate, place, alpha, true));
+          plateUse[seat] = plate.n;
+          plate.cards.slice(2).forEach((q, i) => {
+            cards.push({ quad: moveQuad(place, q), cell: faceIndex(hand[i + 2]), alpha, mode: "footage" });
+          });
+          if (alpha > 0.5) visible[seat] += hand.length - 2;
+        } else {
+          plates.push(null);
+        }
+        continue;
+      }
+
       let want = hand.length;
       let plateAlpha = 1;
       if (dealsTo(clip, seat)) {
         // this clip is putting cards down on this seat: the footage leads
         want = footage;
       } else if (clip.kind === "discard") {
-        const filmed = clip.cards.filter((c) => c.slot === seat);
-        const lastOut = Math.max(-1, ...filmed.map((c) => c.out));
-        if (filmed.length === hand.length) {
+        const lastOut = Math.max(-1, ...own.map((c) => c.out));
+        if (own.length === hand.length) {
           // the take holds this very hand: it is swept up as filmed (a plate would lay a still
           // of the resting cards back in under her hand as each one leaves)
           want = footage;
@@ -71,21 +100,16 @@ export class Scene {
       }
       const plate = want !== footage ? this.plates[seat][want] : undefined;
       if (plate && plateAlpha > 0) {
-        plates.push({ tex: this.plateTex[seat][want], rect: plate.rect, alpha: plateAlpha });
+        const place = placing(clip, seat, plate);
+        plates.push(this.plateDraw(seat, plate, place, plateAlpha, false));
         plateUse[seat] = want;
         plate.cards.forEach((q, i) => {
-          if (hand[i]) cards.push({ quad: q, cell: faceIndex(hand[i]), alpha: plateAlpha, mode: "footage" });
+          if (hand[i]) cards.push({ quad: moveQuad(place, q), cell: faceIndex(hand[i]), alpha: plateAlpha, mode: "footage" });
         });
         visible[seat] = plateAlpha > 0.5 ? want : 0;
       } else {
         plates.push(null);
-        // every card of this seat that is face up on screen: lying, or still sliding in under her fingers
-        for (const c of clip.cards) {
-          const card = c.slot === seat ? hand[c.index - 1] : undefined;
-          const quad = card && faceQuadAt(c, f);
-          if (!card || !quad) continue;
-          cards.push(footageFace(c, quad, f, faceIndex(card), faceFrom(c)));
-        }
+        footageFaces(clip, seat, hand, f, cards);
         visible[seat] = Math.min(footage, hand.length);
       }
     }
@@ -93,8 +117,9 @@ export class Scene {
     // dealer: the up card and the hole card are real; the up card's face rides in with it,
     // the hole shows its face once flipped
     let dealerShown = 0;
-    for (const c of clip.cards) {
-      const card = c.slot === "up" || c.slot === "hole" ? view.dealer[c.index - 1] : undefined;
+    const real = clip.cards.filter((c) => c.slot === "up" || c.slot === "hole");
+    for (const c of real) {
+      const card = view.dealer[c.index - 1];
       if (!card) continue;
       // the hole card's face shows from its flip (and as it turns over), like any card's from landing
       const quad = faceQuadAt(c, f);
@@ -102,12 +127,13 @@ export class Scene {
       cards.push(footageFace(c, quad, f, faceIndex(card), faceFrom(c)));
       if (f >= c.in) dealerShown++;
     }
-    // graphic draws: on the table from when they leave the shoe until the real cards are swept
-    const upCard = clip.cards.find((c) => c.slot === "up");
-    let extrasAlpha = 1;
-    if (clip.kind === "discard" && upCard) extrasAlpha = 1 - (f - upCard.out) / DISCARD_FADE;
-    if (["deal", "hit", "idle"].includes(clip.kind)) extrasAlpha = 0;
-    if (extrasAlpha > 0) {
+    // graphic draws: on the table from when they leave the shoe until her hand comes for the
+    // dealer's cards in the discard
+    const draws = view.dealer.length - 2;
+    let drawsAlpha = 1;
+    if (clip.kind === "discard" && real.length) drawsAlpha = extrasAlpha(clip, "dealer", draws, f, Math.min(...real.map((c) => c.out)));
+    if (["deal", "hit", "idle"].includes(clip.kind)) drawsAlpha = 0;
+    if (drawsAlpha > 0) {
       view.dealer.slice(2).forEach((card, i) => {
         const t0 = view.dealerDrawAt[i];
         if (t0 === undefined || now < t0) return;
@@ -116,8 +142,8 @@ export class Scene {
         const target = dealerExtraQuad(this.m, i);
         const shoe = translateQuad(target, this.m.dealer.shoe[0] - centre(target)[0], this.m.dealer.shoe[1] - centre(target)[1]);
         const q = rotateQuad(lerpQuad(scaleQuad(shoe, 0.9), target, e), (1 - e) * -0.5);
-        cards.push({ quad: q, cell: faceIndex(card), alpha: Math.min(1, extrasAlpha) * Math.min(1, t * 4), mode: "graphic" });
-        if (t >= 1) dealerShown++;
+        cards.push({ quad: q, cell: faceIndex(card), alpha: drawsAlpha * Math.min(1, t * 4), mode: "graphic" });
+        if (t >= 1 && drawsAlpha > 0.5) dealerShown++;
       });
     }
     visible.dealer = dealerShown;
@@ -127,9 +153,10 @@ export class Scene {
   /**
    * A bridge is generated from frames whose seats were cleared to bare felt (the pipeline's
    * SeatCleaner): the two clips it joins hold different cards there, and interpolated cards
-   * would morph and drift. So every seat shows a plate of the game's hand for the whole move.
-   * The dealer's own two cards are in the bridge; their faces glide from where they lay on
-   * the exit frame to where they lie on the entry frame.
+   * would morph and drift. So every seat shows a plate of the game's hand for the whole move,
+   * gliding from where that hand lay on the clip it leaves (each take's dealer put the first two
+   * cards a little differently) to where it lies on the clip it lands in. The dealer's own two
+   * cards are in the bridge; their faces glide the same way.
    */
   bridge(clip: ClipInfo, f: number, view: TableView): SceneResult {
     const { from, at, to } = clip.bridge!;
@@ -145,10 +172,15 @@ export class Scene {
       const hand = view.seats[seat];
       const plate = this.plates[seat][hand.length];
       visible[seat] = hand.length;
-      plates.push(plate ? { tex: this.plateTex[seat][hand.length], rect: plate.rect, alpha: 1 } : null);
-      plateUse[seat] = plate ? hand.length : null;
-      plate?.cards.forEach((q, i) => {
-        if (hand[i]) cards.push({ quad: q, cell: faceIndex(hand[i]), alpha: 1, mode: "footage" });
+      if (!plate) {
+        plates.push(null);
+        continue;
+      }
+      const place = lerpSimilarity(placing(A, seat, plate), placing(B, seat, plate), t);
+      plates.push(this.plateDraw(seat, plate, place, 1, false));
+      plateUse[seat] = hand.length;
+      plate.cards.forEach((q, i) => {
+        if (hand[i]) cards.push({ quad: moveQuad(place, q), cell: faceIndex(hand[i]), alpha: 1, mode: "footage" });
       });
     }
     for (const slot of ["up", "hole"] as const) {
@@ -161,6 +193,45 @@ export class Scene {
       }
     }
     return { plates, cards, visible, plateUse };
+  }
+
+  private plateDraw(seat: SeatId, plate: SeatPlate, place: Similarity, alpha: number, extrasOnly: boolean): PlateDraw {
+    const tex = this.plateTex[seat][plate.n];
+    return { tex: tex.image, matte: tex.matte, rect: plate.rect, place, alpha, extrasOnly };
+  }
+}
+
+/**
+ * Where a plate lies on a clip: its first two cards moved onto that clip's own first two in the
+ * seat (wherever that take's dealer put them), so its other cards lie as they would on that take.
+ * A clip without them takes the plate where it was grabbed.
+ */
+function placing(clip: ClipInfo, seat: SeatId, plate: SeatPlate): Similarity {
+  const a = clip.cards.find((c) => c.slot === seat && c.index === 1);
+  const b = clip.cards.find((c) => c.slot === seat && c.index === 2);
+  return a && b && plate.cards.length >= 2 ? fitSimilarity(plate.cards.slice(0, 2), [a.quad, b.quad]) : IDENTITY;
+}
+
+/**
+ * How much of a hand's laid-in cards (a seat's from the third on, the dealer's graphic draws)
+ * shows: in a discard they are faded out by the frame her hand first comes over the hand (the
+ * manifest's `reach`; else `lift`, its first pickup), but never start fading before the clip
+ * does, as it follows its hold seamlessly. Anywhere else, all of them.
+ */
+function extrasAlpha(clip: ClipInfo, hand: SeatId | "dealer", n: number, f: number, lift: number): number {
+  if (clip.kind !== "discard") return 1;
+  const end = Math.max(EXTRAS_FADE, clip.reach?.[hand]?.[String(n)] ?? lift);
+  const t = Math.min(1, Math.max(0, (end - f) / EXTRAS_FADE));
+  return t * t * (3 - 2 * t);
+}
+
+/** Every card of this seat that is face up on screen: lying, or still sliding in under her fingers. */
+function footageFaces(clip: ClipInfo, seat: SeatId, hand: Card[], f: number, out: CardDraw[]) {
+  for (const c of clip.cards) {
+    const card = c.slot === seat ? hand[c.index - 1] : undefined;
+    const quad = card && faceQuadAt(c, f);
+    if (!card || !quad) continue;
+    out.push(footageFace(c, quad, f, faceIndex(card), faceFrom(c)));
   }
 }
 

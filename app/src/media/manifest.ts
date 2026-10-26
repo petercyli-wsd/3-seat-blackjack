@@ -46,6 +46,12 @@ export interface ClipInfo {
   part?: number;
   /** A bridge clip: the generated frames between `from` at clip frame `at` and `to`'s first frame. */
   bridge?: { from: string; at: number; to: string };
+  /**
+   * A discard: the clip frame her hand first comes over each hand's cards on the approach that
+   * lifts them, for every hand size the take doesn't hold (seat: 3-6 cards, the real two plus
+   * the rest laid in; dealer: 1-5 graphic draws). The laid-in cards are gone by then.
+   */
+  reach?: Partial<Record<SeatId | "dealer", Record<string, number>>>;
 }
 
 /**

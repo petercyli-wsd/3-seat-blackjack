@@ -39,9 +39,13 @@ void main() {
 
 /**
  * Pass 1: footage (optionally crossfading two decks), then each seat's
- * plate laid in under the seat mask — but only where the live pixel is felt
- * or card. Wherever the dealer's arm or hand is, the live frame wins, so she
- * always passes in front of the cards.
+ * plate laid in — but only where the live pixel is felt or card. Wherever the
+ * dealer's arm or hand is, the live frame wins, so she always passes in front
+ * of the cards. A plate is a still moved onto the take's own cards (uPlateUV
+ * takes a video pixel back to it). A whole hand covers the seat mask, hiding
+ * whatever cards the footage has there, and its own cards (matte red) even
+ * where the move takes them past the mask; over a take that holds the hand's
+ * first two cards, only the cards from the third on (matte green) are laid in.
  *
  * A deck playing a packed clip (the dealer's matte stacked below the picture) is read from its
  * top half, and its matte goes on in the alpha channel for pass 3; an unpacked deck gives 1.
@@ -57,8 +61,12 @@ uniform sampler2D uMask;
 uniform sampler2D uPlate0;
 uniform sampler2D uPlate1;
 uniform sampler2D uPlate2;
-uniform vec4 uPlateRect[3];
+uniform sampler2D uMatte0;
+uniform sampler2D uMatte1;
+uniform sampler2D uMatte2;
+uniform mat3 uPlateUV[3];
 uniform float uPlateOn[3];
+uniform float uPlateExtras[3];
 uniform vec2 uSize;
 uniform int uShowMasks;
 uniform int uPackA;
@@ -79,11 +87,13 @@ float matteAt(vec2 uv) {
   return mix(a, b, uMix);
 }
 // sampler arrays can't be indexed by a loop variable in GLSL ES 3.0, hence one call per seat
-vec3 layPlate(vec3 c, sampler2D plate, vec4 r, float on, float m, float key, vec2 px) {
+vec3 layPlate(vec3 c, sampler2D plate, sampler2D matte, mat3 uv, float on, float extras, float m, float key, vec2 px) {
   if (on <= 0.0) return c;
-  vec2 q = (px - r.xy) / r.zw;
+  vec2 q = (uv * vec3(px, 1.0)).xy;
   if (any(lessThan(q, vec2(0.0))) || any(greaterThan(q, vec2(1.0)))) return c;
-  return mix(c, texture(plate, q).rgb, m * key * on);
+  vec2 mt = texture(matte, q).rg;
+  float w = extras > 0.5 ? mt.g : max(m, mt.r);
+  return mix(c, texture(plate, q).rgb, w * key * on);
 }
 void main() {
   vec3 c = frameAt(vUV);
@@ -98,9 +108,9 @@ void main() {
   vec3 a3 = frameAt(vUV + vec2(o.x, -o.y));
   vec3 a4 = frameAt(vUV - o);
   float key = max(max(tableness(c), tableness(a1)), max(max(tableness(a2), tableness(a3)), tableness(a4)));
-  c = layPlate(c, uPlate0, uPlateRect[0], uPlateOn[0], m.r, key, px);
-  c = layPlate(c, uPlate1, uPlateRect[1], uPlateOn[1], m.g, key, px);
-  c = layPlate(c, uPlate2, uPlateRect[2], uPlateOn[2], m.b, key, px);
+  c = layPlate(c, uPlate0, uMatte0, uPlateUV[0], uPlateOn[0], uPlateExtras[0], m.r, key, px);
+  c = layPlate(c, uPlate1, uMatte1, uPlateUV[1], uPlateOn[1], uPlateExtras[1], m.g, key, px);
+  c = layPlate(c, uPlate2, uMatte2, uPlateUV[2], uPlateOn[2], uPlateExtras[2], m.b, key, px);
   if (uShowMasks == 1) {
     c = mix(c, vec3(1.0, 0.75, 0.2), 0.35 * m.r);
     c = mix(c, vec3(0.3, 1.0, 0.4), 0.35 * m.g);
