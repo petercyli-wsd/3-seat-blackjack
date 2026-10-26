@@ -19,9 +19,9 @@
    "to": "001_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/001_idle@0101__001_deal.mp4",
+   "file": "bridges/tool/001_idle@0101__001_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "001_idle@0099__010_deal.mp4",
@@ -30,9 +30,9 @@
    "to": "010_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/001_idle@0099__010_deal.mp4",
+   "file": "bridges/tool/001_idle@0099__010_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "001_idle@0099__011_deal.mp4",
@@ -41,9 +41,9 @@
    "to": "011_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/001_idle@0099__011_deal.mp4",
+   "file": "bridges/tool/001_idle@0099__011_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "001_idle@0120__011_deal.mp4",
@@ -63,9 +63,9 @@
    "to": "100_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/001_idle@0070__100_deal.mp4",
+   "file": "bridges/tool/001_idle@0070__100_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "001_idle@0132__100_deal.mp4",
@@ -85,9 +85,9 @@
    "to": "101_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/001_idle@0095__101_deal.mp4",
+   "file": "bridges/tool/001_idle@0095__101_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "001_idle@0127__101_deal.mp4",
@@ -107,9 +107,9 @@
    "to": "110_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/001_idle@0099__110_deal.mp4",
+   "file": "bridges/tool/001_idle@0099__110_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "001_idle@0123__110_deal.mp4",
@@ -140,9 +140,9 @@
    "to": "111_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/001_idle@0115__111_deal.mp4",
+   "file": "bridges/tool/001_idle@0115__111_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "001_wait@0000__001_reveal.mp4",
@@ -151,9 +151,9 @@
    "to": "001_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/001_wait@0000__001_reveal.mp4",
+   "file": "bridges/tool/001_wait@0000__001_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "001_wait@0046__001_reveal.mp4",
@@ -206,9 +206,9 @@
    "to": "001_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/010_idle@0023__001_deal.mp4",
+   "file": "bridges/tool/010_idle@0023__001_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "010_idle@0015__010_deal.mp4",
@@ -217,9 +217,9 @@
    "to": "010_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/010_idle@0015__010_deal.mp4",
+   "file": "bridges/tool/010_idle@0015__010_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "010_idle@0038__010_deal.mp4",
@@ -239,9 +239,9 @@
    "to": "011_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/010_idle@0013__011_deal.mp4",
+   "file": "bridges/tool/010_idle@0013__011_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "010_idle@0003__100_deal.mp4",
@@ -261,9 +261,9 @@
    "to": "100_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/010_idle@0045__100_deal.mp4",
+   "file": "bridges/tool/010_idle@0045__100_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "010_idle@0022__101_deal.mp4",
@@ -283,9 +283,9 @@
    "to": "101_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/010_idle@0023__101_deal.mp4",
+   "file": "bridges/tool/010_idle@0023__101_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "010_idle@0017__110_deal.mp4",
@@ -294,9 +294,9 @@
    "to": "110_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/010_idle@0017__110_deal.mp4",
+   "file": "bridges/tool/010_idle@0017__110_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "010_idle@0045__110_deal.mp4",
@@ -316,9 +316,9 @@
    "to": "111_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/010_idle@0022__111_deal.mp4",
+   "file": "bridges/tool/010_idle@0022__111_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "010_idle@0029__111_deal.mp4",
@@ -349,9 +349,9 @@
    "to": "010_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/010_wait@0046__010_reveal.mp4",
+   "file": "bridges/tool/010_wait@0046__010_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "010_wait@0000__seat2_card3_deal.mp4",
@@ -382,9 +382,9 @@
    "to": "001_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/011_idle@0021__001_deal.mp4",
+   "file": "bridges/tool/011_idle@0021__001_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "011_idle@0044__001_deal.mp4",
@@ -404,9 +404,9 @@
    "to": "010_deal",
    "class": "generative",
    "critical": false,
-   "file": "bridges/flow/011_idle@0021__010_deal.mp4",
-   "frames": 16,
-   "source": "flow"
+   "file": "bridges/tool/011_idle@0021__010_deal.mp4",
+   "frames": 72,
+   "source": "tool"
   },
   {
    "name": "011_idle@0044__010_deal.mp4",
@@ -415,10 +415,9 @@
    "to": "010_deal",
    "class": "generative",
    "critical": false,
-   "file": "bridges/flow/011_idle@0044__010_deal.mp4",
-   "frames": 16,
-   "source": "flow",
-   "rejected": "Kling: arms jump between frames 24-25 inside an overacted arms-wide reach"
+   "file": "bridges/tool/011_idle@0044__010_deal.mp4",
+   "frames": 72,
+   "source": "tool"
   },
   {
    "name": "011_idle@0020__011_deal.mp4",
@@ -427,9 +426,9 @@
    "to": "011_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/011_idle@0020__011_deal.mp4",
+   "file": "bridges/tool/011_idle@0020__011_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "011_idle@0044__011_deal.mp4",
@@ -460,9 +459,9 @@
    "to": "101_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/011_idle@0021__101_deal.mp4",
+   "file": "bridges/tool/011_idle@0021__101_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "011_idle@0044__101_deal.mp4",
@@ -482,9 +481,9 @@
    "to": "110_deal",
    "class": "generative",
    "critical": false,
-   "file": "bridges/flow/011_idle@0021__110_deal.mp4",
-   "frames": 16,
-   "source": "flow"
+   "file": "bridges/tool/011_idle@0021__110_deal.mp4",
+   "frames": 72,
+   "source": "tool"
   },
   {
    "name": "011_idle@0044__110_deal.mp4",
@@ -504,9 +503,9 @@
    "to": "111_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/011_idle@0020__111_deal.mp4",
+   "file": "bridges/tool/011_idle@0020__111_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "011_idle@0044__111_deal.mp4",
@@ -526,9 +525,9 @@
    "to": "011_reveal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/011_wait@0022__011_reveal.mp4",
+   "file": "bridges/tool/011_wait@0022__011_reveal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "011_wait@0043__011_reveal.mp4",
@@ -592,9 +591,9 @@
    "to": "001_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/100_idle@0036__001_deal.mp4",
+   "file": "bridges/tool/100_idle@0036__001_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "100_idle@0065__001_deal.mp4",
@@ -614,9 +613,9 @@
    "to": "010_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/100_idle@0044__010_deal.mp4",
+   "file": "bridges/tool/100_idle@0044__010_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "100_idle@0052__010_deal.mp4",
@@ -647,9 +646,9 @@
    "to": "011_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/100_idle@0045__011_deal.mp4",
+   "file": "bridges/tool/100_idle@0045__011_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "100_idle@0036__100_deal.mp4",
@@ -669,9 +668,9 @@
    "to": "100_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/100_idle@0045__100_deal.mp4",
+   "file": "bridges/tool/100_idle@0045__100_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "100_idle@0044__101_deal.mp4",
@@ -680,9 +679,9 @@
    "to": "101_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/100_idle@0044__101_deal.mp4",
+   "file": "bridges/tool/100_idle@0044__101_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "100_idle@0043__110_deal.mp4",
@@ -691,9 +690,9 @@
    "to": "110_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/100_idle@0043__110_deal.mp4",
+   "file": "bridges/tool/100_idle@0043__110_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "100_idle@0052__110_deal.mp4",
@@ -713,9 +712,9 @@
    "to": "111_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/100_idle@0043__111_deal.mp4",
+   "file": "bridges/tool/100_idle@0043__111_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "100_idle@0052__111_deal.mp4",
@@ -735,9 +734,9 @@
    "to": "100_reveal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/100_wait@0015__100_reveal.mp4",
+   "file": "bridges/tool/100_wait@0015__100_reveal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "100_wait@0046__100_reveal.mp4",
@@ -779,9 +778,9 @@
    "to": "001_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/101_idle@0050__001_deal.mp4",
+   "file": "bridges/tool/101_idle@0050__001_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "101_idle@0100__001_deal.mp4",
@@ -801,9 +800,9 @@
    "to": "010_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/101_idle@0060__010_deal.mp4",
+   "file": "bridges/tool/101_idle@0060__010_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "101_idle@0100__010_deal.mp4",
@@ -823,9 +822,9 @@
    "to": "011_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/101_idle@0064__011_deal.mp4",
+   "file": "bridges/tool/101_idle@0064__011_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "101_idle@0100__011_deal.mp4",
@@ -856,9 +855,9 @@
    "to": "100_deal",
    "class": "generative",
    "critical": false,
-   "file": "bridges/flow/101_idle@0100__100_deal.mp4",
-   "frames": 16,
-   "source": "flow"
+   "file": "bridges/tool/101_idle@0100__100_deal.mp4",
+   "frames": 72,
+   "source": "tool"
   },
   {
    "name": "101_idle@0048__101_deal.mp4",
@@ -867,9 +866,9 @@
    "to": "101_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/101_idle@0048__101_deal.mp4",
+   "file": "bridges/tool/101_idle@0048__101_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "101_idle@0100__101_deal.mp4",
@@ -889,9 +888,9 @@
    "to": "110_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/101_idle@0060__110_deal.mp4",
+   "file": "bridges/tool/101_idle@0060__110_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "101_idle@0048__111_deal.mp4",
@@ -900,9 +899,9 @@
    "to": "111_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/101_idle@0048__111_deal.mp4",
+   "file": "bridges/tool/101_idle@0048__111_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "101_idle@0090__111_deal.mp4",
@@ -922,9 +921,9 @@
    "to": "101_reveal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/101_wait@0022__101_reveal.mp4",
+   "file": "bridges/tool/101_wait@0022__101_reveal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "101_wait@0046__101_reveal.mp4",
@@ -988,9 +987,9 @@
    "to": "001_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/110_idle@0138__001_deal.mp4",
+   "file": "bridges/tool/110_idle@0138__001_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "110_idle@0140__001_deal.mp4",
@@ -1010,9 +1009,9 @@
    "to": "010_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/110_idle@0134__010_deal.mp4",
+   "file": "bridges/tool/110_idle@0134__010_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "110_idle@0179__010_deal.mp4",
@@ -1032,9 +1031,9 @@
    "to": "011_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/110_idle@0137__011_deal.mp4",
+   "file": "bridges/tool/110_idle@0137__011_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "110_idle@0179__011_deal.mp4",
@@ -1059,26 +1058,15 @@
    "source": "tool"
   },
   {
-   "name": "110_idle@0157__100_deal.mp4",
-   "from": "110_idle",
-   "at": 157,
-   "to": "100_deal",
-   "class": "generative",
-   "critical": false,
-   "file": "bridges/flow/110_idle@0157__100_deal.mp4",
-   "frames": 16,
-   "source": "flow"
-  },
-  {
    "name": "110_idle@0099__101_deal.mp4",
    "from": "110_idle",
    "at": 99,
    "to": "101_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/110_idle@0099__101_deal.mp4",
+   "file": "bridges/tool/110_idle@0099__101_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "110_idle@0179__101_deal.mp4",
@@ -1098,9 +1086,9 @@
    "to": "110_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/110_idle@0135__110_deal.mp4",
+   "file": "bridges/tool/110_idle@0135__110_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "110_idle@0179__110_deal.mp4",
@@ -1120,9 +1108,9 @@
    "to": "111_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/110_idle@0136__111_deal.mp4",
+   "file": "bridges/tool/110_idle@0136__111_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "110_wait@0022__110_reveal.mp4",
@@ -1131,9 +1119,9 @@
    "to": "110_reveal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/110_wait@0022__110_reveal.mp4",
+   "file": "bridges/tool/110_wait@0022__110_reveal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "110_wait@0046__110_reveal.mp4",
@@ -1197,9 +1185,9 @@
    "to": "001_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/111_idle@0125__001_deal.mp4",
+   "file": "bridges/tool/111_idle@0125__001_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "111_idle@0168__001_deal.mp4",
@@ -1219,9 +1207,9 @@
    "to": "010_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/111_idle@0122__010_deal.mp4",
+   "file": "bridges/tool/111_idle@0122__010_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "111_idle@0132__010_deal.mp4",
@@ -1252,9 +1240,9 @@
    "to": "011_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/111_idle@0169__011_deal.mp4",
+   "file": "bridges/tool/111_idle@0169__011_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "111_idle@0098__100_deal.mp4",
@@ -1263,21 +1251,9 @@
    "to": "100_deal",
    "class": "generative",
    "critical": false,
-   "file": "bridges/flow/111_idle@0098__100_deal.mp4",
-   "frames": 16,
-   "source": "flow",
-   "rejected": "Kling: a card appears in her hand and she mimes dealing it"
-  },
-  {
-   "name": "111_idle@0143__100_deal.mp4",
-   "from": "111_idle",
-   "at": 143,
-   "to": "100_deal",
-   "class": "generative",
-   "critical": false,
-   "file": "bridges/flow/111_idle@0143__100_deal.mp4",
-   "frames": 16,
-   "source": "flow"
+   "file": "bridges/tool/111_idle@0098__100_deal.mp4",
+   "frames": 72,
+   "source": "tool"
   },
   {
    "name": "111_idle@0123__101_deal.mp4",
@@ -1286,9 +1262,9 @@
    "to": "101_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/111_idle@0123__101_deal.mp4",
+   "file": "bridges/tool/111_idle@0123__101_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "111_idle@0169__101_deal.mp4",
@@ -1308,9 +1284,9 @@
    "to": "110_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/111_idle@0122__110_deal.mp4",
+   "file": "bridges/tool/111_idle@0122__110_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "111_idle@0169__110_deal.mp4",
@@ -1341,9 +1317,9 @@
    "to": "111_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/111_idle@0140__111_deal.mp4",
+   "file": "bridges/tool/111_idle@0140__111_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "111_wait@0022__111_reveal.mp4",
@@ -1352,9 +1328,9 @@
    "to": "111_reveal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/111_wait@0022__111_reveal.mp4",
+   "file": "bridges/tool/111_wait@0022__111_reveal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "111_wait@0046__111_reveal.mp4",
@@ -1440,9 +1416,9 @@
    "to": "001_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/opening_idle@0080__001_deal.mp4",
+   "file": "bridges/tool/opening_idle@0080__001_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "opening_idle@0068__010_deal.mp4",
@@ -1462,9 +1438,9 @@
    "to": "010_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/opening_idle@0094__010_deal.mp4",
+   "file": "bridges/tool/opening_idle@0094__010_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "opening_idle@0068__011_deal.mp4",
@@ -1484,9 +1460,9 @@
    "to": "011_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/opening_idle@0094__011_deal.mp4",
+   "file": "bridges/tool/opening_idle@0094__011_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "opening_idle@0068__100_deal.mp4",
@@ -1495,10 +1471,9 @@
    "to": "100_deal",
    "class": "generative",
    "critical": false,
-   "file": "bridges/flow/opening_idle@0068__100_deal.mp4",
-   "frames": 16,
-   "source": "flow",
-   "rejected": "Kling: hands jump between frames 36-37"
+   "file": "bridges/tool/opening_idle@0068__100_deal.mp4",
+   "frames": 72,
+   "source": "tool"
   },
   {
    "name": "opening_idle@0088__100_deal.mp4",
@@ -1507,9 +1482,9 @@
    "to": "100_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/opening_idle@0088__100_deal.mp4",
+   "file": "bridges/tool/opening_idle@0088__100_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "opening_idle@0080__101_deal.mp4",
@@ -1518,9 +1493,9 @@
    "to": "101_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/opening_idle@0080__101_deal.mp4",
+   "file": "bridges/tool/opening_idle@0080__101_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "opening_idle@0088__101_deal.mp4",
@@ -1551,9 +1526,9 @@
    "to": "110_deal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/opening_idle@0094__110_deal.mp4",
+   "file": "bridges/tool/opening_idle@0094__110_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "opening_idle@0069__111_deal.mp4",
@@ -1573,9 +1548,9 @@
    "to": "111_deal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/opening_idle@0086__111_deal.mp4",
+   "file": "bridges/tool/opening_idle@0086__111_deal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat1_card3_wait@0022__100_reveal.mp4",
@@ -1584,9 +1559,9 @@
    "to": "100_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat1_card3_wait@0022__100_reveal.mp4",
+   "file": "bridges/tool/seat1_card3_wait@0022__100_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat1_card3_wait@0036__100_reveal.mp4",
@@ -1606,9 +1581,9 @@
    "to": "101_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat1_card3_wait@0022__101_reveal.mp4",
+   "file": "bridges/tool/seat1_card3_wait@0022__101_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat1_card3_wait@0037__101_reveal.mp4",
@@ -1639,9 +1614,9 @@
    "to": "110_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat1_card3_wait@0023__110_reveal.mp4",
+   "file": "bridges/tool/seat1_card3_wait@0023__110_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat1_card3_wait@0022__111_reveal.mp4",
@@ -1650,9 +1625,9 @@
    "to": "111_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat1_card3_wait@0022__111_reveal.mp4",
+   "file": "bridges/tool/seat1_card3_wait@0022__111_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat1_card3_wait@0035__111_reveal.mp4",
@@ -1705,9 +1680,9 @@
    "to": "100_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat1_card4_wait@0023__100_reveal.mp4",
+   "file": "bridges/tool/seat1_card4_wait@0023__100_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat1_card4_wait@0011__101_reveal.mp4",
@@ -1716,9 +1691,9 @@
    "to": "101_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat1_card4_wait@0011__101_reveal.mp4",
+   "file": "bridges/tool/seat1_card4_wait@0011__101_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat1_card4_wait@0046__101_reveal.mp4",
@@ -1749,9 +1724,9 @@
    "to": "110_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat1_card4_wait@0046__110_reveal.mp4",
+   "file": "bridges/tool/seat1_card4_wait@0046__110_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat1_card4_wait@0013__111_reveal.mp4",
@@ -1771,9 +1746,9 @@
    "to": "111_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat1_card4_wait@0023__111_reveal.mp4",
+   "file": "bridges/tool/seat1_card4_wait@0023__111_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat1_card4_wait@0022__seat1_card5_deal.mp4",
@@ -1804,9 +1779,9 @@
    "to": "100_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat1_card5_wait@0022__100_reveal.mp4",
+   "file": "bridges/tool/seat1_card5_wait@0022__100_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat1_card5_wait@0026__100_reveal.mp4",
@@ -1837,9 +1812,9 @@
    "to": "101_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat1_card5_wait@0038__101_reveal.mp4",
+   "file": "bridges/tool/seat1_card5_wait@0038__101_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat1_card5_wait@0021__110_reveal.mp4",
@@ -1848,9 +1823,9 @@
    "to": "110_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat1_card5_wait@0021__110_reveal.mp4",
+   "file": "bridges/tool/seat1_card5_wait@0021__110_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat1_card5_wait@0026__110_reveal.mp4",
@@ -1870,9 +1845,9 @@
    "to": "111_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat1_card5_wait@0022__111_reveal.mp4",
+   "file": "bridges/tool/seat1_card5_wait@0022__111_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat1_card5_wait@0024__111_reveal.mp4",
@@ -1925,9 +1900,9 @@
    "to": "100_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat1_card6_wait@0032__100_reveal.mp4",
+   "file": "bridges/tool/seat1_card6_wait@0032__100_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat1_card6_wait@0020__101_reveal.mp4",
@@ -1936,9 +1911,9 @@
    "to": "101_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat1_card6_wait@0020__101_reveal.mp4",
+   "file": "bridges/tool/seat1_card6_wait@0020__101_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat1_card6_wait@0038__101_reveal.mp4",
@@ -1969,9 +1944,9 @@
    "to": "110_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat1_card6_wait@0032__110_reveal.mp4",
+   "file": "bridges/tool/seat1_card6_wait@0032__110_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat1_card6_wait@0003__111_reveal.mp4",
@@ -1991,9 +1966,9 @@
    "to": "111_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat1_card6_wait@0042__111_reveal.mp4",
+   "file": "bridges/tool/seat1_card6_wait@0042__111_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat2_card3_wait@0005__010_reveal.mp4",
@@ -2013,9 +1988,9 @@
    "to": "010_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat2_card3_wait@0037__010_reveal.mp4",
+   "file": "bridges/tool/seat2_card3_wait@0037__010_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat2_card3_wait@0009__011_reveal.mp4",
@@ -2035,9 +2010,9 @@
    "to": "011_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat2_card3_wait@0037__011_reveal.mp4",
+   "file": "bridges/tool/seat2_card3_wait@0037__011_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat2_card3_wait@0005__110_reveal.mp4",
@@ -2057,9 +2032,9 @@
    "to": "110_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat2_card3_wait@0042__110_reveal.mp4",
+   "file": "bridges/tool/seat2_card3_wait@0042__110_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat2_card3_wait@0005__111_reveal.mp4",
@@ -2079,9 +2054,9 @@
    "to": "111_reveal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/seat2_card3_wait@0046__111_reveal.mp4",
+   "file": "bridges/tool/seat2_card3_wait@0046__111_reveal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat2_card3_wait@0004__seat1_card3_deal.mp4",
@@ -2145,9 +2120,9 @@
    "to": "010_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat2_card4_wait@0023__010_reveal.mp4",
+   "file": "bridges/tool/seat2_card4_wait@0023__010_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat2_card4_wait@0007__011_reveal.mp4",
@@ -2167,9 +2142,9 @@
    "to": "011_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat2_card4_wait@0023__011_reveal.mp4",
+   "file": "bridges/tool/seat2_card4_wait@0023__011_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat2_card4_wait@0009__110_reveal.mp4",
@@ -2189,9 +2164,9 @@
    "to": "110_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat2_card4_wait@0023__110_reveal.mp4",
+   "file": "bridges/tool/seat2_card4_wait@0023__110_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat2_card4_wait@0006__111_reveal.mp4",
@@ -2211,9 +2186,9 @@
    "to": "111_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat2_card4_wait@0023__111_reveal.mp4",
+   "file": "bridges/tool/seat2_card4_wait@0023__111_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat2_card4_wait@0008__seat1_card3_deal.mp4",
@@ -2277,9 +2252,9 @@
    "to": "010_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat2_card5_wait@0023__010_reveal.mp4",
+   "file": "bridges/tool/seat2_card5_wait@0023__010_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat2_card5_wait@0005__011_reveal.mp4",
@@ -2299,9 +2274,9 @@
    "to": "011_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat2_card5_wait@0023__011_reveal.mp4",
+   "file": "bridges/tool/seat2_card5_wait@0023__011_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat2_card5_wait@0007__110_reveal.mp4",
@@ -2321,9 +2296,9 @@
    "to": "110_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat2_card5_wait@0023__110_reveal.mp4",
+   "file": "bridges/tool/seat2_card5_wait@0023__110_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat2_card5_wait@0004__111_reveal.mp4",
@@ -2343,9 +2318,9 @@
    "to": "111_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat2_card5_wait@0023__111_reveal.mp4",
+   "file": "bridges/tool/seat2_card5_wait@0023__111_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat2_card5_wait@0001__seat1_card3_deal.mp4",
@@ -2409,9 +2384,9 @@
    "to": "010_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat2_card6_wait@0023__010_reveal.mp4",
+   "file": "bridges/tool/seat2_card6_wait@0023__010_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat2_card6_wait@0013__011_reveal.mp4",
@@ -2431,9 +2406,9 @@
    "to": "011_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat2_card6_wait@0023__011_reveal.mp4",
+   "file": "bridges/tool/seat2_card6_wait@0023__011_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat2_card6_wait@0018__110_reveal.mp4",
@@ -2453,9 +2428,9 @@
    "to": "110_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat2_card6_wait@0023__110_reveal.mp4",
+   "file": "bridges/tool/seat2_card6_wait@0023__110_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat2_card6_wait@0013__111_reveal.mp4",
@@ -2475,9 +2450,9 @@
    "to": "111_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat2_card6_wait@0023__111_reveal.mp4",
+   "file": "bridges/tool/seat2_card6_wait@0023__111_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat2_card6_wait@0008__seat1_card3_deal.mp4",
@@ -2519,9 +2494,9 @@
    "to": "001_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat3_card3_wait@0023__001_reveal.mp4",
+   "file": "bridges/tool/seat3_card3_wait@0023__001_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat3_card3_wait@0016__011_reveal.mp4",
@@ -2541,9 +2516,9 @@
    "to": "011_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat3_card3_wait@0028__011_reveal.mp4",
+   "file": "bridges/tool/seat3_card3_wait@0028__011_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat3_card3_wait@0007__101_reveal.mp4",
@@ -2563,9 +2538,9 @@
    "to": "101_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat3_card3_wait@0028__101_reveal.mp4",
+   "file": "bridges/tool/seat3_card3_wait@0028__101_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat3_card3_wait@0015__111_reveal.mp4",
@@ -2585,9 +2560,9 @@
    "to": "111_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat3_card3_wait@0023__111_reveal.mp4",
+   "file": "bridges/tool/seat3_card3_wait@0023__111_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat3_card3_wait@0004__seat1_card3_deal.mp4",
@@ -2662,9 +2637,9 @@
    "to": "001_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat3_card4_wait@0019__001_reveal.mp4",
+   "file": "bridges/tool/seat3_card4_wait@0019__001_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat3_card4_wait@0039__001_reveal.mp4",
@@ -2684,9 +2659,9 @@
    "to": "011_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat3_card4_wait@0015__011_reveal.mp4",
+   "file": "bridges/tool/seat3_card4_wait@0015__011_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat3_card4_wait@0039__011_reveal.mp4",
@@ -2706,9 +2681,9 @@
    "to": "101_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat3_card4_wait@0022__101_reveal.mp4",
+   "file": "bridges/tool/seat3_card4_wait@0022__101_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat3_card4_wait@0023__101_reveal.mp4",
@@ -2739,9 +2714,9 @@
    "to": "111_reveal",
    "class": "short",
    "critical": false,
-   "file": "bridges/flow/seat3_card4_wait@0023__111_reveal.mp4",
+   "file": "bridges/tool/seat3_card4_wait@0023__111_reveal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat3_card4_wait@0007__seat1_card3_deal.mp4",
@@ -2816,9 +2791,9 @@
    "to": "001_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat3_card5_wait@0022__001_reveal.mp4",
+   "file": "bridges/tool/seat3_card5_wait@0022__001_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat3_card5_wait@0037__001_reveal.mp4",
@@ -2838,9 +2813,9 @@
    "to": "011_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat3_card5_wait@0022__011_reveal.mp4",
+   "file": "bridges/tool/seat3_card5_wait@0022__011_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat3_card5_wait@0037__011_reveal.mp4",
@@ -2871,9 +2846,9 @@
    "to": "101_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat3_card5_wait@0023__101_reveal.mp4",
+   "file": "bridges/tool/seat3_card5_wait@0023__101_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat3_card5_wait@0022__111_reveal.mp4",
@@ -2882,9 +2857,9 @@
    "to": "111_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat3_card5_wait@0022__111_reveal.mp4",
+   "file": "bridges/tool/seat3_card5_wait@0022__111_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat3_card5_wait@0037__111_reveal.mp4",
@@ -2981,9 +2956,9 @@
    "to": "001_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat3_card6_wait@0026__001_reveal.mp4",
+   "file": "bridges/tool/seat3_card6_wait@0026__001_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat3_card6_wait@0020__011_reveal.mp4",
@@ -3003,9 +2978,9 @@
    "to": "011_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat3_card6_wait@0022__011_reveal.mp4",
+   "file": "bridges/tool/seat3_card6_wait@0022__011_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat3_card6_wait@0021__101_reveal.mp4",
@@ -3014,9 +2989,9 @@
    "to": "101_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat3_card6_wait@0021__101_reveal.mp4",
+   "file": "bridges/tool/seat3_card6_wait@0021__101_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat3_card6_wait@0041__101_reveal.mp4",
@@ -3047,9 +3022,9 @@
    "to": "111_reveal",
    "class": "long",
    "critical": false,
-   "file": "bridges/flow/seat3_card6_wait@0022__111_reveal.mp4",
+   "file": "bridges/tool/seat3_card6_wait@0022__111_reveal.mp4",
    "frames": 16,
-   "source": "flow"
+   "source": "tool"
   },
   {
    "name": "seat3_card6_wait@0016__seat1_card3_deal.mp4",
@@ -3080,9 +3055,9 @@
    "to": "seat2_card3_deal",
    "class": "short",
    "critical": true,
-   "file": "bridges/flow/seat3_card6_wait@0017__seat2_card3_deal.mp4",
+   "file": "bridges/tool/seat3_card6_wait@0017__seat2_card3_deal.mp4",
    "frames": 8,
-   "source": "flow"
+   "source": "tool"
   }
  ]
 }

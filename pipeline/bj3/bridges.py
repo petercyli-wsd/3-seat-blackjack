@@ -458,7 +458,9 @@ def verdict(name: str, value: str, *note: str) -> None:
 
 def resolve() -> None:
     """Decide what the game plays for every planned row and write game_assets/bridges.json:
-    the generated bridge unless it is missing or rejected, else the optical-flow stand-in."""
+    the generated bridge unless it is missing, rejected or stale, else the optical-flow stand-in.
+    A rejected exit whose transition has another exit playing a good generated bridge is left
+    out instead: waiting a little longer for that one beats a stand-in."""
     rows = plan_rows()
     state = _load(STATE, {})
     verdicts = _load(VERDICTS, {})
@@ -469,7 +471,7 @@ def resolve() -> None:
     if stale:
         _save(VERDICTS, dict(sorted(verdicts.items())))
     out = []
-    counts = {"tool": 0, "flow": 0, "rejected": 0}
+    counts = {"tool": 0, "flow": 0, "cut": 0, "rejected": 0}
     for r in rows:
         name = r["output"]
         entry = {"name": name, "from": r["src"], "at": r["frame"], "to": r["dst"],
@@ -489,16 +491,23 @@ def resolve() -> None:
         if rejected:
             entry["rejected"] = verdicts[name].get("note") or True
             counts["rejected"] += 1
-        counts[entry["source"]] += 1
+        counts["cut" if entry["frames"] == 0 else entry["source"]] += 1
         out.append(entry)
+    good = {(e["from"], e["to"]) for e in out if e["source"] == "tool"}
+    dropped = [e for e in out if e.get("rejected") and (e["from"], e["to"]) in good]
+    if dropped:
+        out = [e for e in out if e not in dropped]
+        counts["flow"] -= len(dropped)
+        print(f"  {len(dropped)} rejected exit(s) left out; their transitions use another exit's generated bridge")
     missing = [e["file"] for e in out if e["file"] and not (ASSETS / e["file"]).exists()]
     if missing:
         raise SystemExit(f"{len(missing)} bridge files missing, e.g. {missing[0]} (run `bridges local` first)")
     _save(registry_path(), {"fps": FPS, "bridges": out})
     # what is still to generate (never generated, rejected, or stale), ready to run as one job
-    todo = {e["name"] for e in out if e["source"] != "tool" and e["file"]}
+    todo = {e["name"] for e in out if e["source"] != "tool" and e["file"]} | {e["name"] for e in dropped}
     write_todo([r for r in rows if r["output"] in todo])
-    print(f"bridges.json: {counts['tool']} generated, {counts['flow']} stand-ins ({counts['rejected']} rejected)")
+    print(f"bridges.json: {counts['tool']} generated, {counts['flow']} stand-ins, {counts['cut']} matched cuts "
+          f"({counts['rejected']} rejected, {len(dropped)} of them left out)")
 
 
 def registry_path() -> Path:

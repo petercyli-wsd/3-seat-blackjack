@@ -31,8 +31,9 @@ export async function bootTable(canvas: HTMLCanvasElement, host: HTMLElement, st
   {
     const all = [...bridges.values()].flat();
     const tool = all.filter((b) => b.source === "tool").length;
+    const cut = all.filter((b) => b.frames === 0).length;
     const rejected = all.filter((b) => b.rejected).length;
-    store.set((s) => ({ debug: { ...s.debug, bridges: { tool, flow: all.length - tool, rejected } } }));
+    store.set((s) => ({ debug: { ...s.debug, bridges: { tool, flow: all.length - tool - cut, cut, rejected } } }));
   }
   const files = new ClipLoader(
     m,

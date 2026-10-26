@@ -18,30 +18,24 @@ uv run python -m bj3.bridges resolve                           # rewrite what th
 
 ## Status
 
-There are **280 rows** over 144 transitions. Each transition has two exit points, so the dealer
-is never more than about one loop from a way out.
+There are **280 rows** over 144 transitions. All 279 that need generating were generated, over
+two batches (the second was `bridges_fix_25-10.csv`).
 
-- **165 play generated bridges.** These are all from the second batch, which covered the first 168 rows.
-- **114 rows are to generate:** the 111 new rows plus the 3 rejects. They're listed in
-  **`bridges_todo.csv`** (29 × FILM 0.33 s, 77 × FILM 0.67 s, 8 × Kling 3 s), ready to run as one
-  job. Until then they play optical-flow stand-ins.
-- **1 row needs nothing generated.** Its two frames already match, so it's a plain cut.
-
-From the second batch:
-
-- **3 rejected Kling bridges** play their optical-flow stand-ins until they're regenerated:
+- **277 play in the game.** That's 268 FILM and 9 Kling: 6 new Kling clips, plus 3 redone after
+  they were rejected the first time.
+- **2 Kling clips are rejected on review** (`verdicts.json`):
 
   | Bridge | Problem |
   |---|---|
-  | `011_idle@0044__010_deal` | Arms jump mid-move |
-  | `111_idle@0098__100_deal` | Mimes dealing a card that appears from nowhere |
-  | `opening_idle@0068__100_deal` | Hands jump |
+  | `111_idle@0143__100_deal` | Her face and hair morph through each other |
+  | `110_idle@0157__100_deal` | She sweeps an arm deep into the players' area and back |
 
-- **The fourth Kling bridge (`101_idle@0064__100_deal`) is kept.** It's flagged by the checks only
-  because Kling re-renders her sweater's texture at the seams.
-- **All 164 FILM bridges pass every check.**
-
-Verdicts and their reasons are in `verdicts.json`.
+  Both are second exits, and their transitions' other exit plays a good generated bridge. So
+  `resolve` leaves them out rather than play a stand-in. The game simply waits for the good exit.
+  Regenerating them (they're in `bridges_todo.csv`) would only shorten those two waits.
+- **1 row is a matched cut.** Its two frames already match, so nothing needs generating.
+- **No stand-ins play.** Every transition goes through a generated bridge, the take's own
+  seamless join, or that matched cut.
 
 ## The numbers
 

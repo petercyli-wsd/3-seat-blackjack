@@ -32,7 +32,7 @@ export interface DebugInfo {
   plates: Record<SeatId, number | null>;
   handoffGap: number;
   /** Interpolated bridges between clips: from the generation tool, and optical-flow stand-ins. */
-  bridges: { tool: number; flow: number; rejected: number };
+  bridges: { tool: number; flow: number; cut: number; rejected: number };
   fade: number;
   shoeRemaining: number;
   shuffles: number;
@@ -84,7 +84,7 @@ export const initialState = (): GameState => ({
   debug: {
     clip: "", kind: "", frame: 0, frames: 0, loop: false,
     plates: { seat1: null, seat2: null, seat3: null },
-    handoffGap: 0, bridges: { tool: 0, flow: 0, rejected: 0 }, fade: 1, shoeRemaining: 0, shuffles: 0, log: [],
+    handoffGap: 0, bridges: { tool: 0, flow: 0, cut: 0, rejected: 0 }, fade: 1, shoeRemaining: 0, shuffles: 0, log: [],
   },
   showMasks: false,
   scenario: "random",

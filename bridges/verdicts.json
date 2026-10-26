@@ -1,22 +1,55 @@
 {
+ "011_idle@0021__010_deal.mp4": {
+  "verdict": "ok",
+  "note": "Kling: touches the shoe and settles; natural",
+  "sha1": "334827fdb8e62d88",
+  "t": "2026-10-26T10:17:06+00:00"
+ },
+ "011_idle@0021__110_deal.mp4": {
+  "verdict": "ok",
+  "note": "Kling: calm",
+  "sha1": "f1d31424ae8bcc88",
+  "t": "2026-10-26T10:17:07+00:00"
+ },
  "011_idle@0044__010_deal.mp4": {
-  "verdict": "reject",
-  "note": "Kling: arms jump between frames 24-25 inside an overacted arms-wide reach",
-  "sha1": "968c4013b6d200cc"
+  "verdict": "ok",
+  "note": "Kling redo: calm, clean",
+  "sha1": "632fbbc8ad68e4bb",
+  "t": "2026-10-26T10:17:08+00:00"
  },
  "101_idle@0064__100_deal.mp4": {
   "verdict": "ok",
   "note": "Kling: seams flagged for sweater texture re-rendered, pose continuous; motion clean",
   "sha1": "2f65b45a579f2684"
  },
- "111_idle@0098__100_deal.mp4": {
+ "101_idle@0100__100_deal.mp4": {
+  "verdict": "ok",
+  "note": "Kling: a brief lean in; natural",
+  "sha1": "848364fdfe518a75",
+  "t": "2026-10-26T10:17:09+00:00"
+ },
+ "110_idle@0157__100_deal.mp4": {
   "verdict": "reject",
-  "note": "Kling: a card appears in her hand and she mimes dealing it",
-  "sha1": "74c51dd254b01571"
+  "note": "Kling: sweeps an arm deep into the players' area and back, nothing in hand",
+  "sha1": "5ad978b1d26cfab7",
+  "t": "2026-10-26T10:17:05+00:00"
+ },
+ "111_idle@0098__100_deal.mp4": {
+  "verdict": "ok",
+  "note": "Kling redo: calm, clean",
+  "sha1": "b0218dc60a9a1bd9",
+  "t": "2026-10-26T10:17:10+00:00"
+ },
+ "111_idle@0143__100_deal.mp4": {
+  "verdict": "reject",
+  "note": "Kling: face and hair morph through each other, frames 31-35",
+  "sha1": "3ba0254c00f8f496",
+  "t": "2026-10-26T10:17:04+00:00"
  },
  "opening_idle@0068__100_deal.mp4": {
-  "verdict": "reject",
-  "note": "Kling: hands jump between frames 36-37",
-  "sha1": "b84b359fff05014d"
+  "verdict": "ok",
+  "note": "Kling redo: arm moves smoothly to the deal's start",
+  "sha1": "2c761a8330037dae",
+  "t": "2026-10-26T10:17:11+00:00"
  }
 }
