@@ -1,0 +1,68 @@
+[
+  {
+    "id": "lotus",
+    "name": "Lotus Rose",
+    "file": "scene/sets/lotus.jpg",
+    "felt": [
+      0.0815,
+      0.2825,
+      0.5909
+    ],
+    "credit": "Generated with nano-banana-pro (RunningHub) from this take's empty set"
+  },
+  {
+    "id": "emerald",
+    "name": "Emerald Salon",
+    "file": "scene/sets/emerald.jpg",
+    "felt": [
+      0.0818,
+      0.279,
+      0.5898
+    ],
+    "credit": "Generated with nano-banana-pro (RunningHub) from this take's empty set"
+  },
+  {
+    "id": "sapphire",
+    "name": "Sapphire Night",
+    "file": "scene/sets/sapphire.jpg",
+    "felt": [
+      0.0805,
+      0.2787,
+      0.5874
+    ],
+    "credit": "Generated with nano-banana-pro (RunningHub) from this take's empty set"
+  },
+  {
+    "id": "golden",
+    "name": "Golden Hall",
+    "file": "scene/sets/golden.jpg",
+    "felt": [
+      0.1491,
+      0.2978,
+      0.5374
+    ],
+    "credit": "Generated with nano-banana-pro (RunningHub) from this take's empty set"
+  },
+  {
+    "id": "onyx",
+    "name": "Amber Onyx",
+    "file": "scene/sets/onyx.jpg",
+    "felt": [
+      0.0967,
+      0.2899,
+      0.5673
+    ],
+    "credit": "Generated with nano-banana-pro (RunningHub) from this take's empty set"
+  },
+  {
+    "id": "midnight",
+    "name": "Midnight Velvet",
+    "file": "scene/sets/midnight.jpg",
+    "felt": [
+      0.1416,
+      0.3212,
+      0.6006
+    ],
+    "credit": "Generated with nano-banana-pro (RunningHub) from this take's empty set"
+  }
+]

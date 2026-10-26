@@ -1,7 +1,8 @@
 import type { Quad } from "../media/manifest";
 import { cellUV } from "./faceAtlas";
 import { invert3, squareToQuad, toColumnMajor } from "./homography";
-import { BLIT_FS, CARD_FS, CARD_VS, COMPOSITE_FS, FULLSCREEN_VS, SHADOW_FS } from "./shaders";
+import { BLIT_FS, CARD_FS, CARD_VS, COMPOSITE_FS, FULLSCREEN_VS, SHADOW_FS, STAGE_FS } from "./shaders";
+import type { Rect, TableArt } from "./stageArt";
 
 export interface PlateDraw {
   tex: WebGLTexture;
@@ -19,6 +20,19 @@ export interface CardDraw {
   alpha: number;
   /** footage: face laid on a physical card; graphic: a rendered card with no physical counterpart. */
   mode: "footage" | "graphic";
+}
+
+/** What the canvas shows of the composite: a crop of it, at an output size, and the studio set
+ * she is put in (null keeps the set as filmed). */
+export interface StageDraw {
+  crop: Rect;
+  out: [number, number];
+  set: TexImageSource | null;
+  /** The set's table in place of the one filmed (null keeps the filmed table), its felt recoloured
+   * from the colour it was generated in to another, or left. */
+  table: { art: TableArt; recolor: { from: [number, number, number]; to: [number, number, number] } | null } | null;
+  /** Draw the painted table over the set: the input the pipeline's sets pass restyles. */
+  painted?: boolean;
 }
 
 export interface FrameDraw {
@@ -53,6 +67,7 @@ export class Compositor {
   private blit;
   private card;
   private shadow;
+  private stage;
   private vidA: WebGLTexture;
   private vidB: WebGLTexture;
   private mask: WebGLTexture;
@@ -60,10 +75,24 @@ export class Compositor {
   private black: WebGLTexture;
   private fbo: WebGLFramebuffer;
   private fboTex: WebGLTexture;
+  /** The full-size frame with the cards on it, before the crop: what pass 3 reads. */
+  private scr: WebGLFramebuffer;
+  private scrTex: WebGLTexture;
+  private sceneRef: WebGLTexture;
+  private sceneMasks: WebGLTexture;
+  private sceneClutter: WebGLTexture;
+  private bgTex: WebGLTexture;
+  private topTex: WebGLTexture;
+  private feltTex: WebGLTexture;
+  private woodTex: WebGLTexture;
+  private backLine: [number, number, number] = [0, 0, 0];
+  private view: StageDraw;
   private quadBuf: WebGLBuffer;
   private vao: WebGLVertexArrayObject;
   readonly w: number;
   readonly h: number;
+  /** Draw the set alone, without her: the input the pipeline's set generation restyles. */
+  setOnly = false;
 
   constructor(canvas: HTMLCanvasElement, w: number, h: number, maskImg: TexImageSource, atlasImg: TexImageSource) {
     this.w = w;
@@ -77,6 +106,7 @@ export class Compositor {
     this.blit = compile(gl, FULLSCREEN_VS, BLIT_FS);
     this.card = compile(gl, CARD_VS, CARD_FS);
     this.shadow = compile(gl, CARD_VS, SHADOW_FS);
+    this.stage = compile(gl, FULLSCREEN_VS, STAGE_FS);
     this.vidA = this.texture();
     this.vidB = this.texture();
     this.black = this.texture();
@@ -96,7 +126,20 @@ export class Compositor {
     this.fbo = gl.createFramebuffer()!;
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.fboTex, 0);
+    this.scrTex = this.texture();
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    this.scr = gl.createFramebuffer()!;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.scr);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.scrTex, 0);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    this.sceneRef = this.black;
+    this.sceneMasks = this.black;
+    this.sceneClutter = this.black;
+    this.bgTex = this.texture();
+    this.topTex = this.texture();
+    this.feltTex = this.texture();
+    this.woodTex = this.black;
+    this.view = { crop: [0, 0, w, h], out: [w, h], set: null, table: null };
     this.vao = gl.createVertexArray()!;
     gl.bindVertexArray(this.vao);
     this.quadBuf = gl.createBuffer()!;
@@ -128,6 +171,44 @@ export class Compositor {
     return t;
   }
 
+  /** The pipeline's scene pass: the set without her, the masks she is keyed out with, the cloth's
+   * back edge (a line in source px, positive toward the camera), and the skirts' wood. */
+  setScene(ref: TexImageSource, masks: TexImageSource, clutter: TexImageSource, backLine: [number, number, number], wood: TexImageSource) {
+    const gl = this.gl;
+    this.sceneRef = this.imageTexture(ref);
+    this.sceneMasks = this.imageTexture(masks);
+    this.sceneClutter = this.imageTexture(clutter);
+    this.backLine = backLine;
+    this.woodTex = this.imageTexture(wood);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+  }
+
+  setView(v: StageDraw) {
+    const gl = this.gl;
+    this.view = v;
+    const canvas = gl.canvas as HTMLCanvasElement;
+    if (canvas.width !== v.out[0] || canvas.height !== v.out[1]) {
+      canvas.width = v.out[0];
+      canvas.height = v.out[1];
+    }
+    if (v.set) {
+      gl.bindTexture(gl.TEXTURE_2D, this.bgTex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, v.set);
+    }
+    if (v.table) {
+      // the painted top and its felt are cut out (alpha): premultiplied, so their edges don't fringe
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+      for (const [tex, img] of [[this.topTex, v.table.art.top], [this.feltTex, v.table.art.felt]] as const) {
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+        gl.generateMipmap(gl.TEXTURE_2D);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+      }
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    }
+  }
+
   private bind(unit: number, tex: WebGLTexture, loc: WebGLUniformLocation | null) {
     const gl = this.gl;
     gl.activeTexture(gl.TEXTURE0 + unit);
@@ -145,13 +226,21 @@ export class Compositor {
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, f.b);
     }
 
-    // pass 1: footage + plates -> fbo
+    // a deck playing a clip packed with her matte is twice the frame's height
+    const packed = (src: TexImageSource | undefined) => src instanceof HTMLVideoElement && src.videoHeight > h * 1.5;
+    const mixing = !!f.b && f.mix > 0;
+    const packA = packed(f.a);
+    const packB = mixing ? packed(f.b) : packA;
+
+    // pass 1: footage + plates -> fbo (her matte, where there is one, in alpha)
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
     gl.viewport(0, 0, w, h);
     gl.useProgram(this.comp.p);
     const u = this.comp.u;
     this.bind(0, this.vidA, u.uVidA);
-    this.bind(1, f.b && f.mix > 0 ? this.vidB : this.vidA, u.uVidB);
+    this.bind(1, mixing ? this.vidB : this.vidA, u.uVidB);
+    gl.uniform1i(u.uPackA, packA ? 1 : 0);
+    gl.uniform1i(u.uPackB, packB ? 1 : 0);
     gl.uniform1f(u.uMix, f.b ? f.mix : 0);
     this.bind(2, this.mask, u.uMask);
     const rects = new Float32Array(12);
@@ -170,19 +259,61 @@ export class Compositor {
     gl.uniform1i(u.uShowMasks, f.showMasks ? 1 : 0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
-    // pass 2: blit to screen, then the cards, each reading the composite beneath it
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    // pass 2: blit to the full-size frame, then the cards, each reading the composite beneath it
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.scr);
     gl.viewport(0, 0, w, h);
     gl.useProgram(this.blit.p);
     this.bind(0, this.fboTex, this.blit.u.uComp);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
-    if (!f.cards.length) return;
+    this.drawCards(f.cards);
 
+    // pass 3: crop it to the canvas, and put her in the set
+    const v = this.view;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, v.out[0], v.out[1]);
+    gl.useProgram(this.stage.p);
+    const su = this.stage.u;
+    this.bind(0, this.scrTex, su.uComp);
+    this.bind(1, this.sceneRef, su.uRef);
+    this.bind(2, this.sceneMasks, su.uMasks);
+    this.bind(3, this.bgTex, su.uSet);
+    this.bind(4, this.topTex, su.uTop);
+    this.bind(5, this.woodTex, su.uWood);
+    this.bind(6, this.sceneClutter, su.uClutter);
+    this.bind(7, this.feltTex, su.uFelt);
+    gl.uniform2f(su.uSize, w, h);
+    gl.uniform4fv(su.uCrop, v.crop);
+    gl.uniform3fv(su.uBackLine, this.backLine);
+    gl.uniform1i(su.uSetOnly, this.setOnly ? 1 : 0);
+    gl.uniform1i(su.uHasMatte, packA && packB ? 1 : 0);
+    // the mask overlay is for the plates: show the footage as filmed under it
+    gl.uniform1i(su.uHasSet, v.set && !f.showMasks ? 1 : 0);
+    const table = v.table;
+    gl.uniform1i(su.uSwapTable, table ? 1 : 0);
+    gl.uniform1i(su.uPainted, table && v.painted ? 1 : 0);
+    gl.uniform1i(su.uRecolor, table?.recolor ? 1 : 0);
+    if (table) {
+      const t = table.art;
+      gl.uniformMatrix3fv(su.uToTop, false, toColumnMajor(t.toTop));
+      gl.uniform2fv(su.uSkirt, t.skirt);
+      gl.uniform3fv(su.uSkirtTint, t.skirtTint);
+      gl.uniform3fv(su.uLed, t.led ?? [0, 0, 0]);
+      if (table.recolor) {
+        gl.uniform3fv(su.uFeltBase, table.recolor.from);
+        gl.uniform3fv(su.uFeltColor, table.recolor.to);
+      }
+    }
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  private drawCards(cards: CardDraw[]) {
+    const gl = this.gl;
+    if (!cards.length) return;
     // Cards overlap (a hit lands on the card before it), so each card must read
     // the composite *including* the faces already drawn under it.
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.quadBuf);
-    for (const c of f.cards) {
+    for (const c of cards) {
       if (c.alpha <= 0) continue;
       const invH = toColumnMajor(invert3(squareToQuad(c.quad)));
       gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(c.quad.flat()));
@@ -204,12 +335,12 @@ export class Compositor {
 
   /**
    * A card pass writes into the same fbo it reads from, which is undefined in
-   * GL; so each pass renders to the default framebuffer and the touched region
+   * GL; so each pass renders to the full-size frame and the touched region
    * is copied back into the fbo before the next card.
    */
   private drawCardPass(prog: { p: WebGLProgram; u: Record<string, WebGLUniformLocation | null> }, invH: number[], c: CardDraw, mode: number) {
     const gl = this.gl;
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.scr);
     gl.useProgram(prog.p);
     const u = prog.u;
     this.bind(0, this.fboTex, u.uComp);
@@ -224,7 +355,7 @@ export class Compositor {
       gl.uniform1f(u.uRefWhite, 0.9);
     }
     gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
-    // copy the card's bounding box from the screen back into the composite
+    // copy the card's bounding box from the frame back into the composite
     const xs = c.quad.map((p) => p[0]);
     const ys = c.quad.map((p) => p[1]);
     const x0 = Math.max(0, Math.floor(Math.min(...xs)) - 6);

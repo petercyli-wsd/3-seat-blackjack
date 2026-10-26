@@ -1,0 +1,28 @@
+{
+  "corners": [
+    [
+      128.6,
+      342.8
+    ],
+    [
+      1065.9,
+      354.3
+    ],
+    [
+      1202.3,
+      597.9
+    ],
+    [
+      -10.3,
+      590.9
+    ]
+  ],
+  "planeCm": [
+    240.6,
+    104.8
+  ],
+  "reference": "scene/reference.png",
+  "masks": "scene/masks.png",
+  "clutter": "scene/clutter.png",
+  "frames": 1114
+}

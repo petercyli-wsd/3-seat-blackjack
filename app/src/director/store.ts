@@ -2,6 +2,7 @@ import { useSyncExternalStore } from "react";
 import type { Card } from "../engine/cards";
 import type { Settlement } from "../engine/settle";
 import type { SeatId } from "../media/manifest";
+import type { BackgroundId, Framing, TableId } from "../render/stageArt";
 
 export type Phase = "loading" | "error" | "betting" | "dealing" | "players" | "dealer" | "settling" | "clearing";
 export type SeatStatus = "empty" | "seated" | "waiting" | "acting" | "stood" | "bust" | "blackjack" | "charlie" | "twentyone";
@@ -60,6 +61,15 @@ export interface GameState {
   debug: DebugInfo;
   showMasks: boolean;
   scenario: string;
+  /** Dealer: cropped to her and the table, as on live studio tables. Studio: the whole take. */
+  framing: Framing;
+  /** The studio set she is in, and its table's felt; "studio" keeps either as filmed. */
+  background: BackgroundId;
+  table: TableId;
+  /** The choices there are, with their names: none until the scene masks load (or if the
+   * pipeline's scene pass hasn't run). "studio" first in each. */
+  backgrounds: { id: BackgroundId; name: string }[];
+  tables: { id: TableId; name: string }[];
 }
 
 const seat = (): SeatState => ({ taken: false, bet: 0, cards: [], status: "empty", result: null });
@@ -88,6 +98,11 @@ export const initialState = (): GameState => ({
   },
   showMasks: false,
   scenario: "random",
+  framing: "dealer",
+  background: "lotus",
+  table: "studio-blue",
+  backgrounds: [],
+  tables: [],
 });
 
 export class Store {

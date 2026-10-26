@@ -7,6 +7,9 @@ import { ClipLoader, loadImage } from "./media/preload";
 import { Compositor } from "./render/Compositor";
 import { buildFaceAtlas } from "./render/faceAtlas";
 import { Scene } from "./render/scene";
+import {
+  DEALER_CROP, DEALER_OUT, FELTS, type TableArt, backLine, loadMattes, loadSceneInfo, loadSets, loadSkirtWood, paintSet, paintTable,
+} from "./render/stageArt";
 
 export interface Table {
   store: Store;
@@ -35,6 +38,7 @@ export async function bootTable(canvas: HTMLCanvasElement, host: HTMLElement, st
     const rejected = all.filter((b) => b.rejected).length;
     store.set((s) => ({ debug: { ...s.debug, bridges: { tool, flow: all.length - tool - cut, cut, rejected } } }));
   }
+  // clips the pipeline has packed with her matte are played packed
   const files = new ClipLoader(
     m,
     (done, total) => {
@@ -42,12 +46,63 @@ export async function bootTable(canvas: HTMLCanvasElement, host: HTMLElement, st
       if (store.get().phase === "loading" && done <= files.bootCount) setLoading("Loading dealer footage", done, files.bootCount);
     },
     (e) => store.set({ error: `Footage failed to load: ${e.message}` }),
+    await loadMattes(),
   );
   setLoading("Loading dealer footage", 0, files.bootCount);
   await document.fonts.ready;
   const mask = await loadImage(ASSET_BASE + m.masks);
   const atlas = buildFaceAtlas();
   const compositor = new Compositor(canvas, m.width, m.height, mask, atlas);
+  const sceneInfo = await loadSceneInfo();
+  const sets = sceneInfo ? await loadSets() : [];
+  const studio = { id: "studio", name: "As filmed" };
+  if (sceneInfo) {
+    const [ref, masks, clutter, wood] = await Promise.all([
+      loadImage(ASSET_BASE + sceneInfo.reference), loadImage(ASSET_BASE + sceneInfo.masks), loadImage(ASSET_BASE + sceneInfo.clutter), loadSkirtWood(),
+    ]);
+    compositor.setScene(ref, masks, clutter, backLine(sceneInfo), wood);
+    store.set({
+      backgrounds: [...sets.map(({ id, name }) => ({ id, name })), studio],
+      tables: [...FELTS.map(({ id, name }) => ({ id, name })), studio],
+    });
+    if (!sets.some((x) => x.id === store.get().background)) store.set({ background: sets[0]?.id ?? "studio" });
+  }
+  // ?framing=studio&background=studio&table=studio: the browser checks read the canvas in source pixels
+  const q = new URLSearchParams(location.search);
+  const qFraming = q.get("framing");
+  if (qFraming === "dealer" || qFraming === "studio") store.set({ framing: qFraming });
+  for (const k of ["background", "table"] as const) {
+    const v = q.get(k);
+    if (v) store.set({ [k]: v });
+  }
+
+  // the view: framing, set and felt; each set painted once, re-applied when any changes
+  const painted = new Map<string, Promise<TexImageSource>>();
+  const tableArt: Promise<TableArt> | null = sceneInfo ? paintTable(sceneInfo, m) : null;
+  let viewKey = "";
+  let viewVersion = 0;
+  const applyView = async () => {
+    const { framing, background, table } = store.get();
+    const key = `${framing}/${background}/${table}`;
+    if (key === viewKey) return;
+    viewKey = key;
+    // a set needs the dealer framing: the full take shows the set as filmed
+    const dealer = framing === "dealer";
+    const set = dealer ? sets.find((x) => x.id === background) : undefined;
+    if (set && !painted.has(set.id)) painted.set(set.id, paintSet(set));
+    const felt = FELTS.find((f) => f.id === table);
+    const [image, art] = await Promise.all([set ? painted.get(set.id)! : null, set && felt ? tableArt : null]);
+    if (viewKey !== key) return;
+    compositor.setView({
+      crop: dealer ? DEALER_CROP : [0, 0, m.width, m.height],
+      out: dealer ? DEALER_OUT : [m.width, m.height],
+      set: image,
+      table: set && felt && art ? { art, recolor: felt.colour ? { from: set.felt, to: felt.colour } : null } : null,
+    });
+    viewVersion++;
+  };
+  await applyView();
+  const unsubscribe = store.subscribe(() => void applyView());
   setLoading("Grabbing seat plates");
   const plates = await grabPlates(m, files, maskRects(mask, m.seats), host);
   const plateTex = {} as Record<SeatId, Record<number, WebGLTexture>>;
@@ -76,7 +131,7 @@ export async function bootTable(canvas: HTMLCanvasElement, host: HTMLElement, st
     const v0 = director.view;
     const drawn = [
       player.decks.indexOf(active), active.fileFrame, from ? player.decks.indexOf(from) : -1, from?.fileFrame, player.fadeT,
-      v0.seats.seat1.length, v0.seats.seat2.length, v0.seats.seat3.length, v0.dealer.length, store.get().showMasks,
+      v0.seats.seat1.length, v0.seats.seat2.length, v0.seats.seat3.length, v0.dealer.length, store.get().showMasks, viewVersion,
     ].join();
     const animating = v0.dealerDrawAt.some((t) => now - t < DRAW_ANIM_MS);
     if (drawn === lastDrawn && !animating) return;
@@ -109,13 +164,16 @@ export async function bootTable(canvas: HTMLCanvasElement, host: HTMLElement, st
   };
   raf = requestAnimationFrame(loop);
   // browser checks (scripts/probe.mjs, scripts/frames.mjs) read and draw the live table through this
-  if (import.meta.env.DEV) Object.assign(window, { __table: { store, director, player, scene, compositor, m } });
+  if (import.meta.env.DEV) {
+    Object.assign(window, { __table: { store, director, player, scene, compositor, m, tableArt } });
+  }
   await director.open();
   return {
     store,
     director,
     dispose() {
       cancelAnimationFrame(raf);
+      unsubscribe();
       player.stopAll();
       files.dispose();
     },

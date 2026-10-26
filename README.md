@@ -183,6 +183,47 @@ The table opens once the opening idle and the plate clips are in memory (~22 MB)
 the footage it plays (~160 MB in all; part 2's own deal, reveal and discard are never used) loads behind
 it, in the order a round needs it, and the LIVE badge shows the progress.
 
+## Framing, studios and tables
+
+The table opens cropped to the dealer, framed like a live studio table. Her head is near the top,
+the table's back edge is just past halfway down, and the seats' cards are in the lower third.
+**Room** picks a studio set and **Table** picks its felt; either can be "As filmed". **Full take**
+shows the whole frame as filmed. Her footage never changes: she is put in the set in the
+compositor's last pass (`STAGE_FS`).
+
+- **Studio sets** come from `bj3/sets.py` (needs `RUNNINGHUB_API_KEY` in `.env`), using
+  nano-banana-pro on RunningHub.
+  - Its input is the app's own render of the empty set: the painted table on a grey backdrop,
+    made with `node app/scripts/set-input.mjs`.
+  - So each set's camera, perspective and table geometry are this take's.
+  - Each result is aligned back onto the input (a homography on the table's edges), so the
+    table's back edge lands on the real cloth's.
+  - `ROOMS` holds the prompts.
+  - The felt is always generated blue. A table choice recolours only the felt's share of each
+    pixel, by its blue, so the print and the light stay.
+- **Her matte** comes from `bj3/mattes.py`, which runs MatAnyone 2 on RunningHub over every clip
+  and loop.
+  - Each file is re-encoded with its matte stacked below the picture, as 1440×1620 in
+    `game_assets/matted/`, so the browser decodes picture and matte in lockstep.
+  - It is listed in `scene/mattes.json`, and the loader plays the packed file instead.
+  - Re-run it after re-cutting clips. A clip without a packed version falls back to the colour
+    key below, as the generated bridges always do.
+- **Masks** come from `bj3/scene.py`; run it once per take.
+  - It builds the set as filmed without her (`reference.png`).
+  - It writes her envelope, the cloth, her reach on it, the clutter on it to erase, and the shoe
+    and discard holder.
+- **Keying, per pixel:** coverage `a` is computed, and her colour is unmixed from the reference,
+  `F = (C − (1 − a)·ref) / a`, before being laid over the set.
+  - Above the cloth, `a` is her matte, plus cards she carries (far brighter than the wall) and
+    the tops of the props.
+  - Without a matte, `a` is how unlike the wall she is.
+  - On the cloth, `a` is the share of the bare felt's blue that is missing (cards, her hands,
+    her shadows), plus her matte.
+  - Her shadow, which is the felt darkened, becomes the new felt darkened alike.
+- **Browser checks:** `capture`, `probe` and `frames` read the canvas in source pixels, so they
+  open `?framing=studio&background=studio&table=studio`. Use `BACKGROUND=lotus TABLE=emerald
+  node scripts/frames.mjs …` to render frames in a set; those frames play the unpacked clips.
+
 ## Round flow
 
 ```

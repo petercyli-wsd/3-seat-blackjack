@@ -21,10 +21,15 @@ export class ClipLoader {
   readonly bootCount: number;
   done = 0;
 
+  /**
+   * `packed` names, for a file, the version of it with the dealer's matte stacked below the
+   * picture (the pipeline's mattes pass): that is what is fetched for it.
+   */
   constructor(
     m: Manifest,
     private onProgress: (loaded: number, total: number) => void,
     private onError: (e: Error) => void,
+    private packed: Record<string, string> = {},
   ) {
     const order = loadOrder(m);
     this.queue = order.files;
@@ -58,7 +63,7 @@ export class ClipLoader {
     for (let f = this.queue.shift(); f; f = this.queue.shift()) {
       const w = this.waiting.get(f)!;
       try {
-        const url = URL.createObjectURL(new Blob([await fetchBlob(ASSET_BASE + f)], { type: "video/mp4" }));
+        const url = URL.createObjectURL(new Blob([await fetchBlob(ASSET_BASE + (this.packed[f] ?? f))], { type: "video/mp4" }));
         this.urls.set(f, url);
         w.resolve(url);
         this.onProgress(++this.done, this.total);

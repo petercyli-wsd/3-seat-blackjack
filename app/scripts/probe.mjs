@@ -16,7 +16,7 @@ const browser = await chromium.launch({ channel: "msedge", headless: true, args:
 const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
-await page.goto(process.env.BASE_URL ?? "http://localhost:5183/");
+await page.goto((process.env.BASE_URL ?? "http://localhost:5183/") + "?framing=studio&background=studio&table=studio");
 await page.waitForSelector(".betbar", { timeout: 240_000 });
 await page.click(".icon-btn:has-text('Director')");
 await page.selectOption(".dp-select", scenario);

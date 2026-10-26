@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { type Store, useGame } from "../director/store";
 import { label } from "../engine/rules";
 import type { SeatId } from "../media/manifest";
+import { DEALER_CROP, type Rect } from "../render/stageArt";
 import { OUTCOME_LABEL, STATUS_LABEL, seatNo, signedMoney } from "./format";
 
 const W = 1440;
@@ -14,7 +15,9 @@ const SEAT_ANCHOR: Record<SeatId, [number, number]> = {
 };
 const DEALER_ANCHOR: [number, number] = [761, 352];
 
-const at = ([x, y]: [number, number]) => ({ left: `${(x / W) * 100}%`, top: `${(y / H) * 100}%` });
+const FULL: Rect = [0, 0, W, H];
+const at = ([x, y]: [number, number], [cx, cy, cw, ch]: Rect) => ({ left: `${((x - cx) / cw) * 100}%`, top: `${((y - cy) / ch) * 100}%` });
+const useCrop = (store: Store) => (useGame(store, (s) => s.framing) === "dealer" ? DEALER_CROP : FULL);
 
 function useNow(active: boolean) {
   const [now, setNow] = useState(() => performance.now());
@@ -37,6 +40,7 @@ function SeatMarker({ store, id }: { store: Store; id: SeatId }) {
   const decision = useGame(store, (s) => (s.decision?.seat === id ? s.decision : null));
   const phase = useGame(store, (s) => s.phase);
   const now = useNow(!!decision);
+  const crop = useCrop(store);
   if (!seat.taken) return null;
   const shown = seat.cards.slice(0, visible);
   const total = label(shown);
@@ -46,7 +50,7 @@ function SeatMarker({ store, id }: { store: Store; id: SeatId }) {
   const circ = 2 * Math.PI * r;
   const result = phase === "settling" || phase === "clearing" ? seat.result : null;
   return (
-    <div className={`seat-marker status-${status} ${decision ? "is-acting" : ""}`} style={at(SEAT_ANCHOR[id])}>
+    <div className={`seat-marker status-${status} ${decision ? "is-acting" : ""}`} style={at(SEAT_ANCHOR[id], crop)}>
       {decision && (
         <svg className="seat-timer" viewBox="0 0 64 64" aria-hidden>
           <circle cx="32" cy="32" r={r} className="seat-timer-track" />
@@ -76,10 +80,11 @@ function SeatMarker({ store, id }: { store: Store; id: SeatId }) {
 function DealerMarker({ store }: { store: Store }) {
   const dealer = useGame(store, (s) => s.dealer);
   const visible = useGame(store, (s) => s.visible.dealer);
+  const crop = useCrop(store);
   if (!dealer.length || !visible) return null;
   const total = label(dealer.slice(0, visible));
   return (
-    <div className="dealer-marker" style={at(DEALER_ANCHOR)}>
+    <div className="dealer-marker" style={at(DEALER_ANCHOR, crop)}>
       <span className="dealer-marker-label">Dealer</span>
       <span className="dealer-marker-total">{total}</span>
     </div>
@@ -110,6 +115,50 @@ function Toast({ store }: { store: Store }) {
   );
 }
 
+function SceneSelect({ label, value, options, disabled, onChange }: {
+  label: string;
+  value: string;
+  options: { id: string; name: string }[];
+  disabled: boolean;
+  onChange: (id: string) => void;
+}) {
+  return (
+    <label className="stage-scene-field" title={disabled ? `${label}: needs the dealer view` : label}>
+      <span className="stage-scene-label">{label}</span>
+      <select className="stage-scene-select" value={disabled ? "studio" : value} disabled={disabled} onChange={(e) => onChange(e.target.value)}>
+        {options.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+      </select>
+    </label>
+  );
+}
+
+/** The studio set she is in and its table's felt, chosen apart, and how close the camera is cut. */
+function SceneControls({ store }: { store: Store }) {
+  const backgrounds = useGame(store, (s) => s.backgrounds);
+  const tables = useGame(store, (s) => s.tables);
+  const background = useGame(store, (s) => s.background);
+  const table = useGame(store, (s) => s.table);
+  const framing = useGame(store, (s) => s.framing);
+  if (!tables.length) return null;
+  const full = framing === "studio";
+  return (
+    <div className="stage-scene">
+      <SceneSelect label="Room" value={background} options={backgrounds} disabled={full} onChange={(id) => store.set({ background: id })} />
+      <span className="stage-live-sep" />
+      {/* a filmed room has the filmed table: a set's table belongs to its set */}
+      <SceneSelect label="Table" value={table} options={tables} disabled={full || background === "studio"} onChange={(id) => store.set({ table: id })} />
+      <span className="stage-live-sep" />
+      <button
+        className={`stage-scene-frame ${full ? "is-on" : ""}`}
+        onClick={() => store.set({ framing: full ? "dealer" : "studio" })}
+        title={full ? "Frame the dealer" : "Show the whole take, as filmed"}
+      >
+        {full ? "Full take" : "Dealer view"}
+      </button>
+    </div>
+  );
+}
+
 export function Stage({ store, canvasRef, hostRef }: {
   store: Store;
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -117,9 +166,10 @@ export function Stage({ store, canvasRef, hostRef }: {
 }) {
   const phase = useGame(store, (s) => s.phase);
   const round = useGame(store, (s) => s.round);
+  const framing = useGame(store, (s) => s.framing);
   return (
     <div className="stage">
-      <div className="stage-frame">
+      <div className={`stage-frame framing-${framing}`}>
         <canvas ref={canvasRef} className="stage-canvas" />
         <div ref={hostRef} className="stage-decks" aria-hidden />
         <div className="stage-overlay">
@@ -130,6 +180,7 @@ export function Stage({ store, canvasRef, hostRef }: {
             {round > 0 && <span className="stage-live-round">Round {round}</span>}
             <FootageStatus store={store} />
           </div>
+          <SceneControls store={store} />
           <DealerMarker store={store} />
           {(["seat1", "seat2", "seat3"] as SeatId[]).map((id) => (
             <SeatMarker key={id} store={store} id={id} />

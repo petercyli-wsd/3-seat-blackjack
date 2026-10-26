@@ -8,3 +8,4 @@ bridges/stubs/
 bridges/generated/
 .vite/
 bridges/review.html
+.env

@@ -3,18 +3,22 @@
 // by frame without having to catch the moment in a live round.
 // Usage: node scripts/frames.mjs <clip> <from> <to> [step] [x,y,w,h crop] [out.png]   (ZOOM=3 to enlarge)
 //   e.g. node scripts/frames.mjs 111_deal 200 240 2 680,340,160,90
+// TABLE=emerald and/or BACKGROUND=music_hall_01 (ids in stageArt.ts, game_assets/scene/backgrounds.json)
+// draw them in the dealer framing with that table or room; the crop is then in its 1600x900 canvas.
 // Hands: seats get 7H 8C, KD 3S, 5S 2D and hits 4C 6H 9D QS; the dealer AD 9C (up, hole).
 import { chromium } from "playwright";
 import { mkdirSync, writeFileSync } from "node:fs";
 
-const [clip, from, to, step = "1", crop = "0,0,1440,810", outName] = process.argv.slice(2);
+const { TABLE: table = "studio", BACKGROUND: background = "studio" } = process.env;
+const dealer = table !== "studio" || background !== "studio";
+const [clip, from, to, step = "1", crop = dealer ? "0,0,1600,900" : "0,0,1440,810", outName] = process.argv.slice(2);
 const dir = new URL("../shots/", import.meta.url);
 mkdirSync(dir, { recursive: true });
 const file = (n) => new URL(n, dir).pathname.replace(/^\/([A-Z]:)/, "$1");
 const browser = await chromium.launch({ channel: "msedge", headless: true, args: ["--autoplay-policy=no-user-gesture-required"] });
 const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
 page.on("pageerror", (e) => console.error("[pageerror]", e.message));
-await page.goto(process.env.BASE_URL ?? "http://localhost:5183/");
+await page.goto((process.env.BASE_URL ?? "http://localhost:5183/") + `?framing=${dealer ? "dealer" : "studio"}&background=${background}&table=${table}`);
 await page.waitForSelector(".betbar", { timeout: 240_000 });
 
 const sheet = await page.evaluate(async ({ clip, from, to, step, crop, zoom }) => {

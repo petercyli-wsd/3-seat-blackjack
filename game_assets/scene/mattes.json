@@ -1,0 +1,442 @@
+{
+ "clips/full_table/full_table_deal.mp4": {
+  "file": "matted/clips/full_table/full_table_deal.mp4",
+  "sourceSize": 4622733
+ },
+ "clips/full_table/full_table_discard.mp4": {
+  "file": "matted/clips/full_table/full_table_discard.mp4",
+  "sourceSize": 3102104
+ },
+ "clips/full_table/full_table_hold.mp4": {
+  "file": "matted/clips/full_table/full_table_hold.mp4",
+  "sourceSize": 474141
+ },
+ "clips/full_table/full_table_idle.mp4": {
+  "file": "matted/clips/full_table/full_table_idle.mp4",
+  "sourceSize": 1902731
+ },
+ "clips/full_table/full_table_reveal.mp4": {
+  "file": "matted/clips/full_table/full_table_reveal.mp4",
+  "sourceSize": 1067128
+ },
+ "clips/full_table/full_table_wait.mp4": {
+  "file": "matted/clips/full_table/full_table_wait.mp4",
+  "sourceSize": 2200919
+ },
+ "clips/hits/seat1_card3_deal.mp4": {
+  "file": "matted/clips/hits/seat1_card3_deal.mp4",
+  "sourceSize": 1614751
+ },
+ "clips/hits/seat1_card3_wait.mp4": {
+  "file": "matted/clips/hits/seat1_card3_wait.mp4",
+  "sourceSize": 1123879
+ },
+ "clips/hits/seat1_card4_deal.mp4": {
+  "file": "matted/clips/hits/seat1_card4_deal.mp4",
+  "sourceSize": 1339363
+ },
+ "clips/hits/seat1_card4_wait.mp4": {
+  "file": "matted/clips/hits/seat1_card4_wait.mp4",
+  "sourceSize": 1255185
+ },
+ "clips/hits/seat1_card5_deal.mp4": {
+  "file": "matted/clips/hits/seat1_card5_deal.mp4",
+  "sourceSize": 1487385
+ },
+ "clips/hits/seat1_card5_wait.mp4": {
+  "file": "matted/clips/hits/seat1_card5_wait.mp4",
+  "sourceSize": 865113
+ },
+ "clips/hits/seat1_card6_deal.mp4": {
+  "file": "matted/clips/hits/seat1_card6_deal.mp4",
+  "sourceSize": 1988959
+ },
+ "clips/hits/seat1_card6_wait.mp4": {
+  "file": "matted/clips/hits/seat1_card6_wait.mp4",
+  "sourceSize": 1615622
+ },
+ "clips/hits/seat2_card3_deal.mp4": {
+  "file": "matted/clips/hits/seat2_card3_deal.mp4",
+  "sourceSize": 1390192
+ },
+ "clips/hits/seat2_card3_wait.mp4": {
+  "file": "matted/clips/hits/seat2_card3_wait.mp4",
+  "sourceSize": 926619
+ },
+ "clips/hits/seat2_card4_deal.mp4": {
+  "file": "matted/clips/hits/seat2_card4_deal.mp4",
+  "sourceSize": 1578163
+ },
+ "clips/hits/seat2_card4_wait.mp4": {
+  "file": "matted/clips/hits/seat2_card4_wait.mp4",
+  "sourceSize": 1768682
+ },
+ "clips/hits/seat2_card5_deal.mp4": {
+  "file": "matted/clips/hits/seat2_card5_deal.mp4",
+  "sourceSize": 1136408
+ },
+ "clips/hits/seat2_card5_wait.mp4": {
+  "file": "matted/clips/hits/seat2_card5_wait.mp4",
+  "sourceSize": 1686347
+ },
+ "clips/hits/seat2_card6_deal.mp4": {
+  "file": "matted/clips/hits/seat2_card6_deal.mp4",
+  "sourceSize": 1172067
+ },
+ "clips/hits/seat2_card6_wait.mp4": {
+  "file": "matted/clips/hits/seat2_card6_wait.mp4",
+  "sourceSize": 1396434
+ },
+ "clips/hits/seat3_card3_deal.mp4": {
+  "file": "matted/clips/hits/seat3_card3_deal.mp4",
+  "sourceSize": 1485703
+ },
+ "clips/hits/seat3_card3_wait.mp4": {
+  "file": "matted/clips/hits/seat3_card3_wait.mp4",
+  "sourceSize": 1239371
+ },
+ "clips/hits/seat3_card4_deal.mp4": {
+  "file": "matted/clips/hits/seat3_card4_deal.mp4",
+  "sourceSize": 1245969
+ },
+ "clips/hits/seat3_card4_wait.mp4": {
+  "file": "matted/clips/hits/seat3_card4_wait.mp4",
+  "sourceSize": 1538602
+ },
+ "clips/hits/seat3_card5_deal.mp4": {
+  "file": "matted/clips/hits/seat3_card5_deal.mp4",
+  "sourceSize": 1479606
+ },
+ "clips/hits/seat3_card5_wait.mp4": {
+  "file": "matted/clips/hits/seat3_card5_wait.mp4",
+  "sourceSize": 1277563
+ },
+ "clips/hits/seat3_card6_deal.mp4": {
+  "file": "matted/clips/hits/seat3_card6_deal.mp4",
+  "sourceSize": 2407058
+ },
+ "clips/hits/seat3_card6_wait.mp4": {
+  "file": "matted/clips/hits/seat3_card6_wait.mp4",
+  "sourceSize": 509343
+ },
+ "clips/starting_hands/001_deal.mp4": {
+  "file": "matted/clips/starting_hands/001_deal.mp4",
+  "sourceSize": 3509625
+ },
+ "clips/starting_hands/001_discard.mp4": {
+  "file": "matted/clips/starting_hands/001_discard.mp4",
+  "sourceSize": 1225433
+ },
+ "clips/starting_hands/001_hold.mp4": {
+  "file": "matted/clips/starting_hands/001_hold.mp4",
+  "sourceSize": 439201
+ },
+ "clips/starting_hands/001_idle.mp4": {
+  "file": "matted/clips/starting_hands/001_idle.mp4",
+  "sourceSize": 1686507
+ },
+ "clips/starting_hands/001_reveal.mp4": {
+  "file": "matted/clips/starting_hands/001_reveal.mp4",
+  "sourceSize": 1132032
+ },
+ "clips/starting_hands/001_wait.mp4": {
+  "file": "matted/clips/starting_hands/001_wait.mp4",
+  "sourceSize": 1089384
+ },
+ "clips/starting_hands/010_deal.mp4": {
+  "file": "matted/clips/starting_hands/010_deal.mp4",
+  "sourceSize": 3540702
+ },
+ "clips/starting_hands/010_discard.mp4": {
+  "file": "matted/clips/starting_hands/010_discard.mp4",
+  "sourceSize": 2426285
+ },
+ "clips/starting_hands/010_hold.mp4": {
+  "file": "matted/clips/starting_hands/010_hold.mp4",
+  "sourceSize": 503761
+ },
+ "clips/starting_hands/010_idle.mp4": {
+  "file": "matted/clips/starting_hands/010_idle.mp4",
+  "sourceSize": 476760
+ },
+ "clips/starting_hands/010_reveal.mp4": {
+  "file": "matted/clips/starting_hands/010_reveal.mp4",
+  "sourceSize": 1216991
+ },
+ "clips/starting_hands/010_wait.mp4": {
+  "file": "matted/clips/starting_hands/010_wait.mp4",
+  "sourceSize": 1759157
+ },
+ "clips/starting_hands/011_deal.mp4": {
+  "file": "matted/clips/starting_hands/011_deal.mp4",
+  "sourceSize": 3953632
+ },
+ "clips/starting_hands/011_discard.mp4": {
+  "file": "matted/clips/starting_hands/011_discard.mp4",
+  "sourceSize": 2556469
+ },
+ "clips/starting_hands/011_hold.mp4": {
+  "file": "matted/clips/starting_hands/011_hold.mp4",
+  "sourceSize": 508358
+ },
+ "clips/starting_hands/011_idle.mp4": {
+  "file": "matted/clips/starting_hands/011_idle.mp4",
+  "sourceSize": 499269
+ },
+ "clips/starting_hands/011_reveal.mp4": {
+  "file": "matted/clips/starting_hands/011_reveal.mp4",
+  "sourceSize": 1206067
+ },
+ "clips/starting_hands/011_wait.mp4": {
+  "file": "matted/clips/starting_hands/011_wait.mp4",
+  "sourceSize": 1929811
+ },
+ "clips/starting_hands/100_deal.mp4": {
+  "file": "matted/clips/starting_hands/100_deal.mp4",
+  "sourceSize": 3165814
+ },
+ "clips/starting_hands/100_discard.mp4": {
+  "file": "matted/clips/starting_hands/100_discard.mp4",
+  "sourceSize": 2502832
+ },
+ "clips/starting_hands/100_hold.mp4": {
+  "file": "matted/clips/starting_hands/100_hold.mp4",
+  "sourceSize": 523029
+ },
+ "clips/starting_hands/100_idle.mp4": {
+  "file": "matted/clips/starting_hands/100_idle.mp4",
+  "sourceSize": 775665
+ },
+ "clips/starting_hands/100_reveal.mp4": {
+  "file": "matted/clips/starting_hands/100_reveal.mp4",
+  "sourceSize": 1307274
+ },
+ "clips/starting_hands/100_wait.mp4": {
+  "file": "matted/clips/starting_hands/100_wait.mp4",
+  "sourceSize": 1591037
+ },
+ "clips/starting_hands/101_deal.mp4": {
+  "file": "matted/clips/starting_hands/101_deal.mp4",
+  "sourceSize": 5585418
+ },
+ "clips/starting_hands/101_discard.mp4": {
+  "file": "matted/clips/starting_hands/101_discard.mp4",
+  "sourceSize": 2363936
+ },
+ "clips/starting_hands/101_hold.mp4": {
+  "file": "matted/clips/starting_hands/101_hold.mp4",
+  "sourceSize": 484969
+ },
+ "clips/starting_hands/101_idle.mp4": {
+  "file": "matted/clips/starting_hands/101_idle.mp4",
+  "sourceSize": 1220997
+ },
+ "clips/starting_hands/101_reveal.mp4": {
+  "file": "matted/clips/starting_hands/101_reveal.mp4",
+  "sourceSize": 1160019
+ },
+ "clips/starting_hands/101_wait.mp4": {
+  "file": "matted/clips/starting_hands/101_wait.mp4",
+  "sourceSize": 756557
+ },
+ "clips/starting_hands/110_deal.mp4": {
+  "file": "matted/clips/starting_hands/110_deal.mp4",
+  "sourceSize": 5059417
+ },
+ "clips/starting_hands/110_discard.mp4": {
+  "file": "matted/clips/starting_hands/110_discard.mp4",
+  "sourceSize": 1766132
+ },
+ "clips/starting_hands/110_hold.mp4": {
+  "file": "matted/clips/starting_hands/110_hold.mp4",
+  "sourceSize": 421694
+ },
+ "clips/starting_hands/110_idle.mp4": {
+  "file": "matted/clips/starting_hands/110_idle.mp4",
+  "sourceSize": 2205065
+ },
+ "clips/starting_hands/110_reveal.mp4": {
+  "file": "matted/clips/starting_hands/110_reveal.mp4",
+  "sourceSize": 1329904
+ },
+ "clips/starting_hands/110_wait.mp4": {
+  "file": "matted/clips/starting_hands/110_wait.mp4",
+  "sourceSize": 672756
+ },
+ "clips/starting_hands/111_deal.mp4": {
+  "file": "matted/clips/starting_hands/111_deal.mp4",
+  "sourceSize": 6474084
+ },
+ "clips/starting_hands/111_discard.mp4": {
+  "file": "matted/clips/starting_hands/111_discard.mp4",
+  "sourceSize": 2259613
+ },
+ "clips/starting_hands/111_hold.mp4": {
+  "file": "matted/clips/starting_hands/111_hold.mp4",
+  "sourceSize": 488505
+ },
+ "clips/starting_hands/111_idle.mp4": {
+  "file": "matted/clips/starting_hands/111_idle.mp4",
+  "sourceSize": 2184452
+ },
+ "clips/starting_hands/111_reveal.mp4": {
+  "file": "matted/clips/starting_hands/111_reveal.mp4",
+  "sourceSize": 1151548
+ },
+ "clips/starting_hands/111_wait.mp4": {
+  "file": "matted/clips/starting_hands/111_wait.mp4",
+  "sourceSize": 914771
+ },
+ "clips/starting_hands/opening_idle.mp4": {
+  "file": "matted/clips/starting_hands/opening_idle.mp4",
+  "sourceSize": 1218341
+ },
+ "loops/001_hold_loop.mp4": {
+  "file": "matted/loops/001_hold_loop.mp4",
+  "sourceSize": 853684
+ },
+ "loops/001_idle_loop.mp4": {
+  "file": "matted/loops/001_idle_loop.mp4",
+  "sourceSize": 1631873
+ },
+ "loops/001_wait_loop.mp4": {
+  "file": "matted/loops/001_wait_loop.mp4",
+  "sourceSize": 1086152
+ },
+ "loops/010_hold_loop.mp4": {
+  "file": "matted/loops/010_hold_loop.mp4",
+  "sourceSize": 1024045
+ },
+ "loops/010_idle_loop.mp4": {
+  "file": "matted/loops/010_idle_loop.mp4",
+  "sourceSize": 968978
+ },
+ "loops/010_wait_loop.mp4": {
+  "file": "matted/loops/010_wait_loop.mp4",
+  "sourceSize": 1098907
+ },
+ "loops/011_hold_loop.mp4": {
+  "file": "matted/loops/011_hold_loop.mp4",
+  "sourceSize": 1011712
+ },
+ "loops/011_idle_loop.mp4": {
+  "file": "matted/loops/011_idle_loop.mp4",
+  "sourceSize": 998907
+ },
+ "loops/011_wait_loop.mp4": {
+  "file": "matted/loops/011_wait_loop.mp4",
+  "sourceSize": 1063975
+ },
+ "loops/100_hold_loop.mp4": {
+  "file": "matted/loops/100_hold_loop.mp4",
+  "sourceSize": 1060124
+ },
+ "loops/100_idle_loop.mp4": {
+  "file": "matted/loops/100_idle_loop.mp4",
+  "sourceSize": 1043882
+ },
+ "loops/100_wait_loop.mp4": {
+  "file": "matted/loops/100_wait_loop.mp4",
+  "sourceSize": 1077203
+ },
+ "loops/101_hold_loop.mp4": {
+  "file": "matted/loops/101_hold_loop.mp4",
+  "sourceSize": 986742
+ },
+ "loops/101_idle_loop.mp4": {
+  "file": "matted/loops/101_idle_loop.mp4",
+  "sourceSize": 1507219
+ },
+ "loops/101_wait_loop.mp4": {
+  "file": "matted/loops/101_wait_loop.mp4",
+  "sourceSize": 1043407
+ },
+ "loops/110_hold_loop.mp4": {
+  "file": "matted/loops/110_hold_loop.mp4",
+  "sourceSize": 731727
+ },
+ "loops/110_idle_loop.mp4": {
+  "file": "matted/loops/110_idle_loop.mp4",
+  "sourceSize": 1979716
+ },
+ "loops/110_wait_loop.mp4": {
+  "file": "matted/loops/110_wait_loop.mp4",
+  "sourceSize": 1087983
+ },
+ "loops/111_hold_loop.mp4": {
+  "file": "matted/loops/111_hold_loop.mp4",
+  "sourceSize": 951668
+ },
+ "loops/111_idle_loop.mp4": {
+  "file": "matted/loops/111_idle_loop.mp4",
+  "sourceSize": 1949909
+ },
+ "loops/111_wait_loop.mp4": {
+  "file": "matted/loops/111_wait_loop.mp4",
+  "sourceSize": 1112072
+ },
+ "loops/full_table_hold_loop.mp4": {
+  "file": "matted/loops/full_table_hold_loop.mp4",
+  "sourceSize": 948561
+ },
+ "loops/full_table_idle_loop.mp4": {
+  "file": "matted/loops/full_table_idle_loop.mp4",
+  "sourceSize": 2734435
+ },
+ "loops/full_table_wait_loop.mp4": {
+  "file": "matted/loops/full_table_wait_loop.mp4",
+  "sourceSize": 1192348
+ },
+ "loops/opening_idle_loop.mp4": {
+  "file": "matted/loops/opening_idle_loop.mp4",
+  "sourceSize": 705047
+ },
+ "loops/seat1_card3_wait_loop.mp4": {
+  "file": "matted/loops/seat1_card3_wait_loop.mp4",
+  "sourceSize": 1130588
+ },
+ "loops/seat1_card4_wait_loop.mp4": {
+  "file": "matted/loops/seat1_card4_wait_loop.mp4",
+  "sourceSize": 1033623
+ },
+ "loops/seat1_card5_wait_loop.mp4": {
+  "file": "matted/loops/seat1_card5_wait_loop.mp4",
+  "sourceSize": 1043537
+ },
+ "loops/seat1_card6_wait_loop.mp4": {
+  "file": "matted/loops/seat1_card6_wait_loop.mp4",
+  "sourceSize": 1029548
+ },
+ "loops/seat2_card3_wait_loop.mp4": {
+  "file": "matted/loops/seat2_card3_wait_loop.mp4",
+  "sourceSize": 992568
+ },
+ "loops/seat2_card4_wait_loop.mp4": {
+  "file": "matted/loops/seat2_card4_wait_loop.mp4",
+  "sourceSize": 1270632
+ },
+ "loops/seat2_card5_wait_loop.mp4": {
+  "file": "matted/loops/seat2_card5_wait_loop.mp4",
+  "sourceSize": 1098426
+ },
+ "loops/seat2_card6_wait_loop.mp4": {
+  "file": "matted/loops/seat2_card6_wait_loop.mp4",
+  "sourceSize": 1076694
+ },
+ "loops/seat3_card3_wait_loop.mp4": {
+  "file": "matted/loops/seat3_card3_wait_loop.mp4",
+  "sourceSize": 1037724
+ },
+ "loops/seat3_card4_wait_loop.mp4": {
+  "file": "matted/loops/seat3_card4_wait_loop.mp4",
+  "sourceSize": 1034972
+ },
+ "loops/seat3_card5_wait_loop.mp4": {
+  "file": "matted/loops/seat3_card5_wait_loop.mp4",
+  "sourceSize": 1045221
+ },
+ "loops/seat3_card6_wait_loop.mp4": {
+  "file": "matted/loops/seat3_card6_wait_loop.mp4",
+  "sourceSize": 1019815
+ }
+}
