@@ -50,7 +50,9 @@ Visitors sign in with any username and that password. Each visit downloads the f
 footage. Locally: `npm run build` then `SITE_PASSWORD=… npm start`, which serves on port 10000.
 
 **Checks:** `npm test` runs the rules engine unit tests. With the dev server running,
-`npm run soak -- 6` plays 6 random rounds in headless Edge, and
+`npm run soak -- 6` plays 6 random rounds in headless Edge,
+`node scripts/hidden.mjs` plays rounds with the tab as if hidden through most of the deal (no
+video frame callbacks, footage playing on), and
 `npm run capture -- splitTable 1,3 "d u.decision h w2000 cmid"` saves native-resolution
 composites to `app/shots/`.
 

@@ -228,7 +228,11 @@ export class ClipPlayer {
     return Math.min(ahead(i), ahead(period - i === period ? 0 : period - i));
   }
 
-  /** Resolves when the given clip is on screen at or past `frame`. */
+  /**
+   * Resolves when the given clip is on screen at or past `frame` — or has ended, or left the
+   * screen, without a frame callback saying so: a hidden page gets none, and a clip's `ended`
+   * can hand over before the callback for its last frame comes.
+   */
   whenFrame(name: string, frame: number): Promise<void> {
     const s = this.state();
     if (s && s.name === name && s.frame >= frame && !s.loop) return Promise.resolve();
@@ -282,6 +286,8 @@ export class ClipPlayer {
     }
     if (superseded()) return;
     this.taking = null;
+    // a clip that plays once shows nothing more once it is off screen: nothing may wait on it for ever
+    if (prev && prev !== p.deck && !prev.loop && prev.name && prev.name !== p.name) this.settle(prev.name, Infinity);
     if (prev && prev !== p.deck) {
       if (p.fade > 0) {
         this.fadingFrom = prev;
@@ -335,6 +341,8 @@ export class ClipPlayer {
     el.requestVideoFrameCallback(onFrame);
     el.addEventListener("ended", () => {
       if (deck !== this.active) return;
+      // every frame of it has been shown, whether or not a frame callback reported the last one
+      if (deck.name) this.settle(deck.name, Infinity);
       const h = this.pending?.handoff;
       // an exit on a clip's last frame must not depend on a frame callback reporting that frame
       if (h === "end" || (typeof h === "object" && h.exitAt >= deck.fileFrame)) void this.takeOver();
@@ -352,13 +360,7 @@ export class ClipPlayer {
   private onActiveFrame(deck: Deck, prevFrame: number) {
     const s = this.state(deck);
     if (!s) return;
-    this.frameWaiters = this.frameWaiters.filter((w) => {
-      if (w.name === s.name && s.frame >= w.frame && !s.loop) {
-        w.resolve();
-        return false;
-      }
-      return true;
-    });
+    if (!s.loop) this.settle(s.name, s.frame);
     const p = this.pending;
     if (!p) return;
     if (typeof p.handoff === "object") {
@@ -378,6 +380,15 @@ export class ClipPlayer {
       if (crossed || b === n - 1) void this.takeOver();
     }
     if (p.handoff === "end" && deck.loop) void this.takeOver();
+  }
+
+  /** Resolve the waits on clip `name` for frames up to `frame` (Infinity: all of them). */
+  private settle(name: string, frame: number) {
+    this.frameWaiters = this.frameWaiters.filter((w) => {
+      if (w.name !== name || w.frame > frame) return true;
+      w.resolve();
+      return false;
+    });
   }
 
   /** Whether the deck's last presented frame reached clip frame `at` since the frame before (rVFC can skip frames). */
