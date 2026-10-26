@@ -48,6 +48,50 @@ export function rotateQuad(q: Quad, rad: number): Quad {
   return q.map(([x, y]) => [cx + (x - cx) * cs - (y - cy) * sn, cy + (x - cx) * sn + (y - cy) * cs]) as Quad;
 }
 
+/** z -> a z + b on the video plane, a = ar + i ai (scale and rotation), b = (bx, by). */
+export interface Similarity {
+  ar: number;
+  ai: number;
+  bx: number;
+  by: number;
+}
+
+export const IDENTITY: Similarity = { ar: 1, ai: 0, bx: 0, by: 0 };
+
+/** Least-squares similarity taking the corners of the quads `src` onto those of `dst` (the pipeline's discard.similarity). */
+export function fitSimilarity(src: Quad[], dst: Quad[]): Similarity {
+  const z = src.flat(), w = dst.flat();
+  const mean = (p: Pt[]) => p.reduce((s, q) => [s[0] + q[0] / p.length, s[1] + q[1] / p.length], [0, 0]);
+  const [zx, zy] = mean(z), [wx, wy] = mean(w);
+  let nr = 0, ni = 0, den = 0;
+  z.forEach(([x, y], i) => {
+    const dx = x - zx, dy = y - zy, ex = w[i][0] - wx, ey = w[i][1] - wy;
+    // (w - w̄) · conj(z - z̄)
+    nr += ex * dx + ey * dy;
+    ni += ey * dx - ex * dy;
+    den += dx * dx + dy * dy;
+  });
+  const ar = nr / den, ai = ni / den;
+  return { ar, ai, bx: wx - (ar * zx - ai * zy), by: wy - (ai * zx + ar * zy) };
+}
+
+export const movePt = (s: Similarity, [x, y]: Pt): Pt => [s.ar * x - s.ai * y + s.bx, s.ai * x + s.ar * y + s.by];
+
+export const moveQuad = (s: Similarity, q: Quad): Quad => q.map((p) => movePt(s, p)) as Quad;
+
+export const lerpSimilarity = (a: Similarity, b: Similarity, t: number): Similarity => ({
+  ar: a.ar + (b.ar - a.ar) * t,
+  ai: a.ai + (b.ai - a.ai) * t,
+  bx: a.bx + (b.bx - a.bx) * t,
+  by: a.by + (b.by - a.by) * t,
+});
+
+export function invertSimilarity(s: Similarity): Similarity {
+  const d = s.ar * s.ar + s.ai * s.ai;
+  const ar = s.ar / d, ai = -s.ai / d;
+  return { ar, ai, bx: -(ar * s.bx - ai * s.by), by: -(ai * s.bx + ar * s.by) };
+}
+
 export const centre = (q: Quad): Pt => [
   (q[0][0] + q[1][0] + q[2][0] + q[3][0]) / 4,
   (q[0][1] + q[1][1] + q[2][1] + q[3][1]) / 4,

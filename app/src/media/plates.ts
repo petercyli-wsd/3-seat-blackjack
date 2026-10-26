@@ -6,7 +6,51 @@ export interface SeatPlate {
   /** The seat's mask bounding box in video pixels, which is what the plate holds. */
   rect: [number, number, number, number];
   image: HTMLCanvasElement;
+  /**
+   * Over the image: red where its cards lie, green where its third card on lies, each grown by
+   * MATTE_GROW px (their contact shadows) and feathered. A plate moved onto a take's own cards
+   * lays in only its extra cards by the green, and is never clipped by the seat mask by the red.
+   */
+  matte: HTMLCanvasElement;
   cards: Quad[];
+}
+
+const MATTE_GROW = 3;
+
+function drawMatte(rect: [number, number, number, number], cards: Quad[]): HTMLCanvasElement {
+  const [x, y, w, h] = rect;
+  const cv = document.createElement("canvas");
+  cv.width = w;
+  cv.height = h;
+  const g = cv.getContext("2d")!;
+  g.fillStyle = "#000";
+  g.fillRect(0, 0, w, h);
+  g.globalCompositeOperation = "lighter";
+  const layer = (quads: Quad[], colour: string) => {
+    const l = document.createElement("canvas");
+    l.width = w;
+    l.height = h;
+    const lg = l.getContext("2d")!;
+    lg.fillStyle = lg.strokeStyle = colour;
+    lg.lineJoin = "round";
+    // a solid core, feathered over two pixels outside it
+    for (const [grow, alpha] of [[MATTE_GROW + 2, 0.35], [MATTE_GROW + 1, 0.7], [MATTE_GROW, 1]]) {
+      lg.globalAlpha = alpha;
+      lg.lineWidth = 2 * grow;
+      for (const q of quads) {
+        lg.beginPath();
+        // quads are in the pipeline's pixel-centre coordinates (see shaders.ts)
+        q.forEach(([px, py]) => lg.lineTo(px - x + 0.5, py - y + 0.5));
+        lg.closePath();
+        lg.fill();
+        lg.stroke();
+      }
+    }
+    g.drawImage(l, 0, 0);
+  };
+  layer(cards, "#f00");
+  layer(cards.slice(2), "#0f0");
+  return cv;
 }
 
 export type PlateSet = Record<SeatId, Record<number, SeatPlate>>;
@@ -106,7 +150,7 @@ export async function grabPlates(
       cv.width = w;
       cv.height = h;
       cv.getContext("2d")!.drawImage(el, x, y, w, h, 0, 0, w, h);
-      out[seat][n] = { n, rect: rects[seat], image: cv, cards: plate.cards };
+      out[seat][n] = { n, rect: rects[seat], image: cv, matte: drawMatte(rects[seat], plate.cards), cards: plate.cards };
     }
   }
   el.remove();

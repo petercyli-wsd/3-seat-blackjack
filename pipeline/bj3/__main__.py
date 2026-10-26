@@ -9,14 +9,15 @@ Passes (each cached in work/ and skipped when its output exists, unless --force)
   6. edl       the take cut into named segments
   7. review    contact sheets of every cut (work/review/)
   8. export    trimmed clips + ping-pong loops into game_assets/
-  9. manifest  manifest.json, seat masks and CLIPS.md
+  9. manifest  manifest.json, seat masks and CLIPS.md, with when her hand reaches each hand in the
+               discards (discard.py)
 """
 
 import argparse
 import time
 from pathlib import Path
 
-from bj3 import bridges, edl, export, flight, manifest, pose, review, settle, signals, tracker
+from bj3 import bridges, discard, edl, export, flight, manifest, pose, review, settle, signals, tracker
 
 
 def main() -> None:
@@ -47,7 +48,11 @@ def main() -> None:
     step("edl", work / "edl.json", lambda: edl.build(str(work / "cards.json"), str(work / "signals.npz"), str(work / "edl.json"), str(work / "pose.npz")))
     step("review", work / "review" / "edl_00.jpg", lambda: review.main(a.video, str(work / "edl.json"), str(work / "review")))
     step("export", out / "clips", lambda: export.run(a.video, str(work / "edl.json"), str(out)))
-    step("manifest", out / "manifest.json", lambda: manifest.build(str(work / "cards.json"), str(work / "edl.json"), str(work / "pose.npz"), str(out), str(work / "flights.json"), str(work / "rest.json")))
+    def build_manifest():
+        manifest.build(str(work / "cards.json"), str(work / "edl.json"), str(work / "pose.npz"), str(out), str(work / "flights.json"), str(work / "rest.json"))
+        discard.run(a.video, str(out))
+
+    step("manifest", out / "manifest.json", build_manifest)
 
     step("bridges-plan", bridges.BRIDGE_DIR / "plan.json", lambda: bridges.plan(a.video, str(work)))
     step("bridges-local", out / "bridges.json", lambda: bridges.local(a.video, str(work)))

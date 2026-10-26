@@ -1,12 +1,12 @@
 import { Director } from "./director/Director";
 import { Store } from "./director/store";
 import { ClipPlayer } from "./media/ClipPlayer";
-import { ASSET_BASE, type SeatId, loadBridges, loadManifest } from "./media/manifest";
+import { ASSET_BASE, loadBridges, loadManifest } from "./media/manifest";
 import { grabPlates, maskRects } from "./media/plates";
 import { ClipLoader, loadImage } from "./media/preload";
 import { Compositor } from "./render/Compositor";
 import { buildFaceAtlas } from "./render/faceAtlas";
-import { Scene } from "./render/scene";
+import { type PlateTextures, Scene } from "./render/scene";
 
 export interface Table {
   store: Store;
@@ -50,10 +50,12 @@ export async function bootTable(canvas: HTMLCanvasElement, host: HTMLElement, st
   const compositor = new Compositor(canvas, m.width, m.height, mask, atlas);
   setLoading("Grabbing seat plates");
   const plates = await grabPlates(m, files, maskRects(mask, m.seats), host);
-  const plateTex = {} as Record<SeatId, Record<number, WebGLTexture>>;
+  const plateTex = {} as PlateTextures;
   for (const seat of m.seats) {
     plateTex[seat] = {};
-    for (const [n, p] of Object.entries(plates[seat])) plateTex[seat][Number(n)] = compositor.imageTexture(p.image);
+    for (const [n, p] of Object.entries(plates[seat])) {
+      plateTex[seat][Number(n)] = { image: compositor.imageTexture(p.image), matte: compositor.imageTexture(p.matte) };
+    }
   }
   const scene = new Scene(m, plates, plateTex);
   const player = new ClipPlayer(m, files, host);
