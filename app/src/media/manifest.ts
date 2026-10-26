@@ -18,6 +18,12 @@ export interface FootageCard {
   quad: Quad;
   /** Outline per frame while the dealer slides it in face up: quads[i] is frame from + i, up to `in`. */
   path?: { from: number; quads: Quad[] };
+  /** Times it is lifted off its resting place and put back (the up card scooping the hole card over):
+   *  over [from, to) its outline is quads[i] at frame from + i while it could be followed, else none. */
+  trips?: { from: number; to: number; quads: Quad[] }[];
+  /** The pile its hand is gathered into, when this card is the one on top: quads[i] (null where
+   *  it couldn't be fitted) at frame from + i; the face rides on it to the tray. */
+  pile?: { from: number; quads: (Quad | null)[] };
   /** From the frame it starts to be swept up: its outline while it moves on its own (quads[i] is frame from + i), then none. */
   away?: { from: number; quads: Quad[] };
 }
@@ -123,16 +129,23 @@ export const cardsAt = (clip: ClipInfo, slot: Slot, frame: number) =>
   clip.cards.filter((c) => c.slot === slot && c.in <= frame && frame < c.out);
 
 /** First clip frame the card shows its face up: where its slide-in path starts, else where it lands. */
-export const faceFrom = (c: FootageCard) => (c.path?.quads.length ? c.path.from : c.in);
+export const faceFrom = (c: FootageCard) => (c.path?.quads.length ? c.path.from : faceUp(c));
+
+/** First clip frame the card lies face up where it rests: its landing, or the hole card's flip (never, unflipped). */
+const faceUp = (c: FootageCard) => (c.faceDown ? (c.flip === null ? Infinity : Math.max(c.in, c.flip)) : c.in);
 
 /** Frame the card's face stops showing: when it is no longer followed after leaving its resting place. */
-export const faceUntil = (c: FootageCard) => (c.away ? c.away.from + c.away.quads.length : c.out);
+export const faceUntil = (c: FootageCard) =>
+  c.pile ? c.pile.from + c.pile.quads.length : c.away ? c.away.from + c.away.quads.length : c.out;
 
 /** The card's outline at a clip frame while it is face up on screen (sliding in, lying, being swept off), else null. */
 export function faceQuadAt(c: FootageCard, frame: number): Quad | null {
+  if (c.pile && frame >= c.pile.from) return c.pile.quads[frame - c.pile.from] ?? null;
   if (c.away && frame >= c.away.from) return c.away.quads[frame - c.away.from] ?? null;
   if (frame >= c.out) return null;
-  if (frame >= c.in) return c.quad;
+  const trip = c.trips?.find((t) => frame >= t.from && frame < t.to);
+  if (trip) return trip.quads[frame - trip.from] ?? null;
+  if (frame >= faceUp(c)) return c.quad;
   const i = c.path ? frame - c.path.from : -1;
   return c.path && i >= 0 && i < c.path.quads.length ? c.path.quads[i] : null;
 }

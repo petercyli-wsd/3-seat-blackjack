@@ -25,6 +25,7 @@ import json
 import sys
 from pathlib import Path
 
+import cv2
 import numpy as np
 
 from bj3.rigid import posed, sample, soft_card, table_map
@@ -113,6 +114,39 @@ def leave_frame(fr: Frames, c: dict, q: np.ndarray, rest: float) -> int:
     return leave
 
 
+TRIP_STEP = 2  # frames between looks while scanning a card's stay for trips
+TRIP_FELT = 0.35  # share of its resting outline showing felt that says it has been lifted off
+
+
+def felt_inside(img: np.ndarray, q: np.ndarray) -> float:
+    """Share of the inside of outline q showing felt: the card has gone from there (a hand over
+    it shows skin instead)."""
+    x0, y0 = max(0, int(q[:, 0].min()) - 2), max(0, int(q[:, 1].min()) - 2)
+    crop = img[y0:int(q[:, 1].max()) + 3, x0:int(q[:, 0].max()) + 3].astype(np.int16)
+    blue = crop[..., 0] - np.maximum(crop[..., 1], crop[..., 2])
+    m = np.zeros(crop.shape[:2], np.uint8)
+    cv2.fillConvexPoly(m, (q - (x0, y0)).round().astype(np.int32), 1)
+    m = cv2.erode(m, np.ones((3, 3), np.uint8))
+    return float(((blue > 30) & (m > 0)).sum()) / max(1, int(m.sum()))
+
+
+def trips(fr: Frames, c: dict, q: np.ndarray, rest: float, start: int, leave: int) -> list[list[int]]:
+    """Stretches [a, b) the card leaves its resting place and comes back before it is swept up:
+    the dealer's up card lifted to scoop the hole card over at the reveal. Its edges go, and
+    felt shows where it lay (under a hand passing over it, skin would)."""
+    out, run, lifted = [], None, False
+    for f in range(start, leave, TRIP_STEP):
+        img = fr.get(f)
+        if still_there(img, q) < 0.5 * rest:
+            run = f if run is None else run
+            lifted = lifted or felt_inside(img, q) >= TRIP_FELT
+        elif run is not None:
+            if lifted:
+                out.append([max(start, run - TRIP_STEP), f])
+            run, lifted = None, False
+    return out
+
+
 def settle(fr: Frames, c: dict) -> dict | None:
     q = np.asarray(c["quad"], np.float32)
     if c["face_down"] and c["flip"] is None:
@@ -133,8 +167,10 @@ def settle(fr: Frames, c: dict) -> dict | None:
     centre = q.mean(0)
     out = posed((q - centre) @ np.linalg.inv(M).T, M, centre, pose)
     rest = float(np.median([still_there(fr.get(int(f)), out) for f in frames]))
+    leave = leave_frame(fr, c, out, rest)
     return {
-        "leave": leave_frame(fr, c, out, rest),
+        "leave": leave,
+        "trips": trips(fr, c, out, rest, a, leave),
         "quad": [[round(float(x), 2), round(float(y), 2)] for x, y in out],
         "shift": round(float(np.hypot(pose[0], pose[1])), 2),
         "turn": round(float(np.rad2deg(pose[2])), 2),
@@ -170,6 +206,7 @@ def apply(cards: list[dict], rest_json: str | None) -> list[dict]:
         if c["id"] in rest:
             c["quad"] = rest[c["id"]]["quad"]
             c["leave"] = rest[c["id"]].get("leave", c["death"])
+            c["trips"] = rest[c["id"]].get("trips", [])
     return cards
 
 

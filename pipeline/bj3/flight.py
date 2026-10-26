@@ -29,13 +29,27 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from bj3.cardfit import UP, corners_from_mask
+from bj3.edl import clusters
 from bj3.rigid import depth_scale, posed, sample, soft_card, table_map
 from bj3.settle import apply, edge_contrast
 from bj3.video import Frames
 
 MAX_BACK = 240
+# a card in her hand being picked up or used to flip another is fitted only while this much of
+# it shows flat: lifted and tilted, a face fitted to what's left of it lands off the card
+HANDLED_FILL = 0.6
+HANDLED_EDGES = 0.45  # flat on the table its edges read 0.5-0.75; tilted in her hand under 0.45
 # followed off its resting place no further than this past the tracker's pickup frame
 AWAY_PAST = 24
+FLIP_BEFORE = 90  # frames before the hole card's flip it lies face down and still
+FLIP_REACH = 24  # px from its slot the hole card can land as she turns it over
+
+
+def _by_the_slot(p: np.ndarray) -> bool:
+    """Where the hole card can be as she turns it over: near its slot, and not over toward the up
+    card on its left (a trace that goes there has jumped onto the up card in her other hand)."""
+    return np.hypot(p[0], p[1]) <= FLIP_REACH and p[0] >= -10
 PAD = 70
 # inside the outline must be at least this much moving card stock to keep tracing
 MIN_FILL = 0.42
@@ -83,7 +97,7 @@ PRIOR_PX, PRIOR_DEG = 0.03, 0.03
 
 
 def _search(moving, free, frame, p0, reach, turn, step, turn_step, edges=False, expect=None):
-    """Best pose near p0 as (pose, score, fill). Scale isn't searched: on the table it follows
+    """Best pose near p0 as (pose, score, fill, edge contrast). Scale isn't searched: on the table it follows
     from how far up or down the image the card has moved (`depth_scale`). With `edges`, the
     card's edge contrast joins the score, which pins it to a fraction of a pixel, and poses pay
     for straying from the predicted pose `expect` (default p0)."""
@@ -95,13 +109,14 @@ def _search(moving, free, frame, p0, reach, turn, step, turn_step, edges=False, 
     p[:, 3] = depth_scale(y0, y0 + p[:, 1])
     quads = posed(*frame, p)
     sc, fill = score(moving, free, quads)
-    rank = sc
+    rank, edge = sc, np.zeros_like(sc)
     if edges:
         e = p0 if expect is None else expect
-        rank = (sc + edge_contrast(moving, quads) - PRIOR_PX * np.hypot(*(p[:, :2] - e[:2]).T)
+        edge = edge_contrast(moving, quads)
+        rank = (sc + edge - PRIOR_PX * np.hypot(*(p[:, :2] - e[:2]).T)
                 - PRIOR_DEG * np.abs(np.rad2deg(p[:, 2] - e[2])))
     i = int(np.argmax(rank))
-    return p[i], float(sc[i]), float(fill[i])
+    return p[i], float(sc[i]), float(fill[i]), float(edge[i])
 
 
 def _poly(shape, quad, grow: int = 0) -> np.ndarray:
@@ -123,7 +138,7 @@ def _window(fr: Frames, q: np.ndarray):
 
 REST = np.array([0, 0, 0, 1], np.float32)
 # a card lying still can be hidden this long (her arm passing over it) and still be there after
-MAX_HIDDEN = 36
+MAX_HIDDEN = 72
 # poses this close are the same place: a card lying still (STILL_RUN frames or more) is drawn
 # at one pose there, the resting pose itself if it is that close to it
 STILL_PX, STILL_DEG, STILL_SCALE = 1.0, 1.0, 0.012
@@ -136,13 +151,16 @@ def _near(a: np.ndarray, b: np.ndarray) -> bool:
             and abs(a[3] - b[3]) < STILL_SCALE)
 
 
+WAIT_RUN = 3  # clear poses in one place that say a card is lying still, to wait out a hand over it
+
+
 def _was_still(seen: list) -> bool:
-    """Whether the card lay still just now: STILL_RUN poses in one place among the last few. By
-    position only: as a hand arrives over a card its turn is the first thing to be fitted askew."""
+    """Whether the card lay still just now: WAIT_RUN clear poses in one place among the last few.
+    By position only: as a hand arrives over a card its turn is the first thing to be fitted askew."""
     # the still stretch must reach to within the last couple of fits, or it is history
-    recent = seen[-(STILL_RUN + 2):]
-    return any(all(np.hypot(*(x[:2] - recent[i][:2])) < STILL_PX for x in recent[i:i + STILL_RUN])
-               for i in range(len(recent) - STILL_RUN + 1))
+    recent = seen[-(WAIT_RUN + 2):]
+    return any(all(np.hypot(*(x[:2] - recent[i][:2])) < STILL_PX for x in recent[i:i + WAIT_RUN])
+               for i in range(len(recent) - WAIT_RUN + 1))
 
 
 def _steady(poses: list) -> np.ndarray:
@@ -178,24 +196,38 @@ def _steady(poses: list) -> np.ndarray:
     return P
 
 
-def _follow(fr: Frames, frames, q: np.ndarray, crop, off, bg: np.ndarray):
+# a fit finding this much of the card is clearly seen; a partly hidden card's fit is only kept
+# where there is no clearly seen frame on both sides of it to interpolate between
+CLEAR = 0.7
+
+
+def _follow(fr: Frames, frames, q: np.ndarray, crop, off, bg: np.ndarray, min_fill: float = MIN_FILL,
+            min_edges: float = 0.0, keep=None):
     """Follow the card from its resting outline q through `frames` (walking away from rest) while
-    its outline keeps finding moving card stock. Returns (quads nearest rest first, last pose, model)."""
+    its outline keeps finding moving card stock. Returns (quads nearest rest first, last pose,
+    model, whether it was lying still where it was lost). `min_edges`: a fit also needs this much
+    edge contrast, which a card lifted and tilted in her hand doesn't have (its outline no longer
+    matches the flat card's). It stops where `keep(pose)` says the card can't be there (the hole
+    card is turned over by its slot, not where the up card lies)."""
     free = 1 - bg
     M = table_map(q)
     centre = (q - off).mean(0)
     frame = (((q - off) - centre) @ np.linalg.inv(M).T, M, centre)
     pose = REST.copy()
     vel = np.zeros(4, np.float32)
-    poses, misses = [], 0
-    seen = [REST] * STILL_RUN  # fitted poses, latest last; it starts lying at rest
+    fits, misses = [], 0
+    # clearly seen poses, latest last; it starts lying at rest. Only these say where the card is
+    # and whether it lies still: a card half under her arm is fitted askew
+    seen = [REST] * STILL_RUN
     for f in frames:
         moving = np.clip(soft_card(crop(fr.get(f))) - bg, 0, 1)
         guess = pose + vel
-        p, sc, fill = _search(moving, free, frame, guess, reach=12, turn=10, step=2, turn_step=2.5)
-        p, sc, fill = _search(moving, free, frame, p, reach=2, turn=2.5, step=0.25, turn_step=0.5,
-                              edges=True, expect=guess)
-        if fill < MIN_FILL or sc < MIN_SCORE:
+        p, *_ = _search(moving, free, frame, guess, reach=12, turn=10, step=2, turn_step=2.5)
+        p, sc, fill, edge = _search(moving, free, frame, p, reach=2, turn=2.5, step=0.25, turn_step=0.5,
+                                    edges=True, expect=guess)
+        if keep is not None and not keep(p):
+            break
+        if fill < min_fill or sc < MIN_SCORE or edge < min_edges:
             misses += 1
             # lying still it is only hidden (her arm over it): wait for it to show again there;
             # on the move, one bad frame (a blur, a finger across most of it) holds the motion
@@ -204,7 +236,8 @@ def _follow(fr: Frames, frames, q: np.ndarray, crop, off, bg: np.ndarray):
                 break
             if still:
                 vel[:] = 0
-            poses.append(None)
+                guess = seen[-1].copy()
+            fits.append(None)
             pose = guess
             continue
         misses = 0
@@ -215,26 +248,35 @@ def _follow(fr: Frames, frames, q: np.ndarray, crop, off, bg: np.ndarray):
         vel = 0.5 * vel + 0.5 * step
         vel[3] = 0
         pose = p
-        poses.append(p)
-        seen.append(p)
-    while poses and poses[-1] is None:
-        poses.pop()
+        fits.append((p, fill))
+        if fill >= CLEAR:
+            seen.append(p)
+    while fits and fits[-1] is None:
+        fits.pop()
+    clear = [i for i, x in enumerate(fits) if x is not None and x[1] >= CLEAR]
+    poses = []
+    for i, x in enumerate(fits):
+        bracketed = x is not None and x[1] < CLEAR and any(j > i for j in clear)  # rest is clear before
+        poses.append(None if x is None or bracketed else x[0])
     quads = [posed(*frame, p) + off for p in _steady(poses)]
     return quads, pose, frame, _was_still(seen)
 
 
-def trace(fr: Frames, card: dict, before: int) -> tuple[int, list]:
-    """Quads for the frames before `card` lands; (first frame, quads in time order)."""
+def trace(fr: Frames, card: dict, before: int, land: int | None = None, after: int | None = None,
+          keep=None) -> tuple[int, list]:
+    """Quads for the frames before `card` lands (or lies face up at `land`: the hole card's flip);
+    (first frame, quads in time order)."""
     q = np.asarray(card["quad"], np.float32)
-    land = card["birth"]
+    land = card["birth"] if land is None else land
     crop, off, shape = _window(fr, q)
     # what lies on the table around the card: the frame before it came, and the
     # frame it settled on with its own outline cut out (the card it lands on shows)
     bg_before = soft_card(crop(fr.median(before)))
     own = _poly(shape, q - off, grow=5)
-    bg_after = soft_card(crop(fr.median(card["sample"]))) * (1 - own)
+    bg_after = soft_card(crop(fr.median(card["sample"] if after is None else after))) * (1 - own)
     bg = cv2.dilate(np.maximum(bg_before, bg_after), np.ones((5, 5), np.uint8))
-    quads, pose, frame, _ = _follow(fr, range(land - 1, max(-1, land - 1 - MAX_BACK), -1), q, crop, off, bg)
+    quads, pose, frame, _ = _follow(fr, range(land - 1, max(-1, land - 1 - MAX_BACK), -1), q, crop, off, bg,
+                                    keep=keep)
     # before it lay flat, the card was coming down out of her hand face up: tilted up off the table
     if quads:
         for f in range(land - 1 - len(quads), max(-1, land - 1 - len(quads) - TILT_BACK), -1):
@@ -258,8 +300,26 @@ def trace_away(fr: Frames, card: dict) -> tuple[int, list]:
     own = _poly(shape, q - off, grow=5)
     bg = cv2.dilate(soft_card(crop(fr.median(leave - 4))) * (1 - own), np.ones((5, 5), np.uint8))
     # until the pickup (an early `leave` just follows it lying still) and a little past it
-    quads, _, _, _ = _follow(fr, range(leave, min(fr.count, card["death"] + AWAY_PAST)), q, crop, off, bg)
+    quads, _, _, _ = _follow(fr, range(leave, min(fr.count, card["death"] + AWAY_PAST)), q, crop, off, bg,
+                             min_fill=HANDLED_FILL, min_edges=HANDLED_EDGES)
     return leave, quads
+
+
+def trace_trip(fr: Frames, card: dict, a: int, b: int) -> list:
+    """Quads over [a, b) while the card is off its resting place and comes back (the up card
+    lifted to scoop the hole card over), None where it can't be seen flat on the table: followed
+    on from where it left, and back from where it is put down again, as a landing is."""
+    q = np.asarray(card["quad"], np.float32)
+    crop, off, shape = _window(fr, q)
+    own = _poly(shape, q - off, grow=5)
+    out = [None] * (b - a)
+    for frames, ref in ((range(a, b), a - 4), (range(b - 1, a - 1, -1), b + 4)):
+        bg = cv2.dilate(soft_card(crop(fr.median(ref))) * (1 - own), np.ones((5, 5), np.uint8))
+        quads, _, _, _ = _follow(fr, frames, q, crop, off, bg, min_fill=HANDLED_FILL, min_edges=HANDLED_EDGES)
+        for f, quad in zip(frames, quads):
+            if out[f - a] is None:
+                out[f - a] = quad
+    return out
 
 
 TILT_BACK = 3
@@ -310,6 +370,106 @@ def _search_tilt(moving, free, frame, p0) -> np.ndarray | None:
     return quad if fill >= TILT_FILL and sc >= MIN_SCORE else None
 
 
+# the gathered pile in her hand: fitted as one card while its outline is one card's (a pile
+# squared up), from when the group starts to be swept up until shortly after it has gone
+PILE_PAST = 48
+PILE_AREA = (0.7, 1.6)  # of the top card's resting area (a pile in hand is a little splayed)
+PILE_GAP = 4  # frames between two fits the pile is carried across
+PILE_LOST = 36  # frames without a fit after which the pile has gone (into the tray)
+TRAY = (508, 392)  # where she carries the piles (manifest dealer.discardTray)
+
+
+def _card_shaped(q: np.ndarray) -> bool:
+    """A card's outline, flat (a parallelogram) or tilted up in her hand (a trapezoid: the far
+    side shorter), but not a merged blob of two cards side by side."""
+    e = [float(np.linalg.norm(q[(i + 1) % 4] - q[i])) for i in range(4)]
+    return all(abs(e[i] - e[i + 2]) <= 0.5 * max(e[i], e[i + 2]) for i in (0, 1))
+
+
+def trace_pile(fr: Frames, group: list[dict], top: dict, claimed: dict | None = None) -> tuple[int, list]:
+    """The pile one hand's cards are gathered into, from when they start to be swept up to the
+    tray: (first frame, quads with None where it can't be fitted). The cards are face up and the
+    top one shows, so its face rides on the pile. Each frame the moving card stock (the table as
+    it lay just before, less this hand) is taken as a card-shaped blob near where the pile was;
+    its corners are fitted directly, so a pile tilted in her hand projects as it looks. `claimed`
+    (frame -> outlines) holds piles already traced: another hand's pile passing by isn't this one."""
+    claimed = claimed or {}
+    t0 = min(c.get("leave", c["death"]) for c in group)
+    t1 = min(fr.count, max(c["death"] for c in group) + PILE_PAST)
+    q_top = np.asarray(top["quad"], np.float32)
+    area = cv2.contourArea(q_top)
+    pts = np.concatenate([np.asarray(c["quad"], np.float32) for c in group])
+    x0, y0 = max(0, min(int(pts[:, 0].min()), TRAY[0]) - 60), max(0, min(int(pts[:, 1].min()), TRAY[1]) - 60)
+    x1, y1 = min(fr.width, int(pts[:, 0].max()) + 60), min(fr.height, int(pts[:, 1].max()) + 160)
+    off = np.array([x0, y0], np.float32)
+    crop = lambda img: img[y0:y1, x0:x1]
+    mine = np.zeros((y1 - y0, x1 - x0), np.uint8)
+    for c in group:
+        cv2.fillConvexPoly(mine, (np.asarray(c["quad"]) - off).round().astype(np.int32), 1)
+    mine = cv2.dilate(mine, np.ones((9, 9), np.uint8))
+    bg = cv2.dilate(soft_card(crop(fr.median(t0 - 4))) * (1 - mine), np.ones((5, 5), np.uint8))
+    prev = q_top - off
+    lay = cv2.dilate(mine, np.ones((21, 21), np.uint8)) > 0  # where the hand's cards lay
+    quads, lost = [], 0
+    for f in range(t0, t1):
+        moving = (np.clip(soft_card(crop(fr.get(f))) - bg, 0, 1) > 0.5).astype(np.uint8)
+        moving = cv2.morphologyEx(moving, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+        n, lab, st, cen = cv2.connectedComponentsWithStats(moving)
+        found = None
+        acquired = any(x is not None for x in quads)
+        near = sorted(range(1, n), key=lambda k: np.hypot(*(cen[k] - prev.mean(0))))
+        for k in near[:3]:
+            if not PILE_AREA[0] * area <= st[k, 4] <= PILE_AREA[1] * area:
+                continue
+            at = (float(cen[k][0] + x0), float(cen[k][1] + y0))
+            if any(cv2.pointPolygonTest(o.astype(np.float32), at, False) >= 0 for o in claimed.get(f, [])):
+                continue
+            # once found it moves on from where it was (out of sight a moment, lifted past her wrist,
+            # it may come back some way on); it is first found where the hand lay, which is where she
+            # gathers it (another hand's pile carried past isn't this one)
+            if acquired and np.hypot(*(cen[k] - prev.mean(0))) > 40 + 12 * lost:
+                continue
+            if not acquired and not lay[int(cen[k][1]), int(cen[k][0])]:
+                continue
+            blob = cv2.resize((lab == k).astype(np.float32), None, fx=UP, fy=UP, interpolation=cv2.INTER_LINEAR)
+            q = corners_from_mask(blob)
+            if q is None:
+                continue
+            q = q / UP
+            if not _card_shaped(q) or not PILE_AREA[0] * area <= cv2.contourArea(q) <= PILE_AREA[1] * area:
+                continue
+            # the corner order closest in shape to the last outline keeps the face the right way up
+            found = min((np.roll(q, -r, 0) for r in range(4)),
+                        key=lambda r: float(np.abs((r - r.mean(0)) - (prev - prev.mean(0))).sum()))
+            break
+        if found is None:
+            quads.append(None)
+            lost += 1
+            # squaring the cards up in her hand it is two cards' blob for a while; past this it has gone
+            if lost > PILE_LOST and any(x is not None for x in quads):
+                break
+            continue
+        lost = 0
+        prev = found
+        quads.append(found + off)
+    while quads and quads[-1] is None:
+        quads.pop()
+    first = next((i for i, x in enumerate(quads) if x is not None), len(quads))
+    quads = quads[first:]
+    # a frame or few it couldn't be fitted (fingers across it) between two fits: carried across
+    fitted = [i for i, x in enumerate(quads) if x is not None]
+    for a, b in zip(fitted, fitted[1:]):
+        if 1 < b - a <= PILE_GAP + 1:
+            for i in range(a + 1, b):
+                quads[i] = quads[a] + (quads[b] - quads[a]) * (i - a) / (b - a)
+    # light smoothing over runs of fitted frames
+    sm = list(quads)
+    for i in range(1, len(quads) - 1):
+        if quads[i - 1] is not None and quads[i] is not None and quads[i + 1] is not None:
+            sm[i] = (quads[i - 1] + 2 * quads[i] + quads[i + 1]) / 4
+    return t0 + first, sm
+
+
 SLIDE_APART = 3.0  # px two overlapping cards may shift against each other before their faces end
 OVERLAP = 0.1  # share of the smaller card two outlines must cover to count as overlapping
 
@@ -317,10 +477,12 @@ OVERLAP = 0.1  # share of the smaller card two outlines must cover to count as o
 def untangle(cards: list[dict], paths: dict) -> None:
     """End swept-up cards' faces where the pile forms.
 
-    A stack pushed along as one keeps its order, so its faces can ride with it. Once two
-    overlapping cards slide against each other they are being gathered into a pile whose order
-    the footage doesn't show, and two faces drawn there tangle. Each card's `away` path is cut
-    at the first frame it has shifted more than SLIDE_APART against any card it overlaps.
+    A stack pushed along as one keeps its order, so its faces can ride with it, and a card
+    drawn off a stack in her hand (overlapping the next one less and less) keeps its face. Once
+    cards slide onto each other they are being gathered into a pile whose order the footage
+    doesn't show, and faces drawn there tangle. Each card's `away` path is cut at the first frame
+    it has shifted more than SLIDE_APART against a card it now overlaps by more (OVERLAP of a
+    card) than where both rested.
     """
     def quad_at(c, f):
         away = paths.get(c["id"], {}).get("away")
@@ -341,8 +503,8 @@ def untangle(cards: list[dict], paths: dict) -> None:
                 if o is c or (p := quad_at(o, f)) is None:
                     continue
                 area, _ = cv2.intersectConvexConvex(q, p)
-                # cards lying edge to edge (the up and hole cards) only touch
-                if area <= OVERLAP * min(cv2.contourArea(q), cv2.contourArea(p)):
+                rested, _ = cv2.intersectConvexConvex(np.asarray(c["quad"], np.float32), np.asarray(o["quad"], np.float32))
+                if area - rested <= OVERLAP * min(cv2.contourArea(q), cv2.contourArea(p)):
                     continue
                 moved = (q.mean(0) - np.asarray(c["quad"]).mean(0)) - (p.mean(0) - np.asarray(o["quad"]).mean(0))
                 if np.hypot(*moved) > SLIDE_APART:
@@ -355,7 +517,31 @@ def untangle(cards: list[dict], paths: dict) -> None:
 
 
 def _rounded(quads: list) -> list:
-    return [[[round(float(x), 2), round(float(y), 2)] for x, y in q] for q in quads]
+    return [None if q is None else [[round(float(x), 2), round(float(y), 2)] for x, y in q] for q in quads]
+
+
+def add_piles(fr: Frames, cards: list[dict], paths: dict) -> None:
+    """The piles: each seat's cards (its last-dealt card ends on top, slid over the rest) and the
+    dealer's two (she lays the up card on the hole card), as they are swept up together; the top
+    card gets the pile's outline as `pile`."""
+    groups: dict = {}
+    for r, rnd in enumerate(clusters(cards)):
+        for c in rnd:
+            if "leave" in c:
+                key = "dealer" if c["region"] in ("up", "hole") else c["region"]
+                groups.setdefault((key, r), []).append(c)
+    claimed: dict = {}
+    for (key, _), group in sorted(groups.items(), key=lambda kv: min(c["leave"] for c in kv[1])):
+        top = next((c for c in group if c["region"] == "up"), None) if key == "dealer" else None
+        top = top or max(group, key=lambda c: c["birth"])
+        start, quads = trace_pile(fr, group, top, claimed)
+        for i, q in enumerate(quads):
+            if q is not None:
+                claimed.setdefault(start + i, []).append(np.asarray(q, np.float32))
+        paths.setdefault(top["id"], {}).pop("pile", None)
+        if any(q is not None for q in quads):
+            paths[top["id"]]["pile"] = {"from": start, "quads": _rounded(quads)}
+        print(f"pile {key} ({len(group)} cards, {top['id']} on top): {sum(q is not None for q in quads)} frames from {start}", flush=True)
 
 
 def run(video: str, cards_json: str, out: str, rest_json: str | None = None) -> None:
@@ -364,12 +550,22 @@ def run(video: str, cards_json: str, out: str, rest_json: str | None = None) -> 
     paths = {}
     for c in sorted(cards, key=lambda c: c["birth"]):
         entry, said = {}, []
-        # the hole card comes in face down; its face only shows once flipped, so it has no slide-in
         if not c["face_down"]:
             before = next(int(n.split("=")[1]) for n in c["notes"] if n.startswith("before="))
             start, quads = trace(fr, c, before)
             entry.update({"from": start, "quads": _rounded(quads)})
             said.append(f"traced {len(quads)} frames back")
+        elif c["flip"] is not None:
+            # the hole card comes in face down; it turns face up as she flips it over, from a few
+            # seconds before (its back showing) to just after (lying face up)
+            start, quads = trace(fr, c, c["flip"] - FLIP_BEFORE, land=c["flip"], after=c["flip"] + 8,
+                                 keep=_by_the_slot)
+            entry.update({"from": start, "quads": _rounded(quads)})
+            said.append(f"traced {len(quads)} frames back from its flip at {c['flip']}")
+        if c.get("trips"):
+            entry["trips"] = [{"from": a, "to": b, "quads": _rounded(trace_trip(fr, c, a, b))} for a, b in c["trips"]]
+            said.append("trips " + ", ".join(f"{t['from']}-{t['to']} ({sum(x is not None for x in t['quads'])} followed)"
+                                             for t in entry["trips"]))
         if "leave" in c and (not c["face_down"] or c["flip"] is not None):
             leave, away = trace_away(fr, c)
             entry["away"] = {"from": leave, "quads": _rounded(away)}
@@ -377,7 +573,7 @@ def run(video: str, cards_json: str, out: str, rest_json: str | None = None) -> 
         if entry:
             paths[c["id"]] = entry
             print(f"{c['id']} {c['region']:5s} lands {c['birth']}: " + ", ".join(said), flush=True)
-    untangle(cards, paths)
+    add_piles(fr, cards, paths)
     Path(out).write_text(json.dumps({"paths": paths}, indent=1))
     print(f"{len(paths)} flight paths -> {out}")
 

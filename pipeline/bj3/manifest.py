@@ -8,6 +8,11 @@ carries its per-frame outline from the frame its face turns up to the frame
 before it lands (`path`), so the face rides along with it; and in the clip
 it is swept up in, its outline from the frame it leaves its resting place
 for as long as it moves on its own (`away`), after which its face is gone.
+The hole card's `path` runs up to its flip instead, and a card lifted off its
+resting place and put back (the up card at the reveal) has `trips`: its
+outline while it is off, as far as it could be followed. Each hand's top card
+also has `pile`: the outline of the pile she gathers that hand into, its face
+riding on it to the tray (null where the pile couldn't be fitted).
 
 Plates: for each seat and each hand size the game can need (0, 2-6), a clip
 frame where that seat shows exactly that many cards and nothing covers it.
@@ -23,7 +28,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from bj3 import settle
+from bj3 import flight, settle
 from bj3.edl import clusters
 from bj3.export import clip_path, loop_path, loop_window, STATIC
 from bj3.geometry import PLAY_ORDER, SEATS
@@ -101,6 +106,8 @@ def build(cards_json: str, edl_json: str, pose_npz: str, out_dir: str,
     out = Path(out_dir)
     cards = settle.apply(json.load(open(cards_json))["cards"], rest_json)
     flights = json.load(open(flights_json))["paths"] if flights_json and Path(flights_json).exists() else {}
+    # faces of cards gathered into the pile at the discard end where the pile forms
+    flight.untangle(cards, flights)
     edl = json.load(open(edl_json))
     fps = edl["fps"]
     segs = edl["segments"]
@@ -128,7 +135,7 @@ def build(cards_json: str, edl_json: str, pose_npz: str, out_dir: str,
         visible = []
         for c in cards:
             fl = flights.get(c["id"], {})
-            start = fl["from"] if fl.get("quads") else c["birth"]
+            start = min(c["birth"], fl["from"]) if fl.get("quads") else c["birth"]
             if start < b and c["death"] > a:
                 v = {
                     "slot": c["region"], "index": c["index"],
@@ -137,9 +144,20 @@ def build(cards_json: str, edl_json: str, pose_npz: str, out_dir: str,
                     "faceDown": c["face_down"],
                     "quad": c["quad"],
                 }
-                # only a clip the card is still sliding in during needs the path
-                if fl.get("quads") and c["birth"] > a:
+                # only a clip the card is still sliding in (or, the hole card, turning face up) during
+                # needs the path
+                face_up = c["flip"] if c["face_down"] else c["birth"]
+                if fl.get("quads") and face_up is not None and face_up > a and fl["from"] < b:
                     v["path"] = {"from": fl["from"] - a, "quads": fl["quads"]}
+                # times it leaves its resting place and comes back, in this clip
+                trips = [{"from": t["from"] - a, "to": t["to"] - a, "quads": t["quads"]}
+                         for t in fl.get("trips", []) if t["from"] < b and t["to"] > a]
+                if trips:
+                    v["trips"] = trips
+                # a hand's top card rides on the pile she gathers them into
+                pile = fl.get("pile")
+                if pile and pile["from"] < b and pile["from"] + len(pile["quads"]) > a:
+                    v["pile"] = {"from": pile["from"] - a, "quads": pile["quads"]}
                 # and only the clip it is swept up in needs where it goes from its resting place
                 away = fl.get("away")
                 if away and away["from"] < b:

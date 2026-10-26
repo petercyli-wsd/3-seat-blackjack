@@ -17,6 +17,15 @@ float cardness(vec3 c) {
 float tableness(vec3 c) {
   return max(feltness(c), cardness(c));
 }
+// Card stock to lay a face on, inside a card's own outline: by colour, not brightness (not felt
+// blue, not skin warm, not her dark sleeve). A card in the shade of her arm, or under the
+// exposure dipping as she leans in, reads ~0.6 where a lit one reads 0.85, and must keep its face.
+float stockness(vec3 c) {
+  float notFelt = 1.0 - smoothstep(0.12, 0.22, c.b - max(c.r, c.g));
+  float notSkin = 1.0 - smoothstep(0.03, 0.09, c.r - c.b);
+  float lit = smoothstep(0.30, 0.45, min(min(c.r, c.g), c.b));
+  return notFelt * notSkin * lit;
+}
 `;
 
 export const FULLSCREEN_VS = /* glsl */ `#version 300 es
@@ -159,8 +168,9 @@ void main() {
   face /= float(BLUR_TAPS);
   if (uMode == 0) {
     float lum = dot(base, vec3(0.299, 0.587, 0.114));
-    float shade = clamp(lum / uRefWhite, 0.55, 1.08);
-    float w = cardness(base) * uAlpha * inside;
+    // the face takes the stock's own light, down into shade
+    float shade = clamp(lum / uRefWhite, 0.35, 1.08);
+    float w = stockness(base) * uAlpha * inside;
     outColor = vec4(mix(base, face * shade, w), 1.0);
   } else {
     float r = 0.09;

@@ -96,10 +96,10 @@ export class Scene {
     for (const c of clip.cards) {
       const card = c.slot === "up" || c.slot === "hole" ? view.dealer[c.index - 1] : undefined;
       if (!card) continue;
-      const hole = c.slot === "hole";
-      const quad = !hole || (c.flip !== null && c.flip <= f) ? faceQuadAt(c, f) : null;
+      // the hole card's face shows from its flip (and as it turns over), like any card's from landing
+      const quad = faceQuadAt(c, f);
       if (!quad) continue;
-      cards.push(footageFace(c, quad, f, faceIndex(card), hole ? (c.flip as number) : faceFrom(c)));
+      cards.push(footageFace(c, quad, f, faceIndex(card), faceFrom(c)));
       if (f >= c.in) dealerShown++;
     }
     // graphic draws: on the table from when they leave the shoe until the real cards are swept

@@ -111,15 +111,23 @@ make it consistent:
    - `bj3/flight.py` follows each face-up card backward from where it lands, frame by frame,
      while she slides it in under her fingers. Poses are rigid moves of the card's own outline,
      turned in table space (`bj3/rigid.py`), at the scale its height in the image gives it, and
-     pinned to its edges with a pull toward the predicted pose. A card lying still is followed
-     through her arm passing over it (the dealer's up card often lies a moment before she
-     squares it up). Stretches where it lies still are drawn at one pose and the moving frames
-     are smoothed, so the face doesn't wobble on its card. Where it stops lying flat, a few more frames are
-     fitted with the card swung up about one edge, as it comes down out of her hand; it stops
-     where the card is still face down or edge on.
+     pinned to its edges with a pull toward the predicted pose. Only frames that see most of the
+     card say where it is: a card lying still is waited for through her arm passing over it (the
+     dealer's up card often lies a moment before she squares it up), and a half-hidden fit
+     between two clear ones is interpolated rather than trusted. Stretches where it lies still
+     are drawn at one pose and the moving frames are smoothed, so the face doesn't wobble on its
+     card. Where it stops lying flat, a few more frames are fitted with the card swung up about
+     one edge, as it comes down out of her hand; it stops where the card is face down or edge on.
+   - The hole card's flip is traced the same way, back from the frame it lies face up: its face
+     shows as it turns over and while she squares it, not only once it is back in its slot.
+   - At the reveal she lifts the up card to scoop the hole card over. `settle` finds such trips
+     (the card's edges go and felt shows where it lay; under a passing hand skin would), and
+     `flight` follows the card while it is flat on the table; lifted in her hand it is blank.
    - At the discard, `settle` finds the frame each card starts to move, and `flight` follows
-     it forward from there while it moves on its own. Once it joins the pile in her hand (other
-     moving cards all round it) its face fades out.
+     it forward from there while it moves flat and on its own. Once she has gathered a hand
+     into a pile, the pile is fitted as one card (a card-shaped blob of moving card stock, its
+     corners taken as they look, tilted or not) and the hand's top card rides on it to the tray:
+     a seat's last-dealt card, slid over the rest, or the dealer's up card, laid on the hole card.
 2. **Seat plates.** For each seat and each hand size (0, 2–6) there is a still of that seat from
    the take. The browser grabs it from the clips at load time with the same decoder that plays
    the footage, so the colours match exactly.
@@ -131,13 +139,20 @@ make it consistent:
      seat 2 becomes bare felt.
 3. **Card faces.** The cards in the take are blank white stock. Each card's face is projected
    onto its outline through a homography.
-   - The face takes on the blank card's own luminance, so it keeps the real lighting.
+   - The face takes on the blank card's own luminance, so it keeps the real lighting, down
+     into the shade of her arm.
    - It only shows where the pixel really is card stock, so a hand passing over hides the face.
+     Card stock is told by colour, not brightness: not felt blue, not skin warm, not her dark
+     sleeve. A card in shade keeps its face.
    - Faces appear on the first frame the card shows face up in her hand and ride along its
      slide-in path (`path` in the manifest), motion-blurred along its movement. The hole card's
-     face appears on the frame it flips. At the discard a face follows its card off its resting
-     place (`away`) and fades as the card goes into the pile. The HUD reveals a card only once
-     it has landed.
+     face rides its flip the same way. At the reveal the up card's face follows it (`trips`),
+     and at the discard a face follows its card off its resting place (`away`) and fades as the
+     card goes into the pile; the top card's face then rides on the pile in her hand (`pile`).
+     The HUD reveals a card only once it has landed.
+
+   `node app/scripts/frames.mjs <clip> <from> <to> [step] [x,y,w,h]` renders chosen frames of a
+   clip exactly as the table draws them (dev server running), for checking faces frame by frame.
 
 Clips that follow each other in the take hand over on the exact frame. A cut between clips that
 weren't filmed back to back goes through a **bridge**: a short generated move from an exit frame
