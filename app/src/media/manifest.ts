@@ -26,6 +26,13 @@ export interface FootageCard {
   pile?: { from: number; quads: (Quad | null)[] };
   /** From the frame it starts to be swept up: its outline while it moves on its own (quads[i] is frame from + i), then none. */
   away?: { from: number; quads: Quad[] };
+  /**
+   * A hit card as it comes down onto the hand, tracked back from where it comes to rest (the
+   * pipeline's landing pass, SAM 2), frame by frame from `from`: its outline (convex; none before it
+   * is in view), which tells it from the card it lands on, white on white, and the four corners of
+   * its face as it comes down tilted under her finger. From `rest` it lies on its resting outline.
+   */
+  land?: { from: number; outlines: (Pt[] | null)[]; faces: (Quad | null)[]; rest: number };
 }
 
 export interface ClipInfo {
@@ -149,6 +156,8 @@ export function faceQuadAt(c: FootageCard, frame: number): Quad | null {
   if (c.pile && frame >= c.pile.from) return c.pile.quads[frame - c.pile.from] ?? null;
   if (c.away && frame >= c.away.from) return c.away.quads[frame - c.away.from] ?? null;
   if (frame >= c.out) return null;
+  const landed = c.land && frame < c.land.rest ? c.land.faces[frame - c.land.from] : undefined;
+  if (landed) return landed;
   const trip = c.trips?.find((t) => frame >= t.from && frame < t.to);
   if (trip) return trip.quads[frame - trip.from] ?? null;
   if (frame >= faceUp(c)) return c.quad;

@@ -140,6 +140,7 @@ export class Director {
     this.view.seats = { seat1: [], seat2: [], seat3: [] };
     this.view.dealer = [];
     this.view.dealerDrawAt = [];
+    this.view.home = undefined;
     const fresh = { taken: false, bet: 0, cards: [], status: "empty" as SeatStatus, result: null };
     this.store.set({
       seats: { seat1: { ...fresh }, seat2: { ...fresh }, seat3: { ...fresh } },
@@ -338,6 +339,8 @@ export class Director {
     this.view.seats = hands;
     this.view.dealer = dealer;
     this.view.dealerDrawAt = [];
+    // and they stay where this take's dealer puts them, through hits filmed in another take
+    this.view.home = this.mask;
     void this.follow(clipName.wait(this.mask), true);
     await this.player.whenEnded(deal);
     this.guard(epoch);
@@ -457,6 +460,7 @@ export class Director {
     this.view.seats = { seat1: [], seat2: [], seat3: [] };
     this.view.dealer = [];
     this.view.dealerDrawAt = [];
+    this.view.home = undefined;
     const s = this.store.get();
     // re-bet: keep the stakes, seat by seat, as far as the balance still covers them all together
     let left = Math.max(0, s.balance);

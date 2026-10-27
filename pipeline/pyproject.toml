@@ -9,5 +9,9 @@ dependencies = [
   "imageio-ffmpeg>=0.5",
 ]
 
+[project.optional-dependencies]
+# the landing pass (bj3.landing): SAM 2 video segmentation, on the CPU
+sam = ["torch>=2.5", "sam2>=1.1"]
+
 [tool.uv]
 package = false

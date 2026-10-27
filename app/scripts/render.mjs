@@ -1,26 +1,40 @@
 // Renders runs of clip frames exactly as the table draws them (same scene, plates and shaders)
 // with given hands, to numbered PNGs: for encoding a moment into a clip to judge at full speed.
-// Usage: node scripts/render.mjs <out dir> '<hands json>' <clip>:<from>-<to> [...] [--crop x,y,w,h]
-//   hands: {"seat1":["2C","3D"],"seat2":[],"seat3":[],"dealer":["TS","7H","4C"]}; graphic dealer
-//   draws (the 3rd card on) are drawn as already landed.
+// Usage: node scripts/render.mjs <out dir> '<hands json>' <clip>:<from>-<to> [...] [--crop x,y,w,h] [--first n]
+//   hands: {"seat1":["2C","3D"],"seat2":[],"seat3":[],"dealer":["TS","7H","4C"],"home":"111"}; graphic
+//   dealer draws (the 3rd card on) are drawn as already landed; home: the take the round was dealt
+//   in. Frames are numbered on from --first (to add a run with other hands to the same sequence).
+// TABLE=emerald and/or BACKGROUND=music_hall_01 draw them in the dealer framing with that table or
+// room, as frames.mjs does; the crop is then in its 1600x900 canvas.
 import { chromium } from "playwright";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
+const { TABLE: table = "studio", BACKGROUND: background = "studio" } = process.env;
+const dealer = table !== "studio" || background !== "studio";
 const args = process.argv.slice(2);
 const cropAt = args.indexOf("--crop");
-const crop = (cropAt >= 0 ? args.splice(cropAt, 2)[1] : "0,0,1440,810").split(",").map(Number);
+const crop = (cropAt >= 0 ? args.splice(cropAt, 2)[1] : dealer ? "0,0,1600,900" : "0,0,1440,810").split(",").map(Number);
+const firstAt = args.indexOf("--first");
+const first = firstAt >= 0 ? Number(args.splice(firstAt, 2)[1]) : 0;
 const [out, handsJson, ...runs] = args;
 mkdirSync(out, { recursive: true });
 const hands = JSON.parse(handsJson);
 const browser = await chromium.launch({ channel: "msedge", headless: true, args: ["--autoplay-policy=no-user-gesture-required"] });
 const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
 page.on("pageerror", (e) => console.error("[pageerror]", e.message));
-await page.goto(process.env.BASE_URL ?? "http://localhost:5183/");
+await page.goto((process.env.BASE_URL ?? "http://localhost:5183/") + `?framing=${dealer ? "dealer" : "studio"}&background=${background}&table=${table}`);
 await page.waitForSelector(".betbar", { timeout: 240_000 });
 await page.evaluate(() => window.__table.player.stopAll());
+// a round's own still is grabbed once it is dealt: give it a moment, as the deal would
+if (hands.home) {
+  await page.evaluate((home) => window.__table.scene.compute(
+    { name: "opening_idle", clip: window.__table.m.clips.opening_idle, frame: 0, loop: false },
+    { seats: { seat1: [], seat2: [], seat3: [] }, dealer: [], dealerDrawAt: [], home }, 0), hands.home);
+  await page.waitForTimeout(1500);
+}
 
-let n = 0;
+let n = first;
 for (const run of runs) {
   const [, clip, from, to] = run.match(/^(.+):(\d+)-(\d+)$/);
   await page.evaluate(async (clip) => {
@@ -41,6 +55,7 @@ for (const run of runs) {
         seats: { seat1: hands.seat1 ?? [], seat2: hands.seat2 ?? [], seat3: hands.seat3 ?? [] },
         dealer: hands.dealer ?? [],
         dealerDrawAt: (hands.dealer ?? []).slice(2).map(() => -1e9),
+        home: hands.home,
       };
       const res = scene.compute({ name: clip, clip: m.clips[clip], frame: f, loop: false, deck: { el: video } }, view, performance.now());
       compositor.render({ a: video, mix: 0, plates: res.plates, cards: res.cards });
@@ -55,5 +70,5 @@ for (const run of runs) {
   }
   console.log(`${run}: done`);
 }
-console.log(`${n} frames -> ${out}`);
+console.log(`${n - first} frames -> ${out}`);
 await browser.close();

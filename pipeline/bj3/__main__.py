@@ -10,14 +10,15 @@ Passes (each cached in work/ and skipped when its output exists, unless --force)
   7. review    contact sheets of every cut (work/review/)
   8. export    trimmed clips + ping-pong loops into game_assets/
   9. manifest  manifest.json, seat masks and CLIPS.md, with when her hand reaches each hand in the
-               discards (discard.py)
+               discards (discard.py) and each hit card's outline as it lands (landing.py; SAM 2,
+               installed by `uv sync --extra sam`)
 """
 
 import argparse
 import time
 from pathlib import Path
 
-from bj3 import bridges, discard, edl, export, flight, manifest, pose, review, settle, signals, tracker
+from bj3 import bridges, discard, edl, export, flight, landing, manifest, pose, review, settle, signals, tracker
 
 
 def main() -> None:
@@ -51,6 +52,12 @@ def main() -> None:
     def build_manifest():
         manifest.build(str(work / "cards.json"), str(work / "edl.json"), str(work / "pose.npz"), str(out), str(work / "flights.json"), str(work / "rest.json"))
         discard.run(a.video, str(out))
+        try:
+            import sam2  # noqa: F401
+        except ImportError:
+            print("  [skip] landing: hit cards' landing outlines need SAM 2 (`uv sync --extra sam`), then `python -m bj3.landing`")
+            return
+        landing.run(a.video, str(out), str(work))
 
     step("manifest", out / "manifest.json", build_manifest)
 

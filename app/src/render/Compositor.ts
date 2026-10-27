@@ -1,6 +1,6 @@
-import type { Quad } from "../media/manifest";
+import type { Pt, Quad } from "../media/manifest";
 import { cellUV } from "./faceAtlas";
-import { type Similarity, invert3, invertSimilarity, squareToQuad, toColumnMajor } from "./homography";
+import { IDENTITY, type Similarity, invert3, invertSimilarity, squareToQuad, toColumnMajor } from "./homography";
 import { BLIT_FS, CARD_FS, CARD_VS, COMPOSITE_FS, FULLSCREEN_VS, SHADOW_FS, STAGE_FS } from "./shaders";
 import type { Rect, TableArt } from "./stageArt";
 
@@ -12,15 +12,28 @@ export interface PlateDraw {
   rect: [number, number, number, number];
   /** Where it goes: still pixels -> video pixels. */
   place: Similarity;
-  /** Lay in only its cards from the third on (over a take holding the hand's first two), not the whole seat. */
-  extrasOnly: boolean;
+  /**
+   * whole: the whole seat (its mask) and its own cards; extras: only its cards from the third on
+   * (over a take holding the hand's first two); match: over another take than the round's,
+   * wherever that take (its own still of the seat, `ref`, and the still's matte) or the plate has
+   * a card and the frame shows table, darkened by her shadow, so her hand and a card she is
+   * dealing there (`dealing`, its outline, kept as filmed whatever it looks like) stay; dealing:
+   * match at the seat being dealt to, where only the first two cards differ from the take's.
+   */
+  mode: "whole" | "extras" | "match" | "dealing";
+  ref?: { tex: WebGLTexture; matte: WebGLTexture; rect: [number, number, number, number] };
+  dealing?: Pt[] | null;
   alpha: number;
 }
 
-/** Video pixel (GL's, edges on integers) -> the plate's texture UV, back through its placing. */
-function plateUV(p: PlateDraw): number[] {
-  const s = invertSimilarity(p.place);
-  const [rx, ry, rw, rh] = p.rect;
+const PLATE_MODE = { whole: 0, extras: 1, match: 2, dealing: 3 } as const;
+/** Corners a dealt card's outline can have (the shader's uNew). */
+const NEW_MAX = 16;
+
+/** Video pixel (GL's, edges on integers) -> a still's texture UV, back through its placing. */
+function plateUV(rect: [number, number, number, number], place: Similarity): number[] {
+  const s = invertSimilarity(place);
+  const [rx, ry, rw, rh] = rect;
   // the placing is in the pipeline's pixel-centre coordinates: half a pixel off GL's (shaders.ts)
   return toColumnMajor([
     s.ar / rw, -s.ai / rw, (s.bx - 0.5 * s.ar + 0.5 * s.ai + 0.5 - rx) / rw,
@@ -262,21 +275,32 @@ export class Compositor {
     gl.uniform1f(u.uMix, f.b ? f.mix : 0);
     this.bind(2, this.mask, u.uMask);
     const uv = new Float32Array(27);
+    const refUV = new Float32Array(27);
     const on = new Float32Array(3);
-    const extras = new Float32Array(3);
+    const modes = new Float32Array(3);
     for (let i = 0; i < 3; i++) {
       const p = f.plates[i];
       this.bind(3 + i, p ? p.tex : this.black, u[`uPlate${i}`]);
       this.bind(6 + i, p ? p.matte : this.black, u[`uMatte${i}`]);
+      this.bind(9 + i, p?.ref ? p.ref.tex : this.black, u[`uRef${i}`]);
+      this.bind(12 + i, p?.ref ? p.ref.matte : this.black, u[`uRefMatte${i}`]);
       if (p) {
-        uv.set(plateUV(p), i * 9);
+        uv.set(plateUV(p.rect, p.place), i * 9);
+        refUV.set(plateUV(p.ref?.rect ?? p.rect, IDENTITY), i * 9);
         on[i] = p.alpha;
-        extras[i] = p.extrasOnly ? 1 : 0;
+        modes[i] = PLATE_MODE[p.mode];
       }
     }
     gl.uniformMatrix3fv(u["uPlateUV[0]"], false, uv);
+    gl.uniformMatrix3fv(u["uRefUV[0]"], false, refUV);
     gl.uniform1fv(u["uPlateOn[0]"], on);
-    gl.uniform1fv(u["uPlateExtras[0]"], extras);
+    gl.uniform1fv(u["uPlateMode[0]"], modes);
+    // one seat at a time is dealt a hit: the card coming in
+    const dealing = f.plates.find((p) => p?.dealing)?.dealing?.slice(0, NEW_MAX) ?? [];
+    const outline = new Float32Array(NEW_MAX * 2);
+    outline.set(dealing.flat());
+    gl.uniform2fv(u["uNew[0]"], outline);
+    gl.uniform1i(u.uNewN, dealing.length);
     gl.uniform2f(u.uSize, w, h);
     gl.uniform1i(u.uShowMasks, f.showMasks ? 1 : 0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);

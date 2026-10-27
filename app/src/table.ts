@@ -2,7 +2,7 @@ import { Director } from "./director/Director";
 import { Store } from "./director/store";
 import { ClipPlayer } from "./media/ClipPlayer";
 import { ASSET_BASE, loadBridges, loadManifest } from "./media/manifest";
-import { grabPlates, maskRects } from "./media/plates";
+import { RoundPlates, grabPlates, maskRects } from "./media/plates";
 import { ClipLoader, loadImage } from "./media/preload";
 import { Compositor } from "./render/Compositor";
 import { buildFaceAtlas } from "./render/faceAtlas";
@@ -104,7 +104,8 @@ export async function bootTable(canvas: HTMLCanvasElement, host: HTMLElement, st
   await applyView();
   const unsubscribe = store.subscribe(() => void applyView());
   setLoading("Grabbing seat plates");
-  const plates = await grabPlates(m, files, maskRects(mask, m.seats), host);
+  const rects = maskRects(mask, m.seats);
+  const plates = await grabPlates(m, files, rects, host);
   const plateTex = {} as PlateTextures;
   for (const seat of m.seats) {
     plateTex[seat] = {};
@@ -112,7 +113,7 @@ export async function bootTable(canvas: HTMLCanvasElement, host: HTMLElement, st
       plateTex[seat][Number(n)] = { image: compositor.imageTexture(p.image), matte: compositor.imageTexture(p.matte) };
     }
   }
-  const scene = new Scene(m, plates, plateTex);
+  const scene = new Scene(m, plates, plateTex, new RoundPlates(m, files, rects, host, plates, (src) => compositor.imageTexture(src)));
   const player = new ClipPlayer(m, files, host);
   const director = new Director(m, player, store, bridges);
 

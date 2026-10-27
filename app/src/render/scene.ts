@@ -1,9 +1,11 @@
 import { type Card, faceIndex } from "../engine/cards";
 import type { PlayingState } from "../media/ClipPlayer";
-import { type ClipInfo, type FootageCard, type Manifest, type Quad, type SeatId, cardsAt, faceFrom, faceQuadAt, faceUntil } from "../media/manifest";
-import type { PlateSet, SeatPlate } from "../media/plates";
+import { type ClipInfo, type FootageCard, type Manifest, type Pt, type Quad, type SeatId, cardsAt, clipName, faceFrom, faceQuadAt, faceUntil } from "../media/manifest";
+import type { PlateSet, PlateTexture, RoundPlates, SeatPlate } from "../media/plates";
 import type { CardDraw, PlateDraw } from "./Compositor";
-import { IDENTITY, type Similarity, centre, fitSimilarity, lerpQuad, lerpSimilarity, moveQuad, rotateQuad, scaleQuad, translateQuad } from "./homography";
+import {
+  IDENTITY, type Similarity, centre, fitSimilarity, lerpQuad, lerpSimilarity, moveQuad, rotateQuad, scaleQuad, translateQuad,
+} from "./homography";
 
 /** What the game says is on the table; the scene decides how to show it on the current frame. */
 export interface TableView {
@@ -11,6 +13,11 @@ export interface TableView {
   dealer: Card[];
   /** performance.now() at which each graphic dealer card (3rd onwards) left the shoe. */
   dealerDrawAt: number[];
+  /**
+   * The take the round was dealt in (its seat mask). Its dealer put each seat's first two cards in
+   * that take's own spots, and the cards stay there all round, whatever footage is on screen.
+   */
+  home?: string;
 }
 
 export interface SceneResult {
@@ -23,11 +30,20 @@ export interface SceneResult {
 }
 
 /** Each plate's still and matte, as textures. */
-export type PlateTextures = Record<SeatId, Record<number, { image: WebGLTexture; matte: WebGLTexture }>>;
+export type PlateTextures = Record<SeatId, Record<number, PlateTexture>>;
+
+/** A hand to lay in: a plate, its textures, and where it goes. */
+interface Held {
+  plate: SeatPlate;
+  tex: PlateTexture;
+  place: Similarity;
+}
 
 const LAND_FADE = 3;
 const DRAW_MS = 520;
 const DISCARD_FADE = 5;
+/** Frames after a hit card lands that it is taken to be settling, where the pipeline's landing pass hasn't tracked it. */
+const SETTLE = 6;
 /** Frames a laid-in card takes to fade out of a discard, ending as her hand comes over its hand. */
 const EXTRAS_FADE = 6;
 
@@ -43,15 +59,46 @@ export class Scene {
     private m: Manifest,
     private plates: PlateSet,
     private plateTex: PlateTextures,
+    private round?: RoundPlates,
   ) {}
 
+  /**
+   * A hand laid in over another take than the round's, wherever that take (its own still of the
+   * seat, holding `shown` cards) or the hand has a card and the frame shows table there, darkened
+   * by her shadow; her hand and the card she is `dealing` stay as filmed. At the seat being `dealt`
+   * to, the take holds the hand's cards from the third on just where the round has them, so only
+   * its first two are laid in.
+   */
+  private matched(h: Held, seat: SeatId, shown: number, dealing: Pt[] | null, dealt = false): PlateDraw {
+    const ref = this.plates[seat][shown];
+    if (!ref) return plateDraw(h, 1, "whole");
+    const tex = this.plateTex[seat][shown];
+    return { ...plateDraw(h, 1, dealt ? "dealing" : "match"), ref: { tex: tex.image, matte: tex.matte, rect: ref.rect }, dealing };
+  }
+
+  /**
+   * The seat's hand of `n` as the round dealt in take `view.home` has it: that take's own still of
+   * its first two cards with the plate's others laid on, or, while that still is being grabbed,
+   * the plate moved onto those two cards (its others a few pixels off where they will be).
+   */
+  private held(view: TableView, home: ClipInfo, seat: SeatId, n: number): Held | undefined {
+    const own = view.home ? this.round?.get(view.home, seat, n) : undefined;
+    if (own) return { ...own, place: IDENTITY };
+    const plate = this.plates[seat][n];
+    return plate && { plate, tex: this.plateTex[seat][n], place: placing(home, seat, plate) };
+  }
+
   compute(s: PlayingState, view: TableView, now: number): SceneResult {
+    if (view.home) this.round?.prepare(view.home);
     if (s.clip.bridge) return this.bridge(s.clip, s.frame, view);
     const { clip, frame: f } = s;
     const plates: (PlateDraw | null)[] = [];
     const cards: CardDraw[] = [];
     const visible = { seat1: 0, seat2: 0, seat3: 0, dealer: 0 } as SceneResult["visible"];
     const plateUse = { seat1: null, seat2: null, seat3: null } as SceneResult["plateUse"];
+    // footage from another take than the round's (a hit, from the full-table round), whose dealer
+    // put the cards a few pixels from where the round has them
+    const home = view.home && clip.mask !== view.home ? this.m.clips[clipName.wait(view.home)] : undefined;
 
     for (const seat of this.m.seats) {
       const hand = view.seats[seat];
@@ -59,21 +106,60 @@ export class Scene {
       const footage = cardsAt(clip, seat, f).length;
       const own = clip.cards.filter((c) => c.slot === seat);
 
+      if (home) {
+        const dealt = dealsTo(clip, seat) ? own.find((c) => c.index === clip.card && c.index <= hand.length) : undefined;
+        // the wait after a hit, same take: the seat as it was just dealt to
+        const justDealt = clip.kind === "wait" && clip.seat === seat && hand.length >= 3;
+        if (!dealt && !justDealt) {
+          // the hand as it lies in the round, over whatever this take has in the seat
+          const h = this.held(view, home, seat, hand.length);
+          if (!h) {
+            plates.push(null);
+            continue;
+          }
+          plates.push(this.matched(h, seat, footage, null));
+          plateUse[seat] = h.plate.n;
+          h.plate.cards.forEach((q, i) => cards.push({ quad: moveQuad(h.place, q), cell: faceIndex(hand[i]), alpha: 1, mode: "footage" }));
+          visible[seat] = hand.length;
+          continue;
+        }
+        // The hit, and the wait after it: only the first two cards differ from the round (the rest
+        // lie where the round has them too). So those are laid in, wherever the frame shows the
+        // table just as this take's own still of the seat does, and all else stays as filmed: her
+        // hand, her shadow, the cards from the third on, and the card she brings in, which lands
+        // and settles under her finger as it really does. Over the second card, white on white,
+        // its outline as tracked over its landing (`land`) marks it out until it lies at rest.
+        const land = dealt?.land;
+        const settling = !!dealt && f < (land ? land.rest : dealt.in + SETTLE);
+        // the round's hand, and the take's own still, both without the new card until it lies at rest
+        const h = this.held(view, home, seat, settling ? dealt.index - 1 : hand.length);
+        if (!h) {
+          plates.push(null);
+          continue;
+        }
+        const outline = settling && land ? (land.outlines[f - land.from] ?? null) : null;
+        plates.push(this.matched(h, seat, settling ? dealt.index - 1 : footage, outline, true));
+        plateUse[seat] = h.plate.n;
+        h.plate.cards.slice(0, 2).forEach((q, i) => cards.push({ quad: moveQuad(h.place, q), cell: faceIndex(hand[i]), alpha: 1, mode: "footage" }));
+        footageFaces(clip, seat, hand, f, cards, 3);
+        visible[seat] = Math.min(footage, hand.length);
+        continue;
+      }
+
       if (!dealsTo(clip, seat) && hand.length >= 2 && own.length === 2 && own.every((c) => c.index <= 2)) {
         // The take holds this hand's first two cards: they are the real ones, as filmed (and swept
-        // up as filmed in a discard). A bigger hand's other cards are laid in from its plate, moved
-        // onto these two; she can't pick those up, so in a discard they fade out just before her
-        // hand comes over the hand.
+        // up as filmed in a discard). A bigger hand's other cards are laid in from its plate where
+        // the full-table round's dealer put them (as the hits show them landing); she can't pick
+        // those up, so in a discard they fade out just before her hand comes over the hand.
         footageFaces(clip, seat, hand, f, cards);
         visible[seat] = Math.min(footage, hand.length);
         const plate = hand.length > 2 ? this.plates[seat][hand.length] : undefined;
         const alpha = plate ? extrasAlpha(clip, seat, hand.length, f, Math.min(...own.map((c) => c.out))) : 0;
         if (plate && alpha > 0) {
-          const place = placing(clip, seat, plate);
-          plates.push(this.plateDraw(seat, plate, place, alpha, true));
+          plates.push(plateDraw({ plate, tex: this.plateTex[seat][plate.n], place: IDENTITY }, alpha, "extras"));
           plateUse[seat] = plate.n;
           plate.cards.slice(2).forEach((q, i) => {
-            cards.push({ quad: moveQuad(place, q), cell: faceIndex(hand[i + 2]), alpha, mode: "footage" });
+            cards.push({ quad: q, cell: faceIndex(hand[i + 2]), alpha, mode: "footage" });
           });
           if (alpha > 0.5) visible[seat] += hand.length - 2;
         } else {
@@ -101,7 +187,7 @@ export class Scene {
       const plate = want !== footage ? this.plates[seat][want] : undefined;
       if (plate && plateAlpha > 0) {
         const place = placing(clip, seat, plate);
-        plates.push(this.plateDraw(seat, plate, place, plateAlpha, false));
+        plates.push(plateDraw({ plate, tex: this.plateTex[seat][plate.n], place }, plateAlpha, "whole"));
         plateUse[seat] = want;
         plate.cards.forEach((q, i) => {
           if (hand[i]) cards.push({ quad: moveQuad(place, q), cell: faceIndex(hand[i]), alpha: plateAlpha, mode: "footage" });
@@ -154,14 +240,15 @@ export class Scene {
    * A bridge is generated from frames whose seats were cleared to bare felt (the pipeline's
    * SeatCleaner): the two clips it joins hold different cards there, and interpolated cards
    * would morph and drift. So every seat shows a plate of the game's hand for the whole move,
-   * gliding from where that hand lay on the clip it leaves (each take's dealer put the first two
-   * cards a little differently) to where it lies on the clip it lands in. The dealer's own two
-   * cards are in the bridge; their faces glide the same way.
+   * where the round has it. Outside a round, it glides from where that hand lay on the clip it
+   * leaves (each take's dealer put the first two cards a little differently) to where it lies on
+   * the clip it lands in. The dealer's own two cards are in the bridge; their faces glide so.
    */
   bridge(clip: ClipInfo, f: number, view: TableView): SceneResult {
     const { from, at, to } = clip.bridge!;
     const A = this.m.clips[from];
     const B = this.m.clips[to];
+    const home = view.home ? this.m.clips[clipName.wait(view.home)] : undefined;
     const t = (f + 1) / (clip.frames + 1);
     const tPrev = f / (clip.frames + 1);
     const plates: (PlateDraw | null)[] = [];
@@ -176,11 +263,13 @@ export class Scene {
         plates.push(null);
         continue;
       }
-      const place = lerpSimilarity(placing(A, seat, plate), placing(B, seat, plate), t);
-      plates.push(this.plateDraw(seat, plate, place, 1, false));
+      const h = home
+        ? this.held(view, home, seat, hand.length)!
+        : { plate, tex: this.plateTex[seat][plate.n], place: lerpSimilarity(placing(A, seat, plate), placing(B, seat, plate), t) };
+      plates.push(plateDraw(h, 1, "whole"));
       plateUse[seat] = hand.length;
-      plate.cards.forEach((q, i) => {
-        if (hand[i]) cards.push({ quad: moveQuad(place, q), cell: faceIndex(hand[i]), alpha: 1, mode: "footage" });
+      h.plate.cards.forEach((q, i) => {
+        if (hand[i]) cards.push({ quad: moveQuad(h.place, q), cell: faceIndex(hand[i]), alpha: 1, mode: "footage" });
       });
     }
     for (const slot of ["up", "hole"] as const) {
@@ -194,11 +283,10 @@ export class Scene {
     }
     return { plates, cards, visible, plateUse };
   }
+}
 
-  private plateDraw(seat: SeatId, plate: SeatPlate, place: Similarity, alpha: number, extrasOnly: boolean): PlateDraw {
-    const tex = this.plateTex[seat][plate.n];
-    return { tex: tex.image, matte: tex.matte, rect: plate.rect, place, alpha, extrasOnly };
-  }
+function plateDraw({ plate, tex, place }: Held, alpha: number, mode: PlateDraw["mode"]): PlateDraw {
+  return { tex: tex.image, matte: tex.matte, rect: plate.rect, place, alpha, mode };
 }
 
 /**
@@ -225,10 +313,10 @@ function extrasAlpha(clip: ClipInfo, hand: SeatId | "dealer", n: number, f: numb
   return t * t * (3 - 2 * t);
 }
 
-/** Every card of this seat that is face up on screen: lying, or still sliding in under her fingers. */
-function footageFaces(clip: ClipInfo, seat: SeatId, hand: Card[], f: number, out: CardDraw[]) {
+/** Every card of this seat (from the `from`th on) that is face up on screen: lying, or still sliding in under her fingers. */
+function footageFaces(clip: ClipInfo, seat: SeatId, hand: Card[], f: number, out: CardDraw[], from = 1) {
   for (const c of clip.cards) {
-    const card = c.slot === seat ? hand[c.index - 1] : undefined;
+    const card = c.slot === seat && c.index >= from ? hand[c.index - 1] : undefined;
     const quad = card && faceQuadAt(c, f);
     if (!card || !quad) continue;
     out.push(footageFace(c, quad, f, faceIndex(card), faceFrom(c)));

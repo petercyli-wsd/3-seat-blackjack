@@ -4,10 +4,9 @@
 
 A discard was filmed for every seat combination with two cards in each seat, so a hand of three
 or more shows its two real cards plus the rest laid in from a still of a bigger hand (the seat's
-plate). The plate's first two cards are matched onto the real two by the least-squares similarity
-over their eight corners (`similarity`; the app fits the same one), so the extra cards lie where
-they would on this take. She can't pick them up, so they fade out just before her hand first
-comes over the hand's cards; the graphic dealer draws likewise, before she reaches the dealer's.
+plate), where the full-table round's dealer put them, as the hits show them landing. She can't
+pick them up, so they fade out just before her hand first comes over the hand's cards; the
+graphic dealer draws likewise, before she reaches the dealer's.
 
 For every discard clip, `reach[seat][n]` (a hand of n = 3..6) and `reach["dealer"][k]` (k graphic
 draws, 1..5): the clip frame her hand comes over the hand's cards (the real ones, and the laid-in
@@ -29,20 +28,6 @@ from bj3.video import Frames
 MARGIN = 8
 MIN_PX = 15
 DEALER_DRAWS = 5
-
-
-def similarity(src: list, dst: list) -> tuple[complex, complex]:
-    """Least-squares z -> a z + b taking the corners of the quads `src` onto those of `dst`."""
-    z = np.array([complex(*p) for q in src for p in q])
-    w = np.array([complex(*p) for q in dst for p in q])
-    zm, wm = z.mean(), w.mean()
-    a = np.sum((w - wm) * np.conj(z - zm)) / np.sum(np.abs(z - zm) ** 2)
-    return a, wm - a * zm
-
-
-def moved(xf: tuple[complex, complex], quad: list) -> list:
-    a, b = xf
-    return [[(a * complex(*p) + b).real, (a * complex(*p) + b).imag] for p in quad]
 
 
 def dealer_draw_quad(up: list, i: int) -> list:
@@ -100,13 +85,9 @@ def run(video: str, assets: str = "../game_assets") -> None:
             lift = min(c["out"] for c in real.values())
             out[seat] = {}
             for n in range(3, 7):
-                plate = m["plates"][seat][str(n)]["cards"]
-                xf = similarity(plate[:2], [real[1]["quad"], real[2]["quad"]])
-                extras = [moved(xf, q) for q in plate[2:]]
+                extras = m["plates"][seat][str(n)]["cards"][2:]
                 out[seat][str(n)] = reach(frames, area([real[1]["quad"], real[2]["quad"], *extras], shape), lift)
-            fit = np.array(moved(xf, plate[0]) + moved(xf, plate[1])) - np.array(real[1]["quad"] + real[2]["quad"])
-            print(f"  {name} {seat}: first pickup {lift}, hand reaches it at {out[seat]}"
-                  f" (fit {np.sqrt((fit ** 2).sum(1).mean()):.1f}px rms)")
+            print(f"  {name} {seat}: first pickup {lift}, hand reaches it at {out[seat]}")
         dealer = [c for c in clip["cards"] if c["slot"] in ("up", "hole")]
         if dealer:
             lift = min(c["out"] for c in dealer)

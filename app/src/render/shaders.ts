@@ -46,6 +46,13 @@ void main() {
  * whatever cards the footage has there, and its own cards (matte red) even
  * where the move takes them past the mask; over a take that holds the hand's
  * first two cards, only the cards from the third on (matte green) are laid in.
+ * Over another take than the round's (a hit), a seat is laid in wherever that
+ * take or the round has a card (the mattes of the take's own still of the seat,
+ * uRef, and of the plate) and the frame shows the table just as the still does,
+ * up to her shadow: darker, by as much as the frame is over a few pixels, and on
+ * white a little bluer (the felt's light). Her hand, and a card she is dealing
+ * (unlike the still where it crosses the felt; uNew, its outline, once it has
+ * all but come to rest on the cards), stay as filmed; the plate takes her shadow.
  *
  * A deck playing a packed clip (the dealer's matte stacked below the picture) is read from its
  * top half, and its matte goes on in the alpha channel for pass 3; an unpacked deck gives 1.
@@ -66,12 +73,44 @@ uniform sampler2D uMatte1;
 uniform sampler2D uMatte2;
 uniform mat3 uPlateUV[3];
 uniform float uPlateOn[3];
-uniform float uPlateExtras[3];
+uniform float uPlateMode[3];
+uniform sampler2D uRef0;
+uniform sampler2D uRef1;
+uniform sampler2D uRef2;
+uniform sampler2D uRefMatte0;
+uniform sampler2D uRefMatte1;
+uniform sampler2D uRefMatte2;
+uniform mat3 uRefUV[3];
+uniform vec2 uNew[16];
+uniform int uNewN;
 uniform vec2 uSize;
 uniform int uShowMasks;
 uniform int uPackA;
 uniform int uPackB;
 ${KEYS}
+const float NEW_GROW = 2.5;
+// signed distance from p to the line a->b, positive on the quad's inside (orientation s)
+float edgeIn(vec2 a, vec2 b, vec2 p, float s) {
+  vec2 e = b - a;
+  return s * (e.x * (p.y - a.y) - e.y * (p.x - a.x)) / max(length(e), 1e-3);
+}
+// how far p (pipeline pixel coordinates) lies inside the card being dealt (its convex outline), in px
+float inNewCard(vec2 p) {
+  if (uNewN < 3) return -1e9;
+  float area = 0.0;
+  for (int i = 0; i < 16; i++) {
+    if (i >= uNewN) break;
+    vec2 a = uNew[i], b = uNew[i + 1 < uNewN ? i + 1 : 0];
+    area += a.x * b.y - b.x * a.y;
+  }
+  float s = sign(area);
+  float e = 1e9;
+  for (int i = 0; i < 16; i++) {
+    if (i >= uNewN) break;
+    e = min(e, edgeIn(uNew[i], uNew[i + 1 < uNewN ? i + 1 : 0], p, s));
+  }
+  return e;
+}
 // a packed deck's picture is its top half; its last row stops short of the matte's first
 vec2 picture(sampler2D v, int packed, vec2 uv) {
   if (packed == 0) return uv;
@@ -87,12 +126,59 @@ float matteAt(vec2 uv) {
   return mix(a, b, uMix);
 }
 // sampler arrays can't be indexed by a loop variable in GLSL ES 3.0, hence one call per seat
-vec3 layPlate(vec3 c, sampler2D plate, sampler2D matte, mat3 uv, float on, float extras, float m, float key, vec2 px) {
+float lum(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
+vec3 layPlate(vec3 c, sampler2D plate, sampler2D matte, mat3 uv, sampler2D still, sampler2D stillMatte, mat3 stillUV, float on, float mode, float m, float key, vec2 px) {
   if (on <= 0.0) return c;
   vec2 q = (uv * vec3(px, 1.0)).xy;
   if (any(lessThan(q, vec2(0.0))) || any(greaterThan(q, vec2(1.0)))) return c;
   vec2 mt = texture(matte, q).rg;
-  float w = extras > 0.5 ? mt.g : max(m, mt.r);
+  if (mode > 1.5) {
+    // match (2), or dealing (3): over another take than the round's
+    vec2 r = (stillUV * vec3(px, 1.0)).xy;
+    if (any(lessThan(r, vec2(0.0))) || any(greaterThan(r, vec2(1.0)))) return c;
+    vec3 ref = texture(still, r).rgb;
+    // her shadow: how much darker the table is here than in the still, over a few pixels
+    float lc = 0.0, lr = 0.0;
+    for (int i = -1; i <= 1; i++) {
+      for (int j = -1; j <= 1; j++) {
+        vec2 o = vec2(float(i), float(j)) * 3.0;
+        lc += lum(frameAt((px + o) / uSize));
+        lr += lum(texture(still, (stillUV * vec3(px + o, 1.0)).xy).rgb);
+      }
+    }
+    float k = clamp(lc / max(lr, 0.36), 0.3, 1.05);
+    vec3 d = c - ref * k;
+    d.b = max(d.b - 0.12 * step(0.0, d.b), min(d.b, 0.0));
+    float asStill = 1.0 - smoothstep(0.06, 0.12, length(d));
+    // at the seat being dealt to, and while a card is being dealt (its outline marks it out), whatever
+    // looks like table, felt or card stock, lit or in a shadow, is this take's own cards and felt
+    float table = mode > 2.5 || uNewN >= 3 ? max(asStill, max(feltness(c), stockness(c))) : asStill;
+    // wherever the take or the round has a card; at the seat being dealt to, only its first two (the
+    // rest lie where this take has them in the round too, and stay as filmed, the new card on them)
+    vec2 sm = texture(stillMatte, r).rg;
+    float cards = mode > 2.5 ? max(sm.r * (1.0 - sm.g), mt.r * (1.0 - mt.g)) : max(sm.r, mt.r);
+    // the card being dealt stays as filmed, grown by NEW_GROW for its soft edge; but at the seat
+    // being dealt to, where that rim lies on this take's own first cards (white on white: their own
+    // edge, or her card's shadow line on them), it is laid in as the same shade of the round's table
+    float e = inNewCard(px - 0.5);
+    float line = mode > 2.5 ? step(-NEW_GROW - 0.5, e) * (1.0 - clamp(e + 0.5, 0.0, 1.0)) * sm.r * (1.0 - sm.g) * stockness(ref) : 0.0;
+    float shade = k;
+    if (line > 0.0) {
+      // how much darker than the still, over the pixel and its neighbours (one alone is too noisy)
+      float sc = 0.0, sr = 0.0;
+      for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+          vec2 o = vec2(float(i), float(j));
+          sc += lum(frameAt((px + o) / uSize));
+          sr += lum(texture(still, (stillUV * vec3(px + o, 1.0)).xy).rgb);
+        }
+      }
+      shade = min(k, sc / max(sr, 0.45));
+    }
+    float w = cards * table * max(1.0 - clamp(e + NEW_GROW + 0.5, 0.0, 1.0), line);
+    return mix(c, texture(plate, q).rgb * mix(k, shade, line), w * on);
+  }
+  float w = mode > 0.5 ? mt.g : max(m, mt.r);
   return mix(c, texture(plate, q).rgb, w * key * on);
 }
 void main() {
@@ -108,9 +194,9 @@ void main() {
   vec3 a3 = frameAt(vUV + vec2(o.x, -o.y));
   vec3 a4 = frameAt(vUV - o);
   float key = max(max(tableness(c), tableness(a1)), max(max(tableness(a2), tableness(a3)), tableness(a4)));
-  c = layPlate(c, uPlate0, uMatte0, uPlateUV[0], uPlateOn[0], uPlateExtras[0], m.r, key, px);
-  c = layPlate(c, uPlate1, uMatte1, uPlateUV[1], uPlateOn[1], uPlateExtras[1], m.g, key, px);
-  c = layPlate(c, uPlate2, uMatte2, uPlateUV[2], uPlateOn[2], uPlateExtras[2], m.b, key, px);
+  c = layPlate(c, uPlate0, uMatte0, uPlateUV[0], uRef0, uRefMatte0, uRefUV[0], uPlateOn[0], uPlateMode[0], m.r, key, px);
+  c = layPlate(c, uPlate1, uMatte1, uPlateUV[1], uRef1, uRefMatte1, uRefUV[1], uPlateOn[1], uPlateMode[1], m.g, key, px);
+  c = layPlate(c, uPlate2, uMatte2, uPlateUV[2], uRef2, uRefMatte2, uRefUV[2], uPlateOn[2], uPlateMode[2], m.b, key, px);
   if (uShowMasks == 1) {
     c = mix(c, vec3(1.0, 0.75, 0.2), 0.35 * m.r);
     c = mix(c, vec3(0.3, 1.0, 0.4), 0.35 * m.g);
