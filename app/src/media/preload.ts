@@ -1,3 +1,4 @@
+import type { PackedFile } from "../render/stageArt";
 import { ASSET_BASE, type Manifest, clipName } from "./manifest";
 
 const WORKERS = 6;
@@ -23,13 +24,14 @@ export class ClipLoader {
 
   /**
    * `packed` names, for a file, the version of it with the dealer's matte stacked below the
-   * picture (the pipeline's mattes pass): that is what is fetched for it.
+   * picture (the pipeline's mattes pass): that is what is fetched for it, unless the file has
+   * changed since it was packed (a bridge generated again), when the file itself is.
    */
   constructor(
     m: Manifest,
     private onProgress: (loaded: number, total: number) => void,
     private onError: (e: Error) => void,
-    private packed: Record<string, string> = {},
+    private packed: Record<string, PackedFile> = {},
   ) {
     const order = loadOrder(m);
     this.queue = order.files;
@@ -63,7 +65,9 @@ export class ClipLoader {
     for (let f = this.queue.shift(); f; f = this.queue.shift()) {
       const w = this.waiting.get(f)!;
       try {
-        const url = URL.createObjectURL(new Blob([await fetchBlob(ASSET_BASE + (this.packed[f] ?? f))], { type: "video/mp4" }));
+        const p = this.packed[f];
+        const src = p && (await sameSize(ASSET_BASE + f, p.sourceSize)) ? p.file : f;
+        const url = URL.createObjectURL(new Blob([await fetchBlob(ASSET_BASE + src)], { type: "video/mp4" }));
         this.urls.set(f, url);
         w.resolve(url);
         this.onProgress(++this.done, this.total);
@@ -78,6 +82,17 @@ export class ClipLoader {
   dispose() {
     this.queue = [];
     for (const u of this.urls.values()) URL.revokeObjectURL(u);
+  }
+}
+
+/** Whether a file is still the size it was (a HEAD request; a server that won't say counts as yes). */
+async function sameSize(url: string, size: number): Promise<boolean> {
+  try {
+    const r = await fetch(url, { method: "HEAD" });
+    const n = Number(r.headers.get("content-length"));
+    return !r.ok || !n || n === size;
+  } catch {
+    return true;
   }
 }
 

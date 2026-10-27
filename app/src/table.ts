@@ -8,7 +8,8 @@ import { Compositor } from "./render/Compositor";
 import { buildFaceAtlas } from "./render/faceAtlas";
 import { type PlateTextures, Scene } from "./render/scene";
 import {
-  DEALER_CROP, DEALER_OUT, FELTS, type TableArt, backLine, loadMattes, loadSceneInfo, loadSets, loadSkirtWood, paintSet, paintTable,
+  DEALER_CROP, DEALER_OUT, FELTS, ROOM_BEHIND, type TableArt, backLine, lightOf, loadMattes, loadSceneInfo, loadSets, loadSkirtWood,
+  paintSet, paintTable, tintFor,
 } from "./render/stageArt";
 
 export interface Table {
@@ -56,11 +57,16 @@ export async function bootTable(canvas: HTMLCanvasElement, host: HTMLElement, st
   const sceneInfo = await loadSceneInfo();
   const sets = sceneInfo ? await loadSets() : [];
   const studio = { id: "studio", name: "As filmed" };
+  // the filmed wall behind her, where the dealer framing puts the room behind her: the light she was filmed in
+  let wall: [number, number, number] = [1, 1, 1];
   if (sceneInfo) {
     const [ref, masks, clutter, wood] = await Promise.all([
       loadImage(ASSET_BASE + sceneInfo.reference), loadImage(ASSET_BASE + sceneInfo.masks), loadImage(ASSET_BASE + sceneInfo.clutter), loadSkirtWood(),
     ]);
     compositor.setScene(ref, masks, clutter, backLine(sceneInfo), wood);
+    const [cx, cy, cw, ch] = DEALER_CROP;
+    const [fx, fy, fw, fh] = ROOM_BEHIND;
+    wall = lightOf(ref, [(cx + fx * cw) / m.width, (cy + fy * ch) / m.height, (fw * cw) / m.width, (fh * ch) / m.height]);
     store.set({
       backgrounds: [...sets.map(({ id, name }) => ({ id, name })), studio],
       tables: [...FELTS.map(({ id, name }) => ({ id, name })), studio],
@@ -98,6 +104,7 @@ export async function bootTable(canvas: HTMLCanvasElement, host: HTMLElement, st
       out: dealer ? DEALER_OUT : [m.width, m.height],
       set: image,
       table: set && felt && art ? { art, recolor: felt.colour ? { from: set.felt, to: felt.colour } : null } : null,
+      tint: image ? tintFor(lightOf(image as HTMLCanvasElement, ROOM_BEHIND), wall) : undefined,
     });
     viewVersion++;
   };

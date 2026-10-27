@@ -64,6 +64,8 @@ export interface StageDraw {
   table: { art: TableArt; recolor: { from: [number, number, number]; to: [number, number, number] } | null } | null;
   /** Draw the painted table over the set: the input the pipeline's sets pass restyles. */
   painted?: boolean;
+  /** The footage's tint toward the set's light (per channel; none: as filmed). */
+  tint?: [number, number, number];
 }
 
 export interface FrameDraw {
@@ -209,6 +211,9 @@ export class Compositor {
     this.sceneRef = this.imageTexture(ref);
     this.sceneMasks = this.imageTexture(masks);
     this.sceneClutter = this.imageTexture(clutter);
+    // mipmapped: blurred, the props' outlines are their contact shadows
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
     this.backLine = backLine;
     this.woodTex = this.imageTexture(wood);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
@@ -224,8 +229,11 @@ export class Compositor {
       canvas.height = v.out[1];
     }
     if (v.set) {
+      // mipmapped: its blur is the light that wraps round her edges
       gl.bindTexture(gl.TEXTURE_2D, this.bgTex);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, v.set);
+      gl.generateMipmap(gl.TEXTURE_2D);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
     }
     if (v.table) {
       // the painted top and its felt are cut out (alpha): premultiplied, so their edges don't fringe
@@ -332,6 +340,8 @@ export class Compositor {
     gl.uniform3fv(su.uBackLine, this.backLine);
     gl.uniform1i(su.uSetOnly, this.setOnly ? 1 : 0);
     gl.uniform1i(su.uHasMatte, packA && packB ? 1 : 0);
+    gl.uniform3fv(su.uTint, v.tint ?? [1, 1, 1]);
+    gl.uniform1f(su.uSeed, Math.random() * 512);
     // the mask overlay is for the plates: show the footage as filmed under it
     gl.uniform1i(su.uHasSet, v.set && !f.showMasks ? 1 : 0);
     const table = v.table;

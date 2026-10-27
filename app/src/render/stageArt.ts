@@ -327,16 +327,20 @@ export async function loadSceneInfo(): Promise<SceneInfo | null> {
   }
 }
 
-/** Clips packed with her matte (the pipeline's mattes pass): file -> packed file. */
-export async function loadMattes(): Promise<Record<string, string>> {
+/** Clips packed with her matte (the pipeline's mattes pass): file -> the packed file, and the size
+ * of the clip it was packed from. */
+export async function loadMattes(): Promise<Record<string, PackedFile>> {
   try {
     const r = await fetch(ASSET_BASE + "scene/mattes.json");
-    if (!r.ok) return {};
-    const listing = (await r.json()) as Record<string, { file: string }>;
-    return Object.fromEntries(Object.entries(listing).map(([f, { file }]) => [f, file]));
+    return r.ok ? ((await r.json()) as Record<string, PackedFile>) : {};
   } catch {
     return {};
   }
+}
+
+export interface PackedFile {
+  file: string;
+  sourceSize: number;
 }
 
 export async function loadSets(): Promise<StudioSet[]> {
@@ -346,6 +350,29 @@ export async function loadSets(): Promise<StudioSet[]> {
   } catch {
     return [];
   }
+}
+
+/** Mean colour (0-1 RGB) of a rect of an image (x, y, w, h as fractions of its size). */
+export function lightOf(img: CanvasImageSource & { width: number; height: number }, [x, y, w, h]: Rect): [number, number, number] {
+  const [c, g] = canvas(32, 18);
+  g.drawImage(img, x * img.width, y * img.height, w * img.width, h * img.height, 0, 0, 32, 18);
+  const d = g.getImageData(0, 0, 32, 18).data;
+  const sum = [0, 0, 0];
+  for (let i = 0; i < d.length; i += 4) for (let k = 0; k < 3; k++) sum[k] += d[i + k];
+  const n = (c.width * c.height * 255) || 1;
+  return [sum[0] / n, sum[1] / n, sum[2] / n];
+}
+
+/** The room behind her in the dealer framing (fractions of it): the light she would be lit by. */
+export const ROOM_BEHIND: Rect = [0.2, 0, 0.6, 0.55];
+/** How far toward a room's light her colour is tinted (her key light stays near white: a little). */
+const TINT = 0.3;
+
+/** Her tint in a set: its light's hue over the filmed wall's (both at unit luminance), part way. */
+export function tintFor(room: [number, number, number], wall: [number, number, number]): [number, number, number] {
+  const lum = (c: number[]) => 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2] || 1;
+  const lr = lum(room), lw = lum(wall);
+  return room.map((v, k) => Math.min(1.1, Math.max(0.92, 1 + TINT * (v / lr / (wall[k] / lw || 1) - 1)))) as [number, number, number];
 }
 
 /** A studio set, cover-fitted to the dealer framing's output. */

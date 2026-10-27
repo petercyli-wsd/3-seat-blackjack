@@ -330,12 +330,18 @@ void main() {
  * felt, which is the felt darkened, becomes black at partial coverage: the new felt darkened alike.
  * - Above the cloth: her matte (MatAnyone, packed with the clip), or for footage without one
  *   (the generated bridges) how unlike the wall she is, inside her envelope. Cards she carries
- *   are far brighter than the wall; the tops of the shoe and discard holder are keyed as unlike it.
+ *   are far brighter than the wall (looked for only next to her). Her colour is unmixed by all of
+ *   her matte, but laid in by the middle of its ramp, so her outline is as crisp as the footage's.
  * - On the cloth within her reach: the share of the bare felt's blue that is missing (cards, her
  *   hands, her shadows), and her matte; clutter lying still on it is erased wherever it looks as it
  *   always does. Past her reach the cloth is always replaced.
+ * - The shoe and the discard holder never move: each has a crisp outline (the scene pass's), inside
+ *   which the footage is kept as it is.
  * - With the table kept as filmed, everything below the cloth's back edge stays.
  * The set's felt is generated blue; another table's felt is recoloured by its own blue, light kept.
+ * The footage, enlarged about 1.5x, is sharpened back a little, tinted toward the set's light
+ * (`uTint`) with a little more contrast, and the room behind her, blurred, wraps round her edges;
+ * one film grain goes over it all, so the generated set and the footage read as one picture.
  */
 export const STAGE_FS = /* glsl */ `#version 300 es
 precision highp float;
@@ -364,10 +370,70 @@ uniform mat3 uToTop;
 uniform vec2 uSkirt;
 uniform vec3 uSkirtTint;
 uniform vec3 uLed;
+uniform vec3 uTint;
+uniform float uSeed;
 const int SKIRT_TAPS = 12;
+// The footage is enlarged about 1.5x into the dealer framing: filtered Catmull-Rom (sharper than
+// bilinear) and sharpened back a little.
+const float SHARPEN = 0.3;
+// How dark the shoe and discard holder's contact shadow on the new felt is.
+const float PROP_SHADOW = 0.45;
+// Her matte's edge is drawn over the middle of its ramp (her colour is still unmixed by all of it),
+// once smoothed over a pixel or so: tightened as it comes, its compression blocks would show as steps.
+const vec2 MATTE_EDGE = vec2(0.15, 0.85);
+// How far (source px) the set's light wraps round her edges, and how strongly.
+const float WRAP_PX = 6.0;
+const float WRAP = 0.45;
+// The footage is flatter than the sets: a gentle S-curve.
+const float CONTRAST = 0.22;
+const float GRAIN = 0.018;
 vec4 live(vec2 s) {
   // the composite is a framebuffer: row 0 is the bottom
   return texture(uComp, vec2(s.x / uSize.x, 1.0 - s.y / uSize.y));
+}
+// live(s) through a Catmull-Rom filter: nine bilinear taps weighted to the cubic's sixteen texels
+vec4 liveCubic(vec2 s) {
+  vec2 p = vec2(s.x, uSize.y - s.y) - 0.5;
+  vec2 f = fract(p);
+  vec2 c1 = floor(p) + 0.5;
+  vec2 w0 = f * (-0.5 + f * (1.0 - 0.5 * f));
+  vec2 w1 = 1.0 + f * f * (-2.5 + 1.5 * f);
+  vec2 w2 = f * (0.5 + f * (2.0 - 1.5 * f));
+  vec2 w3 = f * f * (-0.5 + 0.5 * f);
+  vec2 w12 = w1 + w2;
+  vec2 t0 = (c1 - 1.0) / uSize, t12 = (c1 + w2 / w12) / uSize, t3 = (c1 + 2.0) / uSize;
+  vec4 r = (texture(uComp, vec2(t0.x, t0.y)) * w0.x + texture(uComp, vec2(t12.x, t0.y)) * w12.x + texture(uComp, vec2(t3.x, t0.y)) * w3.x) * w0.y
+    + (texture(uComp, vec2(t0.x, t12.y)) * w0.x + texture(uComp, vec2(t12.x, t12.y)) * w12.x + texture(uComp, vec2(t3.x, t12.y)) * w3.x) * w12.y
+    + (texture(uComp, vec2(t0.x, t3.y)) * w0.x + texture(uComp, vec2(t12.x, t3.y)) * w12.x + texture(uComp, vec2(t3.x, t3.y)) * w3.x) * w3.y;
+  return clamp(r, 0.0, 1.0);
+}
+// sharpened by k (only well inside what is kept: at its edge the overshoot would unmix as a bright fringe)
+vec3 sharpened(vec2 s, vec3 c, float k) {
+  vec3 n = live(s + vec2(1.0, 0.0)).rgb + live(s - vec2(1.0, 0.0)).rgb + live(s + vec2(0.0, 1.0)).rgb + live(s - vec2(0.0, 1.0)).rgb;
+  return clamp(c + k * SHARPEN * (c - 0.25 * n), 0.0, 1.0);
+}
+float smoothMatte(vec2 s, float a) {
+  float d = 0.8;
+  return (2.0 * a + live(s + vec2(d, d)).a + live(s + vec2(-d, d)).a + live(s + vec2(d, -d)).a + live(s + vec2(-d, -d)).a) / 6.0;
+}
+// Her matte round s: its mean on a ring (1 deep inside her, about a half at her edge) and its most.
+vec2 matteRing(vec2 s, float r) {
+  float sum = 0.0, hi = 0.0;
+  for (int i = 0; i < 8; i++) {
+    float t = float(i) * 0.7853982;
+    float a = live(s + r * vec2(cos(t), sin(t))).a;
+    sum += a;
+    hi = max(hi, a);
+  }
+  return vec2(sum / 8.0, hi);
+}
+// Filmed under the studio's flat daylight: tinted toward the set's light, with a little more contrast.
+vec3 grade(vec3 c) {
+  c = clamp(c * uTint, 0.0, 1.0);
+  return mix(c, c * c * (3.0 - 2.0 * c), CONTRAST);
+}
+float hash(vec2 p) {
+  return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
 }
 float lum(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
 float blueness(vec3 c) { return c.b - max(c.r, c.g); }
@@ -433,7 +499,7 @@ vec3 painted(vec2 s, vec3 under) {
 }
 void main() {
   vec2 s = uCrop.xy + vUV * uCrop.zw;
-  vec4 lv = live(s);
+  vec4 lv = liveCubic(s);
   vec3 c = lv.rgb;
   if (uHasSet == 0) {
     outColor = vec4(c, 1.0);
@@ -442,14 +508,16 @@ void main() {
   vec2 st = s / uSize;
   vec3 ref = texture(uRef, st).rgb;
   vec3 mk = texture(uMasks, st).rgb;
-  vec2 cp = texture(uClutter, st).rg;
+  vec3 cp = texture(uClutter, st).rgb;
   float env = clamp(mk.r / 0.6, 0.0, 1.0);
   float core = smoothstep(0.75, 0.95, mk.r);
   float cloth = mk.g;
   float reach = mk.b;
   float clutter = cp.r;
-  float props = cp.g;
+  // the shoe and the discard holder, crisp: kept as filmed, her hands and the cards on them with them
+  float props = uSetOnly == 1 ? 0.0 : cp.b;
   float matte = uHasMatte == 1 ? lv.a * env : 0.0;
+  vec2 ring = uHasMatte == 1 ? matteRing(s, WRAP_PX) : vec2(0.0);
 
   // how far above the cloth's back edge this is, in source px
   float rise = -dot(uBackLine, vec3(s, 1.0));
@@ -457,27 +525,58 @@ void main() {
   // them; where it has her body just above, the colour key fills those rows back in.
   float bodyAbove = live(s - vec2(0.0, 10.0)).a;
   float edgeFill = (1.0 - smoothstep(8.0, 12.0, rise)) * bodyAbove * env * aboveKey(c, ref);
+  // a card in her hand, far brighter than the wall, next to her (elsewhere that is the wall lit
+  // brighter than the reference has it, and would show as grey round her)
+  float card = env * brighter(c, ref) * smoothstep(0.3, 0.6, matteRing(s, 18.0).y);
   float above = uHasMatte == 1
-    ? max(max(matte, edgeFill), max(env * brighter(c, ref), props * aboveKey(c, ref)))
+    ? max(max(matte, edgeFill), card)
     : max(core, env * aboveKey(c, ref)) * (1.0 - uncoveredWall(c, ref));
+  float matteEdge = uHasMatte == 1 ? smoothstep(MATTE_EDGE.x, MATTE_EDGE.y, smoothMatte(s, lv.a) * env) : 0.0;
+  float aboveEdge = uHasMatte == 1 ? max(max(matteEdge, edgeFill), card) : above;
   // just past the cloth's back edge a pixel can still be half felt: that is the table's, not hers
   float pastEdge = 1.0 - smoothstep(0.0, 4.0, rise);
-  above *= 1.0 - pastEdge * smoothstep(0.03, 0.1, blueness(c));
+  float notFelt = 1.0 - pastEdge * smoothstep(0.03, 0.1, blueness(c));
+  above *= notFelt;
+  aboveEdge *= notFelt;
   float onCloth = uSwapTable == 1 ? max(reach * clothKey(c, ref) * (1.0 - clutter * same(c, ref)), lv.a * reach * float(uHasMatte)) : 1.0;
+  // Just outside the props' crisp outlines the footage still has their soft edge, darker than the
+  // felt, which the felt key would keep as a blur round them: there it keeps only her (her matte,
+  // or skin's warmth) and a card coming out of the shoe (far brighter than the felt).
+  float roundProps = cp.g * (1.0 - smoothstep(0.0, 0.5, props));
+  float notBlur = max(lv.a * float(uHasMatte), max(smoothstep(1.15, 1.35, lum(c) / max(lum(ref), 0.02)), smoothstep(0.03, 0.08, c.r - c.b)));
+  onCloth *= mix(1.0, notBlur, roundProps * float(uSwapTable));
   // a kept table keeps everything below the cloth's back edge (its drape, the floor under it)
   float tableZone = uSwapTable == 1 ? cloth : max(cloth, smoothstep(-1.0, 1.0, dot(uBackLine, vec3(s, 1.0))));
+  // her colour is unmixed from the set as filmed by all of her coverage, and laid in by its tighter edge
   float a = uSetOnly == 1 ? 0.0 : mix(above, onCloth, tableZone);
-  vec3 fg = clamp((c - (1.0 - a) * ref) / max(a, 0.04), 0.0, 1.0);
+  float aOut = uSetOnly == 1 ? 0.0 : mix(aboveEdge, onCloth, tableZone);
+  vec3 cs = sharpened(s, c, smoothstep(0.85, 1.0, max(a, props)));
+  vec3 fg = grade(clamp((cs - (1.0 - a) * ref) / max(a, 0.04), 0.0, 1.0));
 
   vec3 set = texture(uSet, vUV).rgb;
   if (uPainted == 1) {
     set = painted(s, set);
   } else if (uRecolor == 1) {
-    // the generated felt (blue) recoloured to this table's: a pixel's share of felt is its share of
-    // the felt's blue (its light and grain with it), and only that share changes, so the print's
-    // anti-aliased edges keep their own colour
-    float f = clamp(blueness(set) / max(blueness(uFeltBase), 0.05), 0.0, 1.3) * inTop(uFelt, s).a;
-    set = clamp(set + f * (uFeltColor - uFeltBase), 0.0, 1.0);
+    // the generated felt (blue) recoloured to this table's: a pixel's share of felt is how much of
+    // its colour is the felt's blue, lit or in shade; its light and grain (its luminance) are kept,
+    // and the print's anti-aliased edges keep their own colour
+    float chroma = blueness(set) / max(set.b, 0.02);
+    float f = clamp(chroma / max(blueness(uFeltBase) / uFeltBase.b, 0.05), 0.0, 1.0) * inTop(uFelt, s).a;
+    vec3 felt = uFeltColor * lum(set) / max(lum(uFeltBase), 0.02);
+    set = mix(set, clamp(felt, 0.0, 1.0), f);
   }
-  outColor = vec4(mix(set, fg, a), 1.0);
+  // the props stand on the new felt: a soft contact shadow round their feet (their outline, blurred
+  // over a few pixels and nudged a little away from the camera, as the key light in front throws it)
+  if (uSwapTable == 1) set *= 1.0 - PROP_SHADOW * textureLod(uClutter, st + vec2(0.0, 1.5) / uSize, 2.0).b * tableZone * (1.0 - props);
+  // the set's light wraps round her edges: the room behind her, blurred, over the rim of her matte
+  float rim = uHasMatte == 1 ? pow(clamp(1.0 - ring.x, 0.0, 1.0), 2.0) * (1.0 - tableZone) : 0.0;
+  vec3 glow = textureLod(uSet, vUV, 4.5).rgb;
+  fg = 1.0 - (1.0 - fg) * (1.0 - WRAP * rim * glow);
+  vec3 o = mix(set, fg, aOut);
+  // the props' glossy black mirrors the filmed felt's blue, worst along their edges: taken out
+  vec3 pc = vec3(cs.rg, mix(cs.b, min(cs.b, max(cs.r, cs.g) + 0.02), 0.75));
+  o = mix(o, grade(pc), props);
+  // one grain over the set and the footage alike (not on the set alone: the sets pass's input)
+  if (uSetOnly == 0) o += (hash(gl_FragCoord.xy + uSeed) - 0.5) * GRAIN;
+  outColor = vec4(o, 1.0);
 }`;

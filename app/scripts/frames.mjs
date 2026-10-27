@@ -27,7 +27,9 @@ const sheet = await page.evaluate(async ({ clip, from, to, step, crop, zoom }) =
   const info = m.clips[clip];
   const video = document.createElement("video");
   video.muted = true;
-  video.src = "/" + info.file;
+  // as the table plays it: packed with her matte where the pipeline has made one
+  const mattes = await fetch("/scene/mattes.json").then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
+  video.src = "/" + (mattes[info.file]?.file ?? info.file);
   await new Promise((r) => video.addEventListener("loadeddata", r, { once: true }));
   const view = {
     seats: {

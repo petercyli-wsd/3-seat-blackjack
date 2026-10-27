@@ -1,4 +1,1112 @@
 {
+ "bridges/tool/001_idle@0070__100_deal.mp4": {
+  "file": "matted/bridges/tool/001_idle@0070__100_deal.mp4",
+  "sourceSize": 236134
+ },
+ "bridges/tool/001_idle@0089__111_deal.mp4": {
+  "file": "matted/bridges/tool/001_idle@0089__111_deal.mp4",
+  "sourceSize": 219608
+ },
+ "bridges/tool/001_idle@0095__001_deal.mp4": {
+  "file": "matted/bridges/tool/001_idle@0095__001_deal.mp4",
+  "sourceSize": 158418
+ },
+ "bridges/tool/001_idle@0095__101_deal.mp4": {
+  "file": "matted/bridges/tool/001_idle@0095__101_deal.mp4",
+  "sourceSize": 153607
+ },
+ "bridges/tool/001_idle@0099__010_deal.mp4": {
+  "file": "matted/bridges/tool/001_idle@0099__010_deal.mp4",
+  "sourceSize": 139529
+ },
+ "bridges/tool/001_idle@0099__011_deal.mp4": {
+  "file": "matted/bridges/tool/001_idle@0099__011_deal.mp4",
+  "sourceSize": 224120
+ },
+ "bridges/tool/001_idle@0099__110_deal.mp4": {
+  "file": "matted/bridges/tool/001_idle@0099__110_deal.mp4",
+  "sourceSize": 219793
+ },
+ "bridges/tool/001_idle@0101__001_deal.mp4": {
+  "file": "matted/bridges/tool/001_idle@0101__001_deal.mp4",
+  "sourceSize": 158885
+ },
+ "bridges/tool/001_idle@0115__111_deal.mp4": {
+  "file": "matted/bridges/tool/001_idle@0115__111_deal.mp4",
+  "sourceSize": 225627
+ },
+ "bridges/tool/001_idle@0120__011_deal.mp4": {
+  "file": "matted/bridges/tool/001_idle@0120__011_deal.mp4",
+  "sourceSize": 222344
+ },
+ "bridges/tool/001_idle@0123__110_deal.mp4": {
+  "file": "matted/bridges/tool/001_idle@0123__110_deal.mp4",
+  "sourceSize": 217203
+ },
+ "bridges/tool/001_idle@0127__101_deal.mp4": {
+  "file": "matted/bridges/tool/001_idle@0127__101_deal.mp4",
+  "sourceSize": 218843
+ },
+ "bridges/tool/001_idle@0132__100_deal.mp4": {
+  "file": "matted/bridges/tool/001_idle@0132__100_deal.mp4",
+  "sourceSize": 227818
+ },
+ "bridges/tool/001_wait@0000__001_reveal.mp4": {
+  "file": "matted/bridges/tool/001_wait@0000__001_reveal.mp4",
+  "sourceSize": 233320
+ },
+ "bridges/tool/001_wait@0013__seat3_card3_deal.mp4": {
+  "file": "matted/bridges/tool/001_wait@0013__seat3_card3_deal.mp4",
+  "sourceSize": 226505
+ },
+ "bridges/tool/001_wait@0042__seat3_card3_deal.mp4": {
+  "file": "matted/bridges/tool/001_wait@0042__seat3_card3_deal.mp4",
+  "sourceSize": 237113
+ },
+ "bridges/tool/001_wait@0046__001_reveal.mp4": {
+  "file": "matted/bridges/tool/001_wait@0046__001_reveal.mp4",
+  "sourceSize": 219848
+ },
+ "bridges/tool/010_idle@0003__100_deal.mp4": {
+  "file": "matted/bridges/tool/010_idle@0003__100_deal.mp4",
+  "sourceSize": 226915
+ },
+ "bridges/tool/010_idle@0013__011_deal.mp4": {
+  "file": "matted/bridges/tool/010_idle@0013__011_deal.mp4",
+  "sourceSize": 139950
+ },
+ "bridges/tool/010_idle@0015__010_deal.mp4": {
+  "file": "matted/bridges/tool/010_idle@0015__010_deal.mp4",
+  "sourceSize": 219561
+ },
+ "bridges/tool/010_idle@0017__110_deal.mp4": {
+  "file": "matted/bridges/tool/010_idle@0017__110_deal.mp4",
+  "sourceSize": 218607
+ },
+ "bridges/tool/010_idle@0022__001_deal.mp4": {
+  "file": "matted/bridges/tool/010_idle@0022__001_deal.mp4",
+  "sourceSize": 235259
+ },
+ "bridges/tool/010_idle@0022__101_deal.mp4": {
+  "file": "matted/bridges/tool/010_idle@0022__101_deal.mp4",
+  "sourceSize": 224069
+ },
+ "bridges/tool/010_idle@0022__111_deal.mp4": {
+  "file": "matted/bridges/tool/010_idle@0022__111_deal.mp4",
+  "sourceSize": 217933
+ },
+ "bridges/tool/010_idle@0023__001_deal.mp4": {
+  "file": "matted/bridges/tool/010_idle@0023__001_deal.mp4",
+  "sourceSize": 227157
+ },
+ "bridges/tool/010_idle@0023__101_deal.mp4": {
+  "file": "matted/bridges/tool/010_idle@0023__101_deal.mp4",
+  "sourceSize": 210231
+ },
+ "bridges/tool/010_idle@0029__111_deal.mp4": {
+  "file": "matted/bridges/tool/010_idle@0029__111_deal.mp4",
+  "sourceSize": 226727
+ },
+ "bridges/tool/010_idle@0038__010_deal.mp4": {
+  "file": "matted/bridges/tool/010_idle@0038__010_deal.mp4",
+  "sourceSize": 221079
+ },
+ "bridges/tool/010_idle@0045__100_deal.mp4": {
+  "file": "matted/bridges/tool/010_idle@0045__100_deal.mp4",
+  "sourceSize": 227386
+ },
+ "bridges/tool/010_idle@0045__110_deal.mp4": {
+  "file": "matted/bridges/tool/010_idle@0045__110_deal.mp4",
+  "sourceSize": 223369
+ },
+ "bridges/tool/010_wait@0000__seat2_card3_deal.mp4": {
+  "file": "matted/bridges/tool/010_wait@0000__seat2_card3_deal.mp4",
+  "sourceSize": 236062
+ },
+ "bridges/tool/010_wait@0019__010_reveal.mp4": {
+  "file": "matted/bridges/tool/010_wait@0019__010_reveal.mp4",
+  "sourceSize": 153666
+ },
+ "bridges/tool/010_wait@0046__010_reveal.mp4": {
+  "file": "matted/bridges/tool/010_wait@0046__010_reveal.mp4",
+  "sourceSize": 221036
+ },
+ "bridges/tool/010_wait@0046__seat2_card3_deal.mp4": {
+  "file": "matted/bridges/tool/010_wait@0046__seat2_card3_deal.mp4",
+  "sourceSize": 237595
+ },
+ "bridges/tool/011_idle@0020__011_deal.mp4": {
+  "file": "matted/bridges/tool/011_idle@0020__011_deal.mp4",
+  "sourceSize": 219928
+ },
+ "bridges/tool/011_idle@0020__111_deal.mp4": {
+  "file": "matted/bridges/tool/011_idle@0020__111_deal.mp4",
+  "sourceSize": 226857
+ },
+ "bridges/tool/011_idle@0021__001_deal.mp4": {
+  "file": "matted/bridges/tool/011_idle@0021__001_deal.mp4",
+  "sourceSize": 242963
+ },
+ "bridges/tool/011_idle@0021__010_deal.mp4": {
+  "file": "matted/bridges/tool/011_idle@0021__010_deal.mp4",
+  "sourceSize": 993585
+ },
+ "bridges/tool/011_idle@0021__101_deal.mp4": {
+  "file": "matted/bridges/tool/011_idle@0021__101_deal.mp4",
+  "sourceSize": 236460
+ },
+ "bridges/tool/011_idle@0021__110_deal.mp4": {
+  "file": "matted/bridges/tool/011_idle@0021__110_deal.mp4",
+  "sourceSize": 960429
+ },
+ "bridges/tool/011_idle@0044__001_deal.mp4": {
+  "file": "matted/bridges/tool/011_idle@0044__001_deal.mp4",
+  "sourceSize": 241191
+ },
+ "bridges/tool/011_idle@0044__010_deal.mp4": {
+  "file": "matted/bridges/tool/011_idle@0044__010_deal.mp4",
+  "sourceSize": 1046515
+ },
+ "bridges/tool/011_idle@0044__011_deal.mp4": {
+  "file": "matted/bridges/tool/011_idle@0044__011_deal.mp4",
+  "sourceSize": 231226
+ },
+ "bridges/tool/011_idle@0044__101_deal.mp4": {
+  "file": "matted/bridges/tool/011_idle@0044__101_deal.mp4",
+  "sourceSize": 233737
+ },
+ "bridges/tool/011_idle@0044__110_deal.mp4": {
+  "file": "matted/bridges/tool/011_idle@0044__110_deal.mp4",
+  "sourceSize": 233898
+ },
+ "bridges/tool/011_idle@0044__111_deal.mp4": {
+  "file": "matted/bridges/tool/011_idle@0044__111_deal.mp4",
+  "sourceSize": 229505
+ },
+ "bridges/tool/011_wait@0016__seat2_card3_deal.mp4": {
+  "file": "matted/bridges/tool/011_wait@0016__seat2_card3_deal.mp4",
+  "sourceSize": 229618
+ },
+ "bridges/tool/011_wait@0016__seat3_card3_deal.mp4": {
+  "file": "matted/bridges/tool/011_wait@0016__seat3_card3_deal.mp4",
+  "sourceSize": 236414
+ },
+ "bridges/tool/011_wait@0022__011_reveal.mp4": {
+  "file": "matted/bridges/tool/011_wait@0022__011_reveal.mp4",
+  "sourceSize": 153981
+ },
+ "bridges/tool/011_wait@0023__seat3_card3_deal.mp4": {
+  "file": "matted/bridges/tool/011_wait@0023__seat3_card3_deal.mp4",
+  "sourceSize": 235412
+ },
+ "bridges/tool/011_wait@0027__seat2_card3_deal.mp4": {
+  "file": "matted/bridges/tool/011_wait@0027__seat2_card3_deal.mp4",
+  "sourceSize": 231344
+ },
+ "bridges/tool/011_wait@0043__011_reveal.mp4": {
+  "file": "matted/bridges/tool/011_wait@0043__011_reveal.mp4",
+  "sourceSize": 153169
+ },
+ "bridges/tool/100_idle@0036__001_deal.mp4": {
+  "file": "matted/bridges/tool/100_idle@0036__001_deal.mp4",
+  "sourceSize": 159925
+ },
+ "bridges/tool/100_idle@0036__011_deal.mp4": {
+  "file": "matted/bridges/tool/100_idle@0036__011_deal.mp4",
+  "sourceSize": 227423
+ },
+ "bridges/tool/100_idle@0036__100_deal.mp4": {
+  "file": "matted/bridges/tool/100_idle@0036__100_deal.mp4",
+  "sourceSize": 232617
+ },
+ "bridges/tool/100_idle@0043__110_deal.mp4": {
+  "file": "matted/bridges/tool/100_idle@0043__110_deal.mp4",
+  "sourceSize": 152816
+ },
+ "bridges/tool/100_idle@0043__111_deal.mp4": {
+  "file": "matted/bridges/tool/100_idle@0043__111_deal.mp4",
+  "sourceSize": 154531
+ },
+ "bridges/tool/100_idle@0044__010_deal.mp4": {
+  "file": "matted/bridges/tool/100_idle@0044__010_deal.mp4",
+  "sourceSize": 153760
+ },
+ "bridges/tool/100_idle@0044__101_deal.mp4": {
+  "file": "matted/bridges/tool/100_idle@0044__101_deal.mp4",
+  "sourceSize": 141359
+ },
+ "bridges/tool/100_idle@0045__011_deal.mp4": {
+  "file": "matted/bridges/tool/100_idle@0045__011_deal.mp4",
+  "sourceSize": 220373
+ },
+ "bridges/tool/100_idle@0045__100_deal.mp4": {
+  "file": "matted/bridges/tool/100_idle@0045__100_deal.mp4",
+  "sourceSize": 231921
+ },
+ "bridges/tool/100_idle@0052__010_deal.mp4": {
+  "file": "matted/bridges/tool/100_idle@0052__010_deal.mp4",
+  "sourceSize": 157139
+ },
+ "bridges/tool/100_idle@0052__110_deal.mp4": {
+  "file": "matted/bridges/tool/100_idle@0052__110_deal.mp4",
+  "sourceSize": 155270
+ },
+ "bridges/tool/100_idle@0052__111_deal.mp4": {
+  "file": "matted/bridges/tool/100_idle@0052__111_deal.mp4",
+  "sourceSize": 156060
+ },
+ "bridges/tool/100_idle@0065__001_deal.mp4": {
+  "file": "matted/bridges/tool/100_idle@0065__001_deal.mp4",
+  "sourceSize": 158959
+ },
+ "bridges/tool/100_wait@0015__100_reveal.mp4": {
+  "file": "matted/bridges/tool/100_wait@0015__100_reveal.mp4",
+  "sourceSize": 153120
+ },
+ "bridges/tool/100_wait@0017__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/100_wait@0017__seat1_card3_deal.mp4",
+  "sourceSize": 240978
+ },
+ "bridges/tool/100_wait@0045__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/100_wait@0045__seat1_card3_deal.mp4",
+  "sourceSize": 240541
+ },
+ "bridges/tool/100_wait@0046__100_reveal.mp4": {
+  "file": "matted/bridges/tool/100_wait@0046__100_reveal.mp4",
+  "sourceSize": 151071
+ },
+ "bridges/tool/101_idle@0048__101_deal.mp4": {
+  "file": "matted/bridges/tool/101_idle@0048__101_deal.mp4",
+  "sourceSize": 153818
+ },
+ "bridges/tool/101_idle@0048__111_deal.mp4": {
+  "file": "matted/bridges/tool/101_idle@0048__111_deal.mp4",
+  "sourceSize": 153154
+ },
+ "bridges/tool/101_idle@0050__001_deal.mp4": {
+  "file": "matted/bridges/tool/101_idle@0050__001_deal.mp4",
+  "sourceSize": 234046
+ },
+ "bridges/tool/101_idle@0060__010_deal.mp4": {
+  "file": "matted/bridges/tool/101_idle@0060__010_deal.mp4",
+  "sourceSize": 151475
+ },
+ "bridges/tool/101_idle@0060__110_deal.mp4": {
+  "file": "matted/bridges/tool/101_idle@0060__110_deal.mp4",
+  "sourceSize": 139694
+ },
+ "bridges/tool/101_idle@0064__011_deal.mp4": {
+  "file": "matted/bridges/tool/101_idle@0064__011_deal.mp4",
+  "sourceSize": 225956
+ },
+ "bridges/tool/101_idle@0064__100_deal.mp4": {
+  "file": "matted/bridges/tool/101_idle@0064__100_deal.mp4",
+  "sourceSize": 915944
+ },
+ "bridges/tool/101_idle@0090__111_deal.mp4": {
+  "file": "matted/bridges/tool/101_idle@0090__111_deal.mp4",
+  "sourceSize": 153301
+ },
+ "bridges/tool/101_idle@0100__001_deal.mp4": {
+  "file": "matted/bridges/tool/101_idle@0100__001_deal.mp4",
+  "sourceSize": 235619
+ },
+ "bridges/tool/101_idle@0100__010_deal.mp4": {
+  "file": "matted/bridges/tool/101_idle@0100__010_deal.mp4",
+  "sourceSize": 151538
+ },
+ "bridges/tool/101_idle@0100__011_deal.mp4": {
+  "file": "matted/bridges/tool/101_idle@0100__011_deal.mp4",
+  "sourceSize": 220347
+ },
+ "bridges/tool/101_idle@0100__100_deal.mp4": {
+  "file": "matted/bridges/tool/101_idle@0100__100_deal.mp4",
+  "sourceSize": 1007356
+ },
+ "bridges/tool/101_idle@0100__101_deal.mp4": {
+  "file": "matted/bridges/tool/101_idle@0100__101_deal.mp4",
+  "sourceSize": 152984
+ },
+ "bridges/tool/101_wait@0015__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/101_wait@0015__seat1_card3_deal.mp4",
+  "sourceSize": 234380
+ },
+ "bridges/tool/101_wait@0018__seat3_card3_deal.mp4": {
+  "file": "matted/bridges/tool/101_wait@0018__seat3_card3_deal.mp4",
+  "sourceSize": 216158
+ },
+ "bridges/tool/101_wait@0022__101_reveal.mp4": {
+  "file": "matted/bridges/tool/101_wait@0022__101_reveal.mp4",
+  "sourceSize": 144668
+ },
+ "bridges/tool/101_wait@0023__seat3_card3_deal.mp4": {
+  "file": "matted/bridges/tool/101_wait@0023__seat3_card3_deal.mp4",
+  "sourceSize": 229686
+ },
+ "bridges/tool/101_wait@0024__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/101_wait@0024__seat1_card3_deal.mp4",
+  "sourceSize": 235190
+ },
+ "bridges/tool/101_wait@0046__101_reveal.mp4": {
+  "file": "matted/bridges/tool/101_wait@0046__101_reveal.mp4",
+  "sourceSize": 142691
+ },
+ "bridges/tool/110_idle@0099__101_deal.mp4": {
+  "file": "matted/bridges/tool/110_idle@0099__101_deal.mp4",
+  "sourceSize": 156164
+ },
+ "bridges/tool/110_idle@0121__100_deal.mp4": {
+  "file": "matted/bridges/tool/110_idle@0121__100_deal.mp4",
+  "sourceSize": 236275
+ },
+ "bridges/tool/110_idle@0134__010_deal.mp4": {
+  "file": "matted/bridges/tool/110_idle@0134__010_deal.mp4",
+  "sourceSize": 157186
+ },
+ "bridges/tool/110_idle@0135__110_deal.mp4": {
+  "file": "matted/bridges/tool/110_idle@0135__110_deal.mp4",
+  "sourceSize": 154633
+ },
+ "bridges/tool/110_idle@0136__111_deal.mp4": {
+  "file": "matted/bridges/tool/110_idle@0136__111_deal.mp4",
+  "sourceSize": 143683
+ },
+ "bridges/tool/110_idle@0137__011_deal.mp4": {
+  "file": "matted/bridges/tool/110_idle@0137__011_deal.mp4",
+  "sourceSize": 230600
+ },
+ "bridges/tool/110_idle@0138__001_deal.mp4": {
+  "file": "matted/bridges/tool/110_idle@0138__001_deal.mp4",
+  "sourceSize": 227334
+ },
+ "bridges/tool/110_idle@0140__001_deal.mp4": {
+  "file": "matted/bridges/tool/110_idle@0140__001_deal.mp4",
+  "sourceSize": 236313
+ },
+ "bridges/tool/110_idle@0179__010_deal.mp4": {
+  "file": "matted/bridges/tool/110_idle@0179__010_deal.mp4",
+  "sourceSize": 228964
+ },
+ "bridges/tool/110_idle@0179__011_deal.mp4": {
+  "file": "matted/bridges/tool/110_idle@0179__011_deal.mp4",
+  "sourceSize": 231350
+ },
+ "bridges/tool/110_idle@0179__101_deal.mp4": {
+  "file": "matted/bridges/tool/110_idle@0179__101_deal.mp4",
+  "sourceSize": 227293
+ },
+ "bridges/tool/110_idle@0179__110_deal.mp4": {
+  "file": "matted/bridges/tool/110_idle@0179__110_deal.mp4",
+  "sourceSize": 156239
+ },
+ "bridges/tool/110_wait@0014__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/110_wait@0014__seat1_card3_deal.mp4",
+  "sourceSize": 235995
+ },
+ "bridges/tool/110_wait@0019__seat2_card3_deal.mp4": {
+  "file": "matted/bridges/tool/110_wait@0019__seat2_card3_deal.mp4",
+  "sourceSize": 231747
+ },
+ "bridges/tool/110_wait@0022__110_reveal.mp4": {
+  "file": "matted/bridges/tool/110_wait@0022__110_reveal.mp4",
+  "sourceSize": 138758
+ },
+ "bridges/tool/110_wait@0025__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/110_wait@0025__seat1_card3_deal.mp4",
+  "sourceSize": 230389
+ },
+ "bridges/tool/110_wait@0025__seat2_card3_deal.mp4": {
+  "file": "matted/bridges/tool/110_wait@0025__seat2_card3_deal.mp4",
+  "sourceSize": 230638
+ },
+ "bridges/tool/110_wait@0046__110_reveal.mp4": {
+  "file": "matted/bridges/tool/110_wait@0046__110_reveal.mp4",
+  "sourceSize": 130395
+ },
+ "bridges/tool/111_idle@0098__100_deal.mp4": {
+  "file": "matted/bridges/tool/111_idle@0098__100_deal.mp4",
+  "sourceSize": 1015459
+ },
+ "bridges/tool/111_idle@0111__011_deal.mp4": {
+  "file": "matted/bridges/tool/111_idle@0111__011_deal.mp4",
+  "sourceSize": 236351
+ },
+ "bridges/tool/111_idle@0112__111_deal.mp4": {
+  "file": "matted/bridges/tool/111_idle@0112__111_deal.mp4",
+  "sourceSize": 154271
+ },
+ "bridges/tool/111_idle@0122__010_deal.mp4": {
+  "file": "matted/bridges/tool/111_idle@0122__010_deal.mp4",
+  "sourceSize": 230285
+ },
+ "bridges/tool/111_idle@0122__110_deal.mp4": {
+  "file": "matted/bridges/tool/111_idle@0122__110_deal.mp4",
+  "sourceSize": 231545
+ },
+ "bridges/tool/111_idle@0123__101_deal.mp4": {
+  "file": "matted/bridges/tool/111_idle@0123__101_deal.mp4",
+  "sourceSize": 158869
+ },
+ "bridges/tool/111_idle@0125__001_deal.mp4": {
+  "file": "matted/bridges/tool/111_idle@0125__001_deal.mp4",
+  "sourceSize": 246090
+ },
+ "bridges/tool/111_idle@0132__010_deal.mp4": {
+  "file": "matted/bridges/tool/111_idle@0132__010_deal.mp4",
+  "sourceSize": 233272
+ },
+ "bridges/tool/111_idle@0140__111_deal.mp4": {
+  "file": "matted/bridges/tool/111_idle@0140__111_deal.mp4",
+  "sourceSize": 153864
+ },
+ "bridges/tool/111_idle@0168__001_deal.mp4": {
+  "file": "matted/bridges/tool/111_idle@0168__001_deal.mp4",
+  "sourceSize": 237223
+ },
+ "bridges/tool/111_idle@0169__011_deal.mp4": {
+  "file": "matted/bridges/tool/111_idle@0169__011_deal.mp4",
+  "sourceSize": 231697
+ },
+ "bridges/tool/111_idle@0169__101_deal.mp4": {
+  "file": "matted/bridges/tool/111_idle@0169__101_deal.mp4",
+  "sourceSize": 157501
+ },
+ "bridges/tool/111_idle@0169__110_deal.mp4": {
+  "file": "matted/bridges/tool/111_idle@0169__110_deal.mp4",
+  "sourceSize": 154283
+ },
+ "bridges/tool/111_wait@0020__seat2_card3_deal.mp4": {
+  "file": "matted/bridges/tool/111_wait@0020__seat2_card3_deal.mp4",
+  "sourceSize": 227441
+ },
+ "bridges/tool/111_wait@0021__seat3_card3_deal.mp4": {
+  "file": "matted/bridges/tool/111_wait@0021__seat3_card3_deal.mp4",
+  "sourceSize": 228220
+ },
+ "bridges/tool/111_wait@0022__111_reveal.mp4": {
+  "file": "matted/bridges/tool/111_wait@0022__111_reveal.mp4",
+  "sourceSize": 142399
+ },
+ "bridges/tool/111_wait@0022__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/111_wait@0022__seat1_card3_deal.mp4",
+  "sourceSize": 229640
+ },
+ "bridges/tool/111_wait@0027__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/111_wait@0027__seat1_card3_deal.mp4",
+  "sourceSize": 220180
+ },
+ "bridges/tool/111_wait@0041__seat3_card3_deal.mp4": {
+  "file": "matted/bridges/tool/111_wait@0041__seat3_card3_deal.mp4",
+  "sourceSize": 227058
+ },
+ "bridges/tool/111_wait@0044__seat2_card3_deal.mp4": {
+  "file": "matted/bridges/tool/111_wait@0044__seat2_card3_deal.mp4",
+  "sourceSize": 226828
+ },
+ "bridges/tool/111_wait@0046__111_reveal.mp4": {
+  "file": "matted/bridges/tool/111_wait@0046__111_reveal.mp4",
+  "sourceSize": 137638
+ },
+ "bridges/tool/opening_idle@0068__010_deal.mp4": {
+  "file": "matted/bridges/tool/opening_idle@0068__010_deal.mp4",
+  "sourceSize": 166384
+ },
+ "bridges/tool/opening_idle@0068__011_deal.mp4": {
+  "file": "matted/bridges/tool/opening_idle@0068__011_deal.mp4",
+  "sourceSize": 241753
+ },
+ "bridges/tool/opening_idle@0068__100_deal.mp4": {
+  "file": "matted/bridges/tool/opening_idle@0068__100_deal.mp4",
+  "sourceSize": 1035071
+ },
+ "bridges/tool/opening_idle@0068__110_deal.mp4": {
+  "file": "matted/bridges/tool/opening_idle@0068__110_deal.mp4",
+  "sourceSize": 251454
+ },
+ "bridges/tool/opening_idle@0069__111_deal.mp4": {
+  "file": "matted/bridges/tool/opening_idle@0069__111_deal.mp4",
+  "sourceSize": 245115
+ },
+ "bridges/tool/opening_idle@0080__001_deal.mp4": {
+  "file": "matted/bridges/tool/opening_idle@0080__001_deal.mp4",
+  "sourceSize": 147992
+ },
+ "bridges/tool/opening_idle@0080__101_deal.mp4": {
+  "file": "matted/bridges/tool/opening_idle@0080__101_deal.mp4",
+  "sourceSize": 238145
+ },
+ "bridges/tool/opening_idle@0086__111_deal.mp4": {
+  "file": "matted/bridges/tool/opening_idle@0086__111_deal.mp4",
+  "sourceSize": 240268
+ },
+ "bridges/tool/opening_idle@0088__100_deal.mp4": {
+  "file": "matted/bridges/tool/opening_idle@0088__100_deal.mp4",
+  "sourceSize": 242179
+ },
+ "bridges/tool/opening_idle@0088__101_deal.mp4": {
+  "file": "matted/bridges/tool/opening_idle@0088__101_deal.mp4",
+  "sourceSize": 235276
+ },
+ "bridges/tool/opening_idle@0094__010_deal.mp4": {
+  "file": "matted/bridges/tool/opening_idle@0094__010_deal.mp4",
+  "sourceSize": 231788
+ },
+ "bridges/tool/opening_idle@0094__011_deal.mp4": {
+  "file": "matted/bridges/tool/opening_idle@0094__011_deal.mp4",
+  "sourceSize": 236177
+ },
+ "bridges/tool/opening_idle@0094__110_deal.mp4": {
+  "file": "matted/bridges/tool/opening_idle@0094__110_deal.mp4",
+  "sourceSize": 161114
+ },
+ "bridges/tool/seat1_card3_wait@0022__100_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card3_wait@0022__100_reveal.mp4",
+  "sourceSize": 244030
+ },
+ "bridges/tool/seat1_card3_wait@0022__101_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card3_wait@0022__101_reveal.mp4",
+  "sourceSize": 242313
+ },
+ "bridges/tool/seat1_card3_wait@0022__110_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card3_wait@0022__110_reveal.mp4",
+  "sourceSize": 233613
+ },
+ "bridges/tool/seat1_card3_wait@0022__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card3_wait@0022__111_reveal.mp4",
+  "sourceSize": 237691
+ },
+ "bridges/tool/seat1_card3_wait@0022__seat1_card4_deal.mp4": {
+  "file": "matted/bridges/tool/seat1_card3_wait@0022__seat1_card4_deal.mp4",
+  "sourceSize": 227956
+ },
+ "bridges/tool/seat1_card3_wait@0023__110_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card3_wait@0023__110_reveal.mp4",
+  "sourceSize": 243138
+ },
+ "bridges/tool/seat1_card3_wait@0035__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card3_wait@0035__111_reveal.mp4",
+  "sourceSize": 237629
+ },
+ "bridges/tool/seat1_card3_wait@0036__100_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card3_wait@0036__100_reveal.mp4",
+  "sourceSize": 243461
+ },
+ "bridges/tool/seat1_card3_wait@0037__101_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card3_wait@0037__101_reveal.mp4",
+  "sourceSize": 241792
+ },
+ "bridges/tool/seat1_card3_wait@0037__seat1_card4_deal.mp4": {
+  "file": "matted/bridges/tool/seat1_card3_wait@0037__seat1_card4_deal.mp4",
+  "sourceSize": 150355
+ },
+ "bridges/tool/seat1_card4_wait@0011__101_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card4_wait@0011__101_reveal.mp4",
+  "sourceSize": 236413
+ },
+ "bridges/tool/seat1_card4_wait@0011__110_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card4_wait@0011__110_reveal.mp4",
+  "sourceSize": 232146
+ },
+ "bridges/tool/seat1_card4_wait@0013__100_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card4_wait@0013__100_reveal.mp4",
+  "sourceSize": 238024
+ },
+ "bridges/tool/seat1_card4_wait@0013__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card4_wait@0013__111_reveal.mp4",
+  "sourceSize": 231397
+ },
+ "bridges/tool/seat1_card4_wait@0022__seat1_card5_deal.mp4": {
+  "file": "matted/bridges/tool/seat1_card4_wait@0022__seat1_card5_deal.mp4",
+  "sourceSize": 147878
+ },
+ "bridges/tool/seat1_card4_wait@0023__100_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card4_wait@0023__100_reveal.mp4",
+  "sourceSize": 237220
+ },
+ "bridges/tool/seat1_card4_wait@0023__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card4_wait@0023__111_reveal.mp4",
+  "sourceSize": 229246
+ },
+ "bridges/tool/seat1_card4_wait@0046__101_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card4_wait@0046__101_reveal.mp4",
+  "sourceSize": 235676
+ },
+ "bridges/tool/seat1_card4_wait@0046__110_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card4_wait@0046__110_reveal.mp4",
+  "sourceSize": 232821
+ },
+ "bridges/tool/seat1_card4_wait@0046__seat1_card5_deal.mp4": {
+  "file": "matted/bridges/tool/seat1_card4_wait@0046__seat1_card5_deal.mp4",
+  "sourceSize": 146077
+ },
+ "bridges/tool/seat1_card5_wait@0013__101_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card5_wait@0013__101_reveal.mp4",
+  "sourceSize": 234152
+ },
+ "bridges/tool/seat1_card5_wait@0019__seat1_card6_deal.mp4": {
+  "file": "matted/bridges/tool/seat1_card5_wait@0019__seat1_card6_deal.mp4",
+  "sourceSize": 143433
+ },
+ "bridges/tool/seat1_card5_wait@0021__110_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card5_wait@0021__110_reveal.mp4",
+  "sourceSize": 234193
+ },
+ "bridges/tool/seat1_card5_wait@0022__100_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card5_wait@0022__100_reveal.mp4",
+  "sourceSize": 235624
+ },
+ "bridges/tool/seat1_card5_wait@0022__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card5_wait@0022__111_reveal.mp4",
+  "sourceSize": 229778
+ },
+ "bridges/tool/seat1_card5_wait@0024__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card5_wait@0024__111_reveal.mp4",
+  "sourceSize": 230641
+ },
+ "bridges/tool/seat1_card5_wait@0026__100_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card5_wait@0026__100_reveal.mp4",
+  "sourceSize": 235162
+ },
+ "bridges/tool/seat1_card5_wait@0026__110_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card5_wait@0026__110_reveal.mp4",
+  "sourceSize": 233054
+ },
+ "bridges/tool/seat1_card5_wait@0038__101_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card5_wait@0038__101_reveal.mp4",
+  "sourceSize": 233940
+ },
+ "bridges/tool/seat1_card5_wait@0046__seat1_card6_deal.mp4": {
+  "file": "matted/bridges/tool/seat1_card5_wait@0046__seat1_card6_deal.mp4",
+  "sourceSize": 141366
+ },
+ "bridges/tool/seat1_card6_wait@0000__100_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card6_wait@0000__100_reveal.mp4",
+  "sourceSize": 232387
+ },
+ "bridges/tool/seat1_card6_wait@0000__110_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card6_wait@0000__110_reveal.mp4",
+  "sourceSize": 233130
+ },
+ "bridges/tool/seat1_card6_wait@0003__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card6_wait@0003__111_reveal.mp4",
+  "sourceSize": 229381
+ },
+ "bridges/tool/seat1_card6_wait@0020__101_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card6_wait@0020__101_reveal.mp4",
+  "sourceSize": 231495
+ },
+ "bridges/tool/seat1_card6_wait@0032__100_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card6_wait@0032__100_reveal.mp4",
+  "sourceSize": 234350
+ },
+ "bridges/tool/seat1_card6_wait@0032__110_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card6_wait@0032__110_reveal.mp4",
+  "sourceSize": 231967
+ },
+ "bridges/tool/seat1_card6_wait@0038__101_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card6_wait@0038__101_reveal.mp4",
+  "sourceSize": 228741
+ },
+ "bridges/tool/seat1_card6_wait@0042__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat1_card6_wait@0042__111_reveal.mp4",
+  "sourceSize": 229295
+ },
+ "bridges/tool/seat2_card3_wait@0000__seat2_card4_deal.mp4": {
+  "file": "matted/bridges/tool/seat2_card3_wait@0000__seat2_card4_deal.mp4",
+  "sourceSize": 144813
+ },
+ "bridges/tool/seat2_card3_wait@0004__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat2_card3_wait@0004__seat1_card3_deal.mp4",
+  "sourceSize": 229946
+ },
+ "bridges/tool/seat2_card3_wait@0005__010_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card3_wait@0005__010_reveal.mp4",
+  "sourceSize": 232748
+ },
+ "bridges/tool/seat2_card3_wait@0005__110_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card3_wait@0005__110_reveal.mp4",
+  "sourceSize": 225924
+ },
+ "bridges/tool/seat2_card3_wait@0005__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card3_wait@0005__111_reveal.mp4",
+  "sourceSize": 227586
+ },
+ "bridges/tool/seat2_card3_wait@0009__011_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card3_wait@0009__011_reveal.mp4",
+  "sourceSize": 232280
+ },
+ "bridges/tool/seat2_card3_wait@0031__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat2_card3_wait@0031__seat1_card3_deal.mp4",
+  "sourceSize": 229346
+ },
+ "bridges/tool/seat2_card3_wait@0036__seat2_card4_deal.mp4": {
+  "file": "matted/bridges/tool/seat2_card3_wait@0036__seat2_card4_deal.mp4",
+  "sourceSize": 141663
+ },
+ "bridges/tool/seat2_card3_wait@0037__010_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card3_wait@0037__010_reveal.mp4",
+  "sourceSize": 233540
+ },
+ "bridges/tool/seat2_card3_wait@0037__011_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card3_wait@0037__011_reveal.mp4",
+  "sourceSize": 232493
+ },
+ "bridges/tool/seat2_card3_wait@0042__110_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card3_wait@0042__110_reveal.mp4",
+  "sourceSize": 231962
+ },
+ "bridges/tool/seat2_card3_wait@0046__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card3_wait@0046__111_reveal.mp4",
+  "sourceSize": 154288
+ },
+ "bridges/tool/seat2_card4_wait@0006__010_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card4_wait@0006__010_reveal.mp4",
+  "sourceSize": 241846
+ },
+ "bridges/tool/seat2_card4_wait@0006__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card4_wait@0006__111_reveal.mp4",
+  "sourceSize": 230204
+ },
+ "bridges/tool/seat2_card4_wait@0007__011_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card4_wait@0007__011_reveal.mp4",
+  "sourceSize": 240160
+ },
+ "bridges/tool/seat2_card4_wait@0008__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat2_card4_wait@0008__seat1_card3_deal.mp4",
+  "sourceSize": 218139
+ },
+ "bridges/tool/seat2_card4_wait@0008__seat2_card5_deal.mp4": {
+  "file": "matted/bridges/tool/seat2_card4_wait@0008__seat2_card5_deal.mp4",
+  "sourceSize": 218115
+ },
+ "bridges/tool/seat2_card4_wait@0009__110_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card4_wait@0009__110_reveal.mp4",
+  "sourceSize": 241781
+ },
+ "bridges/tool/seat2_card4_wait@0023__010_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card4_wait@0023__010_reveal.mp4",
+  "sourceSize": 245473
+ },
+ "bridges/tool/seat2_card4_wait@0023__011_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card4_wait@0023__011_reveal.mp4",
+  "sourceSize": 239353
+ },
+ "bridges/tool/seat2_card4_wait@0023__110_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card4_wait@0023__110_reveal.mp4",
+  "sourceSize": 240889
+ },
+ "bridges/tool/seat2_card4_wait@0023__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card4_wait@0023__111_reveal.mp4",
+  "sourceSize": 237993
+ },
+ "bridges/tool/seat2_card4_wait@0023__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat2_card4_wait@0023__seat1_card3_deal.mp4",
+  "sourceSize": 229168
+ },
+ "bridges/tool/seat2_card4_wait@0023__seat2_card5_deal.mp4": {
+  "file": "matted/bridges/tool/seat2_card4_wait@0023__seat2_card5_deal.mp4",
+  "sourceSize": 236310
+ },
+ "bridges/tool/seat2_card5_wait@0001__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat2_card5_wait@0001__seat1_card3_deal.mp4",
+  "sourceSize": 153747
+ },
+ "bridges/tool/seat2_card5_wait@0004__010_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card5_wait@0004__010_reveal.mp4",
+  "sourceSize": 242424
+ },
+ "bridges/tool/seat2_card5_wait@0004__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card5_wait@0004__111_reveal.mp4",
+  "sourceSize": 233885
+ },
+ "bridges/tool/seat2_card5_wait@0005__011_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card5_wait@0005__011_reveal.mp4",
+  "sourceSize": 237800
+ },
+ "bridges/tool/seat2_card5_wait@0007__110_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card5_wait@0007__110_reveal.mp4",
+  "sourceSize": 237555
+ },
+ "bridges/tool/seat2_card5_wait@0020__seat2_card6_deal.mp4": {
+  "file": "matted/bridges/tool/seat2_card5_wait@0020__seat2_card6_deal.mp4",
+  "sourceSize": 151493
+ },
+ "bridges/tool/seat2_card5_wait@0023__010_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card5_wait@0023__010_reveal.mp4",
+  "sourceSize": 241730
+ },
+ "bridges/tool/seat2_card5_wait@0023__011_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card5_wait@0023__011_reveal.mp4",
+  "sourceSize": 238246
+ },
+ "bridges/tool/seat2_card5_wait@0023__110_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card5_wait@0023__110_reveal.mp4",
+  "sourceSize": 237345
+ },
+ "bridges/tool/seat2_card5_wait@0023__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card5_wait@0023__111_reveal.mp4",
+  "sourceSize": 234340
+ },
+ "bridges/tool/seat2_card5_wait@0023__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat2_card5_wait@0023__seat1_card3_deal.mp4",
+  "sourceSize": 155912
+ },
+ "bridges/tool/seat2_card5_wait@0023__seat2_card6_deal.mp4": {
+  "file": "matted/bridges/tool/seat2_card5_wait@0023__seat2_card6_deal.mp4",
+  "sourceSize": 152179
+ },
+ "bridges/tool/seat2_card6_wait@0008__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat2_card6_wait@0008__seat1_card3_deal.mp4",
+  "sourceSize": 150093
+ },
+ "bridges/tool/seat2_card6_wait@0013__010_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card6_wait@0013__010_reveal.mp4",
+  "sourceSize": 239557
+ },
+ "bridges/tool/seat2_card6_wait@0013__011_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card6_wait@0013__011_reveal.mp4",
+  "sourceSize": 235353
+ },
+ "bridges/tool/seat2_card6_wait@0013__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card6_wait@0013__111_reveal.mp4",
+  "sourceSize": 231521
+ },
+ "bridges/tool/seat2_card6_wait@0018__110_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card6_wait@0018__110_reveal.mp4",
+  "sourceSize": 234561
+ },
+ "bridges/tool/seat2_card6_wait@0023__010_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card6_wait@0023__010_reveal.mp4",
+  "sourceSize": 241841
+ },
+ "bridges/tool/seat2_card6_wait@0023__011_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card6_wait@0023__011_reveal.mp4",
+  "sourceSize": 238194
+ },
+ "bridges/tool/seat2_card6_wait@0023__110_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card6_wait@0023__110_reveal.mp4",
+  "sourceSize": 236191
+ },
+ "bridges/tool/seat2_card6_wait@0023__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat2_card6_wait@0023__111_reveal.mp4",
+  "sourceSize": 233765
+ },
+ "bridges/tool/seat2_card6_wait@0023__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat2_card6_wait@0023__seat1_card3_deal.mp4",
+  "sourceSize": 153011
+ },
+ "bridges/tool/seat3_card3_wait@0004__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card3_wait@0004__seat1_card3_deal.mp4",
+  "sourceSize": 241442
+ },
+ "bridges/tool/seat3_card3_wait@0007__101_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card3_wait@0007__101_reveal.mp4",
+  "sourceSize": 232207
+ },
+ "bridges/tool/seat3_card3_wait@0010__seat2_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card3_wait@0010__seat2_card3_deal.mp4",
+  "sourceSize": 236825
+ },
+ "bridges/tool/seat3_card3_wait@0015__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card3_wait@0015__111_reveal.mp4",
+  "sourceSize": 229676
+ },
+ "bridges/tool/seat3_card3_wait@0016__011_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card3_wait@0016__011_reveal.mp4",
+  "sourceSize": 228611
+ },
+ "bridges/tool/seat3_card3_wait@0018__001_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card3_wait@0018__001_reveal.mp4",
+  "sourceSize": 234325
+ },
+ "bridges/tool/seat3_card3_wait@0019__seat3_card4_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card3_wait@0019__seat3_card4_deal.mp4",
+  "sourceSize": 146099
+ },
+ "bridges/tool/seat3_card3_wait@0023__001_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card3_wait@0023__001_reveal.mp4",
+  "sourceSize": 237326
+ },
+ "bridges/tool/seat3_card3_wait@0023__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card3_wait@0023__111_reveal.mp4",
+  "sourceSize": 225177
+ },
+ "bridges/tool/seat3_card3_wait@0024__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card3_wait@0024__seat1_card3_deal.mp4",
+  "sourceSize": 240839
+ },
+ "bridges/tool/seat3_card3_wait@0028__011_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card3_wait@0028__011_reveal.mp4",
+  "sourceSize": 232516
+ },
+ "bridges/tool/seat3_card3_wait@0028__101_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card3_wait@0028__101_reveal.mp4",
+  "sourceSize": 229211
+ },
+ "bridges/tool/seat3_card3_wait@0028__seat2_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card3_wait@0028__seat2_card3_deal.mp4",
+  "sourceSize": 240574
+ },
+ "bridges/tool/seat3_card3_wait@0041__seat3_card4_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card3_wait@0041__seat3_card4_deal.mp4",
+  "sourceSize": 147434
+ },
+ "bridges/tool/seat3_card4_wait@0000__seat3_card5_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card4_wait@0000__seat3_card5_deal.mp4",
+  "sourceSize": 163500
+ },
+ "bridges/tool/seat3_card4_wait@0007__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card4_wait@0007__seat1_card3_deal.mp4",
+  "sourceSize": 239727
+ },
+ "bridges/tool/seat3_card4_wait@0008__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card4_wait@0008__111_reveal.mp4",
+  "sourceSize": 156618
+ },
+ "bridges/tool/seat3_card4_wait@0011__seat2_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card4_wait@0011__seat2_card3_deal.mp4",
+  "sourceSize": 240462
+ },
+ "bridges/tool/seat3_card4_wait@0015__011_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card4_wait@0015__011_reveal.mp4",
+  "sourceSize": 233302
+ },
+ "bridges/tool/seat3_card4_wait@0019__001_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card4_wait@0019__001_reveal.mp4",
+  "sourceSize": 237197
+ },
+ "bridges/tool/seat3_card4_wait@0022__101_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card4_wait@0022__101_reveal.mp4",
+  "sourceSize": 221999
+ },
+ "bridges/tool/seat3_card4_wait@0023__101_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card4_wait@0023__101_reveal.mp4",
+  "sourceSize": 232507
+ },
+ "bridges/tool/seat3_card4_wait@0023__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card4_wait@0023__111_reveal.mp4",
+  "sourceSize": 156443
+ },
+ "bridges/tool/seat3_card4_wait@0023__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card4_wait@0023__seat1_card3_deal.mp4",
+  "sourceSize": 247356
+ },
+ "bridges/tool/seat3_card4_wait@0023__seat2_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card4_wait@0023__seat2_card3_deal.mp4",
+  "sourceSize": 236576
+ },
+ "bridges/tool/seat3_card4_wait@0039__001_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card4_wait@0039__001_reveal.mp4",
+  "sourceSize": 240398
+ },
+ "bridges/tool/seat3_card4_wait@0039__011_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card4_wait@0039__011_reveal.mp4",
+  "sourceSize": 157539
+ },
+ "bridges/tool/seat3_card4_wait@0039__seat3_card5_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card4_wait@0039__seat3_card5_deal.mp4",
+  "sourceSize": 164779
+ },
+ "bridges/tool/seat3_card5_wait@0011__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card5_wait@0011__seat1_card3_deal.mp4",
+  "sourceSize": 231221
+ },
+ "bridges/tool/seat3_card5_wait@0020__101_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card5_wait@0020__101_reveal.mp4",
+  "sourceSize": 238577
+ },
+ "bridges/tool/seat3_card5_wait@0021__seat2_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card5_wait@0021__seat2_card3_deal.mp4",
+  "sourceSize": 221089
+ },
+ "bridges/tool/seat3_card5_wait@0022__001_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card5_wait@0022__001_reveal.mp4",
+  "sourceSize": 245369
+ },
+ "bridges/tool/seat3_card5_wait@0022__011_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card5_wait@0022__011_reveal.mp4",
+  "sourceSize": 237016
+ },
+ "bridges/tool/seat3_card5_wait@0022__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card5_wait@0022__111_reveal.mp4",
+  "sourceSize": 231251
+ },
+ "bridges/tool/seat3_card5_wait@0022__seat3_card6_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card5_wait@0022__seat3_card6_deal.mp4",
+  "sourceSize": 145915
+ },
+ "bridges/tool/seat3_card5_wait@0023__101_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card5_wait@0023__101_reveal.mp4",
+  "sourceSize": 234766
+ },
+ "bridges/tool/seat3_card5_wait@0023__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card5_wait@0023__seat1_card3_deal.mp4",
+  "sourceSize": 227673
+ },
+ "bridges/tool/seat3_card5_wait@0023__seat2_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card5_wait@0023__seat2_card3_deal.mp4",
+  "sourceSize": 153259
+ },
+ "bridges/tool/seat3_card5_wait@0037__001_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card5_wait@0037__001_reveal.mp4",
+  "sourceSize": 243332
+ },
+ "bridges/tool/seat3_card5_wait@0037__011_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card5_wait@0037__011_reveal.mp4",
+  "sourceSize": 234247
+ },
+ "bridges/tool/seat3_card5_wait@0037__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card5_wait@0037__111_reveal.mp4",
+  "sourceSize": 231533
+ },
+ "bridges/tool/seat3_card5_wait@0043__seat3_card6_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card5_wait@0043__seat3_card6_deal.mp4",
+  "sourceSize": 146902
+ },
+ "bridges/tool/seat3_card6_wait@0011__001_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card6_wait@0011__001_reveal.mp4",
+  "sourceSize": 244945
+ },
+ "bridges/tool/seat3_card6_wait@0016__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card6_wait@0016__seat1_card3_deal.mp4",
+  "sourceSize": 228847
+ },
+ "bridges/tool/seat3_card6_wait@0017__seat2_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card6_wait@0017__seat2_card3_deal.mp4",
+  "sourceSize": 145721
+ },
+ "bridges/tool/seat3_card6_wait@0020__011_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card6_wait@0020__011_reveal.mp4",
+  "sourceSize": 235048
+ },
+ "bridges/tool/seat3_card6_wait@0020__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card6_wait@0020__111_reveal.mp4",
+  "sourceSize": 232982
+ },
+ "bridges/tool/seat3_card6_wait@0021__101_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card6_wait@0021__101_reveal.mp4",
+  "sourceSize": 238616
+ },
+ "bridges/tool/seat3_card6_wait@0022__011_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card6_wait@0022__011_reveal.mp4",
+  "sourceSize": 228875
+ },
+ "bridges/tool/seat3_card6_wait@0022__111_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card6_wait@0022__111_reveal.mp4",
+  "sourceSize": 230857
+ },
+ "bridges/tool/seat3_card6_wait@0024__seat1_card3_deal.mp4": {
+  "file": "matted/bridges/tool/seat3_card6_wait@0024__seat1_card3_deal.mp4",
+  "sourceSize": 228557
+ },
+ "bridges/tool/seat3_card6_wait@0026__001_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card6_wait@0026__001_reveal.mp4",
+  "sourceSize": 242480
+ },
+ "bridges/tool/seat3_card6_wait@0041__101_reveal.mp4": {
+  "file": "matted/bridges/tool/seat3_card6_wait@0041__101_reveal.mp4",
+  "sourceSize": 238032
+ },
  "clips/full_table/full_table_deal.mp4": {
   "file": "matted/clips/full_table/full_table_deal.mp4",
   "sourceSize": 4622733

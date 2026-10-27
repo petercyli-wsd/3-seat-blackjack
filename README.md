@@ -229,9 +229,15 @@ compositor's last pass (`STAGE_FS`).
   - Its input is the app's own render of the empty set: the painted table on a grey backdrop,
     made with `node app/scripts/set-input.mjs`.
   - So each set's camera, perspective and table geometry are this take's.
-  - Each result is aligned back onto the input (a homography on the table's edges), so the
-    table's back edge lands on the real cloth's.
-  - `ROOMS` holds the prompts.
+  - It takes two edits. The first makes the room around the painted table (which it keeps,
+    flat). The second re-makes the table alone as a photographed one (felt, padded armrest,
+    brass trim and apron, lit by that room), with `--style` giving it photos of real tables (a
+    felt, a padded armrest) to match in realism. `--keep-rooms` runs only the second edit, on the
+    sets as they are, and `--pick` chooses a room's table from the generations kept.
+  - Each result is aligned back onto the input (a homography on the table's edges, then on its
+    felt), so the felt lies on the real cloth and its back edge on the cloth's.
+  - A table whose felt came out another size is asked for again: aligning it would scale the room.
+  - `ROOMS` holds the prompts; raw generations are kept in `pipeline/work/sets/`.
   - The felt is always generated blue. A table choice recolours only the felt's share of each
     pixel, by its blue, so the print and the light stay.
 - **Her matte** comes from `bj3/mattes.py`, which runs MatAnyone 2 on RunningHub over every clip
@@ -239,23 +245,40 @@ compositor's last pass (`STAGE_FS`).
   - Each file is re-encoded with its matte stacked below the picture, as 1440×1620 in
     `game_assets/matted/`, so the browser decodes picture and matte in lockstep.
   - It is listed in `scene/mattes.json`, and the loader plays the packed file instead.
-  - Re-run it after re-cutting clips. A clip without a packed version falls back to the colour
-    key below, as the generated bridges always do.
+  - `--bridges` mattes the generated bridges too. They are short and many, so they go to
+    MatAnyone strung together, a few hundred frames to a job, each led in by its first frame
+    held a few times; the matte is then cut back into the bridges.
+  - Re-run it after re-cutting clips or generating bridges again. The loader checks each file's
+    size against the one it was packed from, and plays a changed one unpacked, with the colour
+    key below.
 - **Masks** come from `bj3/scene.py`; run it once per take.
   - It builds the set as filmed without her (`reference.png`).
   - It writes her envelope, the cloth, her reach on it, the clutter on it to erase, and the shoe
     and discard holder.
+  - The shoe and discard holder never move, so each also gets a crisp outline from the median
+    frame: anti-aliased, a little inside the footage's own soft edge (`clutter.png`, blue).
 - **Keying, per pixel:** coverage `a` is computed, and her colour is unmixed from the reference,
   `F = (C − (1 − a)·ref) / a`, before being laid over the set.
-  - Above the cloth, `a` is her matte, plus cards she carries (far brighter than the wall) and
-    the tops of the props.
+  - Above the cloth, `a` is her matte, plus cards she carries (far brighter than the wall, and
+    only next to her). Her colour is unmixed by all of the matte but laid in by the middle of its
+    ramp, so her outline is as crisp as the footage's.
   - Without a matte, `a` is how unlike the wall she is.
+  - Inside the props' crisp outlines the footage is kept as it is. Just outside them it keeps
+    only her and a card coming out of the shoe (the rest is the props' own soft edge, which
+    would show as a blur), and the new felt gets a soft contact shadow round their feet.
   - On the cloth, `a` is the share of the bare felt's blue that is missing (cards, her hands,
     her shadows), plus her matte.
   - Her shadow, which is the felt darkened, becomes the new felt darkened alike.
+- **Matching her to the set:** the footage, enlarged about 1.5×, is filtered Catmull-Rom rather
+  than bilinear, and sharpened back a little inside what is kept. It is
+  tinted toward the room's light (the room behind her against the wall she was filmed in front
+  of, half way) with a little more contrast. The room behind her, blurred, wraps round her
+  edges. One film grain goes over everything, so the generated set and the footage read as one
+  picture.
 - **Browser checks:** `capture`, `probe` and `frames` read the canvas in source pixels, so they
   open `?framing=studio&background=studio&table=studio`. Use `BACKGROUND=lotus TABLE=emerald
-  node scripts/frames.mjs …` to render frames in a set; those frames play the unpacked clips.
+  node scripts/frames.mjs …` to render frames in a set. Like the table, `frames` plays the clip
+  packed with her matte where there is one.
 
 ## Round flow
 

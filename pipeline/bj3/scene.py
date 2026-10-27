@@ -14,7 +14,9 @@ Reads every clip in the manifest (a sample of frames from each) and writes to ga
                  B: the cloth within her reach, where her arms, the cards and the props ever move
   clutter.png    R: clutter on the cloth to erase (clamps, pens, bet markers...): anything lying
                     still that isn't felt, the shoe or the discard holder
-                 G: the shoe and the discard holder
+                 G: the shoe and the discard holder, and a few pixels round them
+                 B: the shoe and the discard holder, crisp (anti-aliased, a little inside their
+                    soft edges in the footage): kept as filmed, whatever is around them
   scene.json     the cloth's corners in the frame and the table plane they span, in cm
 
 The app keys her out against reference.png (wall above, felt below) inside those masks, so her
@@ -130,6 +132,50 @@ def plane_depth(corners: np.ndarray, cards: list[np.ndarray], width_cm: float) -
 def card_width_px(m: dict) -> float:
     q = np.array(m["dealer"]["up"])
     return float(np.linalg.norm(q[1] - q[0]))
+
+
+# the props' outlines are drawn this many times finer, then averaged down: an anti-aliased edge
+PROP_SS = 8
+# and pulled in this far (source px), past the half-felt pixels of the footage's own soft edge
+PROP_CHOKE = 0.6
+
+
+def prop_mattes(median: np.ndarray, ref: np.ndarray, near: np.ndarray) -> np.ndarray:
+    """The shoe and the discard holder, crisp: 0-1, anti-aliased over one pixel.
+
+    Each stands still all take, so its outline is found once, in the median frame: where that frame
+    is more like the prop (its darkest tenth) than like the set without it (`ref`), at sub-pixel
+    accuracy (the share is interpolated 8x before it is cut at a half), and its convex hull taken
+    (a box seen from anywhere is convex; that also takes in its glossy sides, which mirror the felt).
+    """
+    H, W = median.shape[:2]
+    out = np.zeros((H, W), np.float32)
+    n, lab, stats, _ = cv2.connectedComponentsWithStats(near.astype(np.uint8), 8)
+    for i in range(1, n):
+        x, y, w, h = stats[i, :4]
+        x0, y0, x1, y1 = max(x - 4, 0), max(y - 4, 0), min(x + w + 4, W), min(y + h + 4, H)
+        c = median[y0:y1, x0:x1].astype(np.float32)
+        r = ref[y0:y1, x0:x1].astype(np.float32)
+        inside = lab[y0:y1, x0:x1] == i
+        dark = c[inside].sum(-1)
+        prop = c[inside][dark <= np.percentile(dark, 10)].mean(0)
+        # each pixel's share of the prop, on the line from the set's colour there to the prop's
+        d = prop - r
+        share = ((c - r) * d).sum(-1) / np.maximum((d * d).sum(-1), 1.0) * inside
+        big = cv2.resize(share, ((x1 - x0) * PROP_SS, (y1 - y0) * PROP_SS), interpolation=cv2.INTER_LINEAR)
+        solid = (big > 0.5).astype(np.uint8)
+        cs, _ = cv2.findContours(solid, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        if not cs:
+            continue
+        hull = cv2.convexHull(max(cs, key=cv2.contourArea))
+        fine = np.zeros_like(solid)
+        cv2.fillConvexPoly(fine, hull, 1)
+        k = 2 * round(PROP_CHOKE * PROP_SS) + 1
+        fine = cv2.erode(fine, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k)))
+        # the resize put pixel centres at (i + 0.5) * SS - 0.5: area-averaging back lands on them
+        small = cv2.resize(fine.astype(np.float32), (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
+        out[y0:y1, x0:x1] = np.maximum(out[y0:y1, x0:x1], small)
+    return out
 
 
 def main() -> None:
@@ -306,7 +352,8 @@ def main() -> None:
     reach_over = reach | (cv2.dilate(reach.astype(np.uint8), np.ones((9, 1), np.uint8)).astype(bool) & ~below)
     masks = np.round(np.dstack([reach_over, cloth, r]).astype(np.float32) * 255).astype(np.uint8)  # BGR
     cv2.imwrite(str(out / "masks.png"), masks)
-    cv2.imwrite(str(out / "clutter.png"), np.dstack([np.zeros((H, W), np.uint8), props.astype(np.uint8) * 255, clutter.astype(np.uint8) * 255]))
+    crisp = np.round(prop_mattes(median, ref, props) * 255).astype(np.uint8)
+    cv2.imwrite(str(out / "clutter.png"), np.dstack([crisp, props.astype(np.uint8) * 255, clutter.astype(np.uint8) * 255]))
 
     cards = [np.array(m["dealer"]["up"]), np.array(m["dealer"]["hole"])]
     for seat in m["seats"]:
