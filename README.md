@@ -276,6 +276,14 @@ compositor's last pass (`STAGE_FS`).
   - On the cloth, `a` is the share of the bare felt's blue that is missing (cards, her hands,
     her shadows), plus her matte.
   - Her shadow, which is the felt darkened, becomes the new felt darkened alike.
+  - Clutter on the cloth (the clear bet markers, clamps) is erased, but never inside a card whose
+    face is drawn that frame. On the open felt, with her matte, everything there goes except her
+    and card stock. Card stock is told from a marker's glint by being stock-coloured a few pixels
+    all round. This matters because she knocks the bet marker by seat 1 askew partway through the
+    take, so it matches the reference in neither place. The scene pass finds it in both places by
+    also looking for still clutter in each quarter of the take on its own.
+  - By the shoe and the discard holder, cards come and go before their faces are drawn. There,
+    clutter is erased only where it looks as it always does.
 - **Matching her to the set:** the footage, enlarged about 1.5×, is filtered Catmull-Rom rather
   than bilinear, and sharpened back a little inside what is kept. It is
   tinted toward the room's light (the room behind her against the wall she was filmed in front

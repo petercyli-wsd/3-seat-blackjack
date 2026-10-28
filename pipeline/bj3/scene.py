@@ -13,7 +13,9 @@ Reads every clip in the manifest (a sample of frames from each) and writes to ga
                  G: the cloth (the table surface, its drape, and the shoe and discard holder on it)
                  B: the cloth within her reach, where her arms, the cards and the props ever move
   clutter.png    R: clutter on the cloth to erase (clamps, pens, bet markers...): anything lying
-                    still that isn't felt, the shoe or the discard holder
+                    still (all take, or between her moving it) that isn't felt, a card, the shoe
+                    or the discard holder. 1 on the open felt, a half by the shoe and the
+                    discard holder (there, only where it looks as it always does)
                  G: the shoe and the discard holder, and a few pixels round them
                  B: the shoe and the discard holder, crisp (anti-aliased, a little inside their
                     soft edges in the footage): kept as filmed, whatever is around them
@@ -34,6 +36,20 @@ import numpy as np
 
 STEP = 9  # every 9th frame of every clip (~1100 frames over the take)
 MEDIAN_EVERY = 6  # of those, every 6th goes into the per-pixel medians
+# clutter she moves (the bet marker by seat 1 is knocked askew partway through) is still only
+# between moves: it is also looked for in each of this many stretches of the take on its own
+STILL_SPANS = 4
+# and never where a card lies, nor this close (px): a card lying still a while is no clutter;
+# nor in specks smaller than this (px)
+CARD_CLEAR = 6
+SPAN_MIN = 30
+# clutter this far (px) from the shoe and the discard holder lies on the open felt, where the app
+# can erase all of it but her and the cards; nearer, cards come out of the shoe and go into the
+# holder before and after their faces are drawn
+PROP_CLEAR = 10
+# and grown this much (px) there: a marker's bright edge would otherwise spread past the mask as the
+# app enlarges the footage (it is felt round it, which is replaced anyway)
+OPEN_GROW = 3
 CARD_CM = (6.35, 8.89)
 
 
@@ -191,10 +207,12 @@ def main() -> None:
     felt_sum = np.zeros((H, W, 3), np.float32)
     person = np.zeros((H, W), np.uint16)
     stack: list[np.ndarray] = []
+    when: list[int] = []
     n = 0
     files = sorted({c["file"] for c in m["clips"].values()})
+    start = {c["file"]: c["sourceStart"] for c in m["clips"].values()}
     for name in files:
-        for f in frames(root / name, STEP):
+        for i, f in enumerate(frames(root / name, STEP)):
             k = feltness(f)
             fe = k > 0.5
             # bare felt only, well clear of anything on it (a card's edge blends into the felt)
@@ -204,15 +222,25 @@ def main() -> None:
             person += ~wallish(f) & ~fe
             if n % MEDIAN_EVERY == 0:
                 stack.append(f)
+                when.append(start[name] + i * STEP)
             n += 1
     print(f"{n} frames from {len(files)} clips, {len(stack)} in the median")
     stack = np.stack(stack)
     median = np.median(stack, axis=0).astype(np.uint8)
-    # how often each pixel looks unlike its median: props lying still almost never do
-    changed = np.zeros((H, W), np.float32)
-    for f in stack:
-        changed += np.abs(f.astype(np.int16) - median).max(axis=2) > 24
-    changed /= len(stack)
+
+    def unlike(frames: np.ndarray, med: np.ndarray) -> np.ndarray:
+        """How often each pixel looks unlike its median: props lying still almost never do."""
+        out = np.zeros((H, W), np.float32)
+        for f in frames:
+            out += np.abs(f.astype(np.int16) - med).max(axis=2) > 24
+        return out / len(frames)
+
+    changed = unlike(stack, median)
+    # and each stretch of the take on its own, in take order
+    spans = []
+    for part in np.array_split(np.argsort(when), STILL_SPANS):
+        med = np.median(stack[part], axis=0).astype(np.uint8)
+        spans.append((med, unlike(stack[part], med)))
     del stack
     felt_frac = felt_count / n
 
@@ -275,13 +303,31 @@ def main() -> None:
 
     # clutter: on the cloth and lying still. That is anything not felt in the median, and the clear
     # bet markers, which are felt through their middles but leave rims unlike the felt around
-    # them. The cards and her resting hands change far too often to count. The shoe and the
-    # discard holder are kept as filmed, including the parts that stand up past the cloth's edge.
-    m_felt = feltness(median)
-    local = np.abs(median.astype(np.int16) - cv2.medianBlur(median, 21)).max(axis=2) > 18
-    still = cloth & (changed < 0.12) & ((m_felt < 0.5) | local)
+    # them. The cards and her resting hands change far too often to count. Clutter she moves lies
+    # still between moves: anything lying still through a stretch of the take counts too, away from
+    # where the cards lie. The shoe and the discard holder are kept as filmed, including the parts
+    # that stand up past the cloth's edge.
+    def lying_still(med: np.ndarray, unlike_med: np.ndarray) -> np.ndarray:
+        local = np.abs(med.astype(np.int16) - cv2.medianBlur(med, 21)).max(axis=2) > 18
+        return cloth & (unlike_med < 0.12) & ((feltness(med) < 0.5) | local)
+
+    still = lying_still(median, changed)
+    cards_lie = np.zeros((H, W), np.uint8)
+    for clip in m["clips"].values():
+        for v in clip["cards"]:
+            for q in [v["quad"]] + [r["quad"] for r in v.get("rests", [])]:
+                cv2.fillConvexPoly(cards_lie, np.array(q, np.float32).round().astype(np.int32), 1)
+    for p in (p for s in m["seats"] for p in m["plates"][s].values()):
+        for q in p["cards"]:
+            cv2.fillConvexPoly(cards_lie, np.array(q, np.float32).round().astype(np.int32), 1)
+    k = 2 * CARD_CLEAR + 1
+    cards_lie = cv2.dilate(cards_lie, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k))).astype(bool)
+    for med, unlike_med in spans:
+        found = (lying_still(med, unlike_med) & ~cards_lie).astype(np.uint8)
+        n_lab, lab, stats, _ = cv2.connectedComponentsWithStats(found, 8)
+        still |= np.isin(lab, 1 + np.flatnonzero(stats[1:, cv2.CC_STAT_AREA] >= SPAN_MIN))
     still = cv2.dilate(still.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool) & cloth
-    solid = (m_felt < 0.5) & ~wallish(median)
+    solid = (feltness(median) < 0.5) & ~wallish(median)
     n_lab, lab, stats, _ = cv2.connectedComponentsWithStats(solid.astype(np.uint8), 8)
     props = np.zeros_like(still)
     for name in ("shoe", "discardTray"):
@@ -305,6 +351,13 @@ def main() -> None:
     leaning = cv2.dilate(body.astype(np.uint8), np.ones((41, 25), np.uint8)).astype(bool)
     clutter = still & ~props & ~leaning
     clutter = cv2.dilate(clutter.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool) & ~props & ~leaning
+    # each piece on the open felt, clear of the props
+    k = 2 * PROP_CLEAR + 1
+    by_props = cv2.dilate(props.astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k))).astype(bool)
+    n_lab, lab = cv2.connectedComponents(clutter.astype(np.uint8), connectivity=8)
+    open_felt = clutter & ~np.isin(lab, np.unique(lab[by_props & clutter]))
+    k = 2 * OPEN_GROW + 1
+    open_felt = cv2.dilate(open_felt.astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k))).astype(bool) & cloth & ~props & ~leaning
 
     # her reach: the stretch of cloth where anything ever moves that her arms or the cards are
     # part of. Past it (the softbox's flickering edge, the drape) the cloth is always replaced.
@@ -353,7 +406,8 @@ def main() -> None:
     masks = np.round(np.dstack([reach_over, cloth, r]).astype(np.float32) * 255).astype(np.uint8)  # BGR
     cv2.imwrite(str(out / "masks.png"), masks)
     crisp = np.round(prop_mattes(median, ref, props) * 255).astype(np.uint8)
-    cv2.imwrite(str(out / "clutter.png"), np.dstack([crisp, props.astype(np.uint8) * 255, clutter.astype(np.uint8) * 255]))
+    erase = np.where(open_felt, 255, np.where(clutter, 128, 0)).astype(np.uint8)
+    cv2.imwrite(str(out / "clutter.png"), np.dstack([crisp, props.astype(np.uint8) * 255, erase]))
 
     cards = [np.array(m["dealer"]["up"]), np.array(m["dealer"]["hole"])]
     for seat in m["seats"]:

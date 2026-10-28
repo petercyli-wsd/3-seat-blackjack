@@ -29,6 +29,8 @@ export interface PlateDraw {
 const PLATE_MODE = { whole: 0, extras: 1, match: 2, dealing: 3 } as const;
 /** Corners a dealt card's outline can have (the shader's uNew). */
 const NEW_MAX = 16;
+/** Cards drawn in a frame whose outlines the stage pass spares from erasing clutter (its uCards). */
+const STAGE_CARDS = 32;
 
 /** Video pixel (GL's, edges on integers) -> a still's texture UV, back through its placing. */
 function plateUV(rect: [number, number, number, number], place: Similarity): number[] {
@@ -342,6 +344,11 @@ export class Compositor {
     gl.uniform1i(su.uHasMatte, packA && packB ? 1 : 0);
     gl.uniform3fv(su.uTint, v.tint ?? [1, 1, 1]);
     gl.uniform1f(su.uSeed, Math.random() * 512);
+    const drawn = f.cards.filter((c) => c.alpha > 0).slice(0, STAGE_CARDS);
+    const outlines = new Float32Array(STAGE_CARDS * 8);
+    drawn.forEach((c, i) => outlines.set(c.quad.flat(), i * 8));
+    gl.uniform2fv(su["uCards[0]"], outlines);
+    gl.uniform1i(su.uCardN, drawn.length);
     // the mask overlay is for the plates: show the footage as filmed under it
     gl.uniform1i(su.uHasSet, v.set && !f.showMasks ? 1 : 0);
     const table = v.table;

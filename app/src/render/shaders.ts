@@ -333,8 +333,10 @@ void main() {
  *   are far brighter than the wall (looked for only next to her). Her colour is unmixed by all of
  *   her matte, but laid in by the middle of its ramp, so her outline is as crisp as the footage's.
  * - On the cloth within her reach: the share of the bare felt's blue that is missing (cards, her
- *   hands, her shadows), and her matte; clutter lying still on it is erased wherever it looks as it
- *   always does. Past her reach the cloth is always replaced.
+ *   hands, her shadows), and her matte; clutter lying on it is erased, never on a card drawn this
+ *   frame: on the open felt all of it but her and card stock (where she has a matte), by the shoe
+ *   and the discard holder wherever it looks as it always does. Past her reach the cloth is always
+ *   replaced.
  * - The shoe and the discard holder never move: each has a crisp outline (the scene pass's), inside
  *   which the footage is kept as it is.
  * - With the table kept as filmed, everything below the cloth's back edge stays.
@@ -372,6 +374,11 @@ uniform vec3 uSkirtTint;
 uniform vec3 uLed;
 uniform vec3 uTint;
 uniform float uSeed;
+// the outlines of the cards whose faces are drawn this frame (pipeline pixel-centre coordinates)
+const int CARDS = 32;
+uniform vec2 uCards[CARDS * 4];
+uniform int uCardN;
+${KEYS}
 const int SKIRT_TAPS = 12;
 // The footage is enlarged about 1.5x into the dealer framing: filtered Catmull-Rom (sharper than
 // bilinear) and sharpened back a little.
@@ -468,6 +475,32 @@ float same(vec3 c, vec3 r) {
   vec3 d = abs(c - r);
   return 1.0 - smoothstep(0.07, 0.16, max(d.r, max(d.g, d.b)));
 }
+float cross2(vec2 a, vec2 b) { return a.x * b.y - a.y * b.x; }
+// signed distance (px) of p from the line a -> b
+float side(vec2 a, vec2 b, vec2 p) { return cross2(b - a, p - a) / max(length(b - a), 1e-3); }
+// How far inside the deepest of the cards drawn this frame p is, in px (negative: outside them all).
+float inCards(vec2 p) {
+  float best = -1e3;
+  for (int i = 0; i < CARDS; i++) {
+    if (i >= uCardN) break;
+    vec2 q0 = uCards[i * 4], q1 = uCards[i * 4 + 1], q2 = uCards[i * 4 + 2], q3 = uCards[i * 4 + 3];
+    // inside is on the same side of all four edges, whichever way round the outline runs
+    float o = sign(cross2(q2 - q0, q3 - q1));
+    float d = min(min(o * side(q0, q1, p), o * side(q1, q2, p)), min(o * side(q2, q3, p), o * side(q3, q0, p)));
+    if (o != 0.0) best = max(best, d);
+  }
+  return best;
+}
+// Card stock with no face drawn on it (the cards she gathers up): stock-coloured, and so on most of
+// a ring a few pixels round, where a bet marker's glint is a line a pixel or two wide.
+float faceless(vec2 s, vec3 c) {
+  float n = 0.0;
+  for (int i = 0; i < 8; i++) {
+    float t = float(i) * 0.7853982;
+    n += stockness(live(s + 3.0 * vec2(cos(t), sin(t))).rgb);
+  }
+  return stockness(c) * smoothstep(0.3, 0.6, n / 8.0);
+}
 vec2 topUV(vec2 s) {
   vec3 h = uToTop * vec3(s, 1.0);
   return h.z <= 0.0 ? vec2(-1.0) : h.xy / h.z;
@@ -513,7 +546,16 @@ void main() {
   float core = smoothstep(0.75, 0.95, mk.r);
   float cloth = mk.g;
   float reach = mk.b;
-  float clutter = cp.r;
+  // clutter: 1 on the open felt, a half by the shoe and the discard holder; never on a card drawn
+  // this frame. On the open felt, with her matte to keep her by, all of it goes but her and the
+  // faceless cards she carries over it (the bet marker she knocks askew looks like itself in
+  // neither place); elsewhere only where it looks as it always does.
+  float clutter = min(cp.r * 2.0, 1.0);
+  float openFelt = 0.0;
+  if (uSwapTable == 1 && cp.r > 0.0) {
+    clutter *= 1.0 - smoothstep(-1.0, 1.0, inCards(s - 0.5));
+    if (uHasMatte == 1 && cp.r > 0.5) openFelt = clamp(cp.r * 2.0 - 1.0, 0.0, 1.0) * (1.0 - faceless(s, c));
+  }
   // the shoe and the discard holder, crisp: kept as filmed, her hands and the cards on them with them
   float props = uSetOnly == 1 ? 0.0 : cp.b;
   float matte = uHasMatte == 1 ? lv.a * env : 0.0;
@@ -538,7 +580,8 @@ void main() {
   float notFelt = 1.0 - pastEdge * smoothstep(0.03, 0.1, blueness(c));
   above *= notFelt;
   aboveEdge *= notFelt;
-  float onCloth = uSwapTable == 1 ? max(reach * clothKey(c, ref) * (1.0 - clutter * same(c, ref)), lv.a * reach * float(uHasMatte)) : 1.0;
+  float erase = clutter * max(same(c, ref), openFelt);
+  float onCloth = uSwapTable == 1 ? max(reach * clothKey(c, ref) * (1.0 - erase), lv.a * reach * float(uHasMatte)) : 1.0;
   // Just outside the props' crisp outlines the footage still has their soft edge, darker than the
   // felt, which the felt key would keep as a blur round them: there it keeps only her (her matte,
   // or skin's warmth) and a card coming out of the shoe (far brighter than the felt).
