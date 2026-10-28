@@ -18,6 +18,9 @@ export interface FootageCard {
   quad: Quad;
   /** Outline per frame while the dealer slides it in face up: quads[i] is frame from + i, up to `in`. */
   path?: { from: number; quads: Quad[] };
+  /** Where it lies from each frame it was moved where it lay (a dealer card squared against the
+   *  hole card, or put back a few pixels off after the reveal); before the first, `quad`. */
+  rests?: { from: number; quad: Quad }[];
   /** Times it is lifted off its resting place and put back (the up card scooping the hole card over):
    *  over [from, to) its outline is quads[i] at frame from + i while it could be followed, else none. */
   trips?: { from: number; to: number; quads: Quad[] }[];
@@ -160,7 +163,7 @@ export function faceQuadAt(c: FootageCard, frame: number): Quad | null {
   if (landed) return landed;
   const trip = c.trips?.find((t) => frame >= t.from && frame < t.to);
   if (trip) return trip.quads[frame - trip.from] ?? null;
-  if (frame >= faceUp(c)) return c.quad;
+  if (frame >= faceUp(c)) return c.rests?.findLast((r) => frame >= r.from)?.quad ?? c.quad;
   const i = c.path ? frame - c.path.from : -1;
   return c.path && i >= 0 && i < c.path.quads.length ? c.path.quads[i] : null;
 }

@@ -10,7 +10,10 @@ it is swept up in, its outline from the frame it leaves its resting place
 for as long as it moves on its own (`away`), after which its face is gone.
 The hole card's `path` runs up to its flip instead, and a card lifted off its
 resting place and put back (the up card at the reveal) has `trips`: its
-outline while it is off, as far as it could be followed. Each hand's top card
+outline while it is off, as far as it could be followed. A dealer card she
+moves where it lies (squared against the hole card, put back a few pixels off
+after the reveal) has `rests`: from each frame it was moved, where it lies;
+slid there under her fingers, its outline on the way is a trip. Each hand's top card
 also has `pile`: the outline of the pile she gathers that hand into, its face
 riding on it to the tray (null where the pile couldn't be fitted).
 
@@ -149,9 +152,17 @@ def build(cards_json: str, edl_json: str, pose_npz: str, out_dir: str,
                 face_up = c["flip"] if c["face_down"] else c["birth"]
                 if fl.get("quads") and face_up is not None and face_up > a and fl["from"] < b:
                     v["path"] = {"from": fl["from"] - a, "quads": fl["quads"]}
+                # a dealer card moved where it lies: where it lies from each frame it was moved
+                rests = [{"from": f - a, "quad": q} for f, q in c.get("rests", []) if f < b]
+                if rests:
+                    v["rests"] = rests
                 # times it leaves its resting place and comes back, in this clip
                 trips = [{"from": t["from"] - a, "to": t["to"] - a, "quads": t["quads"]}
                          for t in fl.get("trips", []) if t["from"] < b and t["to"] > a]
+                # and slid along the felt from one place to the next (as a trip that ends elsewhere)
+                trips += [{"from": sl["from"] - a, "to": sl["from"] + len(sl["quads"]) - a, "quads": sl["quads"]}
+                          for sl in c.get("slides", []) if sl["from"] < b and sl["from"] + len(sl["quads"]) > a]
+                trips.sort(key=lambda t: t["from"])
                 if trips:
                     v["trips"] = trips
                 # a hand's top card rides on the pile she gathers them into
@@ -196,8 +207,14 @@ def build(cards_json: str, edl_json: str, pose_npz: str, out_dir: str,
         for n, p in plates[seat].items():
             assert len(p["cards"]) == int(n), (seat, n, len(p["cards"]))
 
+    def lies_longest(c):
+        """The outline a card lies on longest (a dealer card moved where it lies has several)."""
+        spans = [[c["birth"], c["quad"]]] + c.get("rests", [])
+        ends = [f for f, _ in spans[1:]] + [c.get("leave", c["death"])]
+        return max(zip(spans, ends), key=lambda s: s[1] - s[0][0])[0][1]
+
     def median_quad(slot):
-        qs = np.array([c["quad"] for c in cards if c["region"] == slot], np.float32)
+        qs = np.array([lies_longest(c) for c in cards if c["region"] == slot], np.float32)
         return np.median(qs, axis=0).round(2).tolist()
 
     seat_masks(cards, out / "masks" / "seats.png")

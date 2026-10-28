@@ -110,6 +110,12 @@ make it consistent:
    - `bj3/settle.py` then refits every card's resting outline on ~24 frames of its stay, from
      edge contrast (card stock just inside each side, none just outside), and keeps the median
      pose. One frame with a hand beside the card can no longer put its face off the card.
+   - The dealer's cards are moved where they lie: she squares the up card against the hole card
+     once that is dealt, and puts it back a few pixels off after scooping the hole card over. So
+     each dealer card is fitted afresh every 3 frames of its stay, and a fit that plainly shows
+     it (three sides or more) somewhere else, with the next few agreeing, starts another stretch
+     with its own outline (`rests`). Slid there under her fingers, it is followed frame by frame
+     (`slides`, played as trips), fitted where it shows and moved on in step between.
    - `bj3/flight.py` follows each face-up card backward from where it lands, frame by frame,
      while she slides it in under her fingers. Poses are rigid moves of the card's own outline,
      turned in table space (`bj3/rigid.py`), at the scale its height in the image gives it, and
@@ -124,7 +130,8 @@ make it consistent:
      shows as it turns over and while she squares it, not only once it is back in its slot.
    - At the reveal she lifts the up card to scoop the hole card over. `settle` finds such trips
      (the card's edges go and felt shows where it lay; under a passing hand skin would), and
-     `flight` follows the card while it is flat on the table; lifted in her hand it is blank.
+     `flight` follows the card while it is flat on the table, from where it lay and back from
+     where it is put down (not always where it lay); lifted in her hand it is blank.
    - At the discard, `settle` finds the frame each card starts to move, and `flight` follows
      it forward from there while it moves flat and on its own. Once she has gathered a hand
      into a pile, the pile is fitted as one card (a card-shaped blob of moving card stock, its

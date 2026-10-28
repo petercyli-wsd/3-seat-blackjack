@@ -91,7 +91,8 @@ def run(video: str, assets: str = "../game_assets") -> None:
         dealer = [c for c in clip["cards"] if c["slot"] in ("up", "hole")]
         if dealer:
             lift = min(c["out"] for c in dealer)
-            real = [c["quad"] for c in dealer]
+            # where each lies as the discard starts (she may have moved it since it landed)
+            real = [next((r["quad"] for r in reversed(c.get("rests", [])) if r["from"] <= 0), c["quad"]) for c in dealer]
             out["dealer"] = {str(k): reach(frames, area(real + [dealer_draw_quad(m["dealer"]["up"], i) for i in range(k)], shape), lift)
                              for k in range(1, DEALER_DRAWS + 1)}
             print(f"  {name} dealer: first pickup {lift}, hand reaches it at {out['dealer']}")
