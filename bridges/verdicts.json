@@ -34,6 +34,12 @@
   "sha1": "5ad978b1d26cfab7",
   "t": "2026-10-26T10:17:05+00:00"
  },
+ "111_hold@0019__111_idle.mp4": {
+  "verdict": "reject",
+  "note": "sent back in human review",
+  "sha1": "63e17d634aff98c1",
+  "t": "2026-10-28T18:23:20+00:00"
+ },
  "111_idle@0098__100_deal.mp4": {
   "verdict": "ok",
   "note": "Kling redo: calm, clean",
