@@ -38,6 +38,8 @@ export class Director {
   private cutGen = 0;
   /** A no-discard clear under way (ending/): what the render hook draws over the table. */
   clearing: Clearing | null = null;
+  /** The footage going back to the betting loop after a no-discard clear, while betting is open. */
+  private backToBetting: Promise<void> | null = null;
 
   constructor(
     private m: Manifest,
@@ -154,6 +156,7 @@ export class Director {
     this.view.dealerDrawAt = [];
     this.view.home = undefined;
     this.clearing = null;
+    this.backToBetting = null;
     const fresh = { taken: false, bet: 0, cards: [], status: "empty" as SeatStatus, result: null };
     this.store.set({
       seats: { seat1: { ...fresh }, seat2: { ...fresh }, seat3: { ...fresh } },
@@ -170,6 +173,10 @@ export class Director {
     this.running = true;
     const epoch = this.epoch;
     try {
+      // a no-discard round reopens betting while the footage is still on its way back to the
+      // betting loop: the deal follows on from there
+      if (this.backToBetting) await this.backToBetting;
+      this.guard(epoch);
       await this.round(epoch);
     } catch (e) {
       if (!(e instanceof Abort)) throw e;
@@ -498,11 +505,20 @@ export class Director {
     // the table is empty: the style keeps every real card hidden until the footage leaves the hold
     this.clearing = { ...this.clearing, done: true };
     this.emptyTable();
-    this.store.set({ message: "" });
-    await this.cutTo(this.bettingAfterHold(), { loop: true });
-    this.guard(epoch);
-    this.clearing = null;
-    this.store.set({ clearing: null });
+    // Betting reopens on the bare table at once: waiting for the hold to come round to a bridge
+    // (up to a loop's length) would leave the table empty and silent. The footage goes back to the
+    // betting loop meanwhile, the cards kept hidden until it has; a Deal waits for it (deal()).
+    this.backToBetting = this.cutTo(this.bettingAfterHold(), { loop: true }).then(
+      () => {
+        if (epoch !== this.epoch) return;
+        this.clearing = null;
+        this.backToBetting = null;
+        this.store.set({ clearing: null });
+      },
+      (e: unknown) => {
+        if (!(e instanceof Abort)) throw e;
+      },
+    );
     this.reopenBetting();
   }
 
