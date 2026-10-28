@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { type Store, useGame } from "../director/store";
 import { label } from "../engine/rules";
 import type { SeatId } from "../media/manifest";
+import { EndingOverlay } from "../ending/overlays";
 import { DEALER_CROP, type Rect } from "../render/stageArt";
 import { OUTCOME_LABEL, STATUS_LABEL, seatNo, signedMoney } from "./format";
 
@@ -186,6 +187,7 @@ export function Stage({ store, canvasRef, hostRef }: {
             <SeatMarker key={id} store={store} id={id} />
           ))}
           {phase !== "loading" && <Toast store={store} />}
+          <EndingOverlay store={store} />
         </div>
       </div>
     </div>

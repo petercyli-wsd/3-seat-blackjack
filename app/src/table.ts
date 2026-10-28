@@ -7,6 +7,8 @@ import { ClipLoader, loadImage } from "./media/preload";
 import { Compositor } from "./render/Compositor";
 import { buildFaceAtlas } from "./render/faceAtlas";
 import { type PlateTextures, Scene } from "./render/scene";
+import { applyEnding } from "./ending";
+import { ENDING_IDS, type Ending, type EndingContext } from "./ending/types";
 import {
   DEALER_CROP, DEALER_OUT, FELTS, ROOM_BEHIND, type TableArt, backLine, lightOf, loadMattes, loadSceneInfo, loadSets, loadSkirtWood,
   paintSet, paintTable, tintFor,
@@ -81,6 +83,9 @@ export async function bootTable(canvas: HTMLCanvasElement, host: HTMLElement, st
     const v = q.get(k);
     if (v) store.set({ [k]: v });
   }
+  // ?ending=fade|panel|collect: play rounds out without the discard footage
+  const qEnding = q.get("ending");
+  if (qEnding && (ENDING_IDS as string[]).includes(qEnding)) store.set({ ending: qEnding as Ending });
 
   // the view: framing, set and felt; each set painted once, re-applied when any changes
   const painted = new Map<string, Promise<TexImageSource>>();
@@ -123,6 +128,7 @@ export async function bootTable(canvas: HTMLCanvasElement, host: HTMLElement, st
   const scene = new Scene(m, plates, plateTex, new RoundPlates(m, files, rects, host, plates, (src) => compositor.imageTexture(src)));
   const player = new ClipPlayer(m, files, host);
   const director = new Director(m, player, store, bridges);
+  const endingCtx: EndingContext = { m, plates, plateTex, compositor, files, host };
 
   let raf = 0;
   let lastDebug = 0;
@@ -142,11 +148,13 @@ export async function bootTable(canvas: HTMLCanvasElement, host: HTMLElement, st
     const drawn = [
       player.decks.indexOf(active), active.fileFrame, from ? player.decks.indexOf(from) : -1, from?.fileFrame, player.fadeT,
       v0.seats.seat1.length, v0.seats.seat2.length, v0.seats.seat3.length, v0.dealer.length, store.get().showMasks, viewVersion,
+      director.clearing?.style, director.clearing?.done,
     ].join();
-    const animating = v0.dealerDrawAt.some((t) => now - t < DRAW_ANIM_MS);
+    // a no-discard clear animates on the clock too
+    const animating = v0.dealerDrawAt.some((t) => now - t < DRAW_ANIM_MS) || (!!director.clearing && !director.clearing.done);
     if (drawn === lastDrawn && !animating) return;
     lastDrawn = drawn;
-    const res = scene.compute(st, director.view, now);
+    const res = applyEnding(scene.compute(st, director.view, now), director.clearing, now, endingCtx);
     compositor.render({
       a: from ? from.el : active.el,
       b: from ? active.el : undefined,

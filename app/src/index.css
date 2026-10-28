@@ -521,3 +521,6 @@ kbd {
   .with-panel .main { grid-template-columns: 1fr; }
   .director { display: none; }
 }
+
+/* ending: a stand-in cover until the results panel is built (ending/PanelOverlay.tsx) */
+.ending-panel-stub{position:absolute;left:8%;right:8%;bottom:6%;height:44%;display:grid;place-items:center;background:rgba(10,14,20,.86);color:#fff;border-radius:14px;font-size:20px}

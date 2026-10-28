@@ -1,5 +1,6 @@
 import type { Director } from "../director/Director";
 import { type Store, useGame } from "../director/store";
+import { ENDINGS, ENDING_IDS } from "../ending/types";
 import { money, signedMoney } from "./format";
 
 export function OctaneMark({ size = 28 }: { size?: number }) {
@@ -23,6 +24,7 @@ export function TopBar({ store, director, onToggleDirector, directorOpen }: {
   const net = useGame(store, (s) => s.lastNet);
   const mode = useGame(store, (s) => s.mode);
   const phase = useGame(store, (s) => s.phase);
+  const ending = useGame(store, (s) => s.ending);
   return (
     <header className="topbar">
       <a className="brand" href="#" onClick={(e) => e.preventDefault()}>
@@ -35,6 +37,17 @@ export function TopBar({ store, director, onToggleDirector, directorOpen }: {
         <h1>Blackjack <em>· Three Seat</em></h1>
       </div>
       <div className="topbar-right">
+        <div className="mode-switch ending-switch" role="radiogroup" aria-label="How a round ends (switching starts a new game)">
+          {ENDING_IDS.map((e) => (
+            <button
+              key={e} role="radio" aria-checked={ending === e} className={ending === e ? "is-on" : ""}
+              title={`${ENDINGS[e].hint}${ending === e ? "" : " — starts a new game"}`}
+              onClick={() => director?.setEnding(e)} disabled={!director}
+            >
+              {ENDINGS[e].label}
+            </button>
+          ))}
+        </div>
         <div className="mode-switch" role="radiogroup" aria-label="Decision time">
           {(["speed", "regular"] as const).map((m) => (
             <button key={m} role="radio" aria-checked={mode === m} className={mode === m ? "is-on" : ""} onClick={() => director?.setMode(m)}>

@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import type { Card } from "../engine/cards";
 import type { Settlement } from "../engine/settle";
+import type { Clear, Ending } from "../ending/types";
 import type { SeatId } from "../media/manifest";
 import type { BackgroundId, Framing, TableId } from "../render/stageArt";
 
@@ -70,6 +71,10 @@ export interface GameState {
    * pipeline's scene pass hasn't run). "studio" first in each. */
   backgrounds: { id: BackgroundId; name: string }[];
   tables: { id: TableId; name: string }[];
+  /** How a round ends: the filmed discard, or one of the no-discard clears (ending/). */
+  ending: Ending;
+  /** A no-discard clear under way, for the overlays: which, from when, for how long (ms). */
+  clearing: { style: Clear; startedAt: number; duration: number } | null;
 }
 
 const seat = (): SeatState => ({ taken: false, bet: 0, cards: [], status: "empty", result: null });
@@ -103,6 +108,8 @@ export const initialState = (): GameState => ({
   table: "studio-blue",
   backgrounds: [],
   tables: [],
+  ending: "discard",
+  clearing: null,
 });
 
 export class Store {

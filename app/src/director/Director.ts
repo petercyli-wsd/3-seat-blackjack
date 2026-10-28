@@ -3,6 +3,8 @@ import { RULES, dealerDraws, handFinished, isBlackjack, isBust, isCharlie, total
 import { settle } from "../engine/settle";
 import { Shoe } from "../engine/shoe";
 import { autoHit } from "../engine/strategy";
+import { timing } from "../ending";
+import type { Clear, Clearing, Ending } from "../ending/types";
 import type { ClipPlayer, Handoff } from "../media/ClipPlayer";
 import { type Bridge, type Manifest, type SeatId, clipName, loopSpan, naturalNext } from "../media/manifest";
 import type { TableView } from "../render/scene";
@@ -34,6 +36,8 @@ export class Director {
   private epoch = 0;
   private mask = "000";
   private cutGen = 0;
+  /** A no-discard clear under way (ending/): what the render hook draws over the table. */
+  clearing: Clearing | null = null;
 
   constructor(
     private m: Manifest,
@@ -109,6 +113,14 @@ export class Director {
     this.store.set({ scenario: key });
   }
 
+  /** How rounds end. A round can't change its ending halfway, so switching starts a new game. */
+  setEnding(ending: Ending) {
+    if (ending === this.store.get().ending) return;
+    this.store.set({ ending });
+    this.log(`ending: ${ending} — new game`);
+    void this.resetTable();
+  }
+
   canDeal() {
     return this.store.get().phase === "betting" && !this.dealBlocker();
   }
@@ -141,10 +153,11 @@ export class Director {
     this.view.dealer = [];
     this.view.dealerDrawAt = [];
     this.view.home = undefined;
+    this.clearing = null;
     const fresh = { taken: false, bet: 0, cards: [], status: "empty" as SeatStatus, result: null };
     this.store.set({
       seats: { seat1: { ...fresh }, seat2: { ...fresh }, seat3: { ...fresh } },
-      dealer: [], activeSeat: null, decision: null, balance: 1000, lastNet: null, round: 0, history: [],
+      dealer: [], activeSeat: null, decision: null, balance: 1000, lastNet: null, round: 0, history: [], clearing: null,
     });
     this.log("table reset");
     await this.open();
@@ -441,6 +454,8 @@ export class Director {
       message: isBlackjack(this.view.dealer) ? "Dealer has Blackjack" : d > 21 ? `Dealer busts with ${d}` : `Dealer stands on ${d}`,
     }));
     this.log(`settled: net ${record.net >= 0 ? "+" : ""}${record.net}`);
+    const ending = this.store.get().ending;
+    if (ending !== "discard") return this.clearWithoutDiscard(ending, epoch);
     // The discard can only start where the hold loop comes round to the take's own next frame
     // (up to a loop's length away), so ask for it after a short read of the results, not after a
     // fixed pause plus that wait. The results stay up while she clears.
@@ -457,10 +472,50 @@ export class Director {
     const dc = this.m.clips[discard];
     await this.player.whenFrame(discard, Math.min(dc.frames - 1, Math.max(0, ...dc.cards.map((c) => c.out)) + CLEARED_FRAMES));
     this.guard(epoch);
+    this.emptyTable();
+    this.reopenBetting();
+  }
+
+  /**
+   * The round ends without the discard footage: she stays at rest in the hold loop while the
+   * style clears the table (ending/), then the footage goes from her rest straight back to the
+   * betting loop of this take (the idle that follows its discard as filmed).
+   */
+  private async clearWithoutDiscard(style: Clear, epoch: number) {
+    const { readMs, duration } = timing(style);
+    await sleep(readMs);
+    this.guard(epoch);
+    const startedAt = performance.now();
+    const v = this.view;
+    this.clearing = {
+      style, startedAt, duration, mask: this.mask, done: false,
+      seats: { seat1: [...v.seats.seat1], seat2: [...v.seats.seat2], seat3: [...v.seats.seat3] },
+      dealer: [...v.dealer],
+    };
+    this.store.set({ phase: "clearing", clearing: { style, startedAt, duration } });
+    await sleep(duration);
+    this.guard(epoch);
+    // the table is empty: the style keeps every real card hidden until the footage leaves the hold
+    this.clearing = { ...this.clearing, done: true };
+    this.emptyTable();
+    this.store.set({ message: "" });
+    await this.cutTo(clipName.idle(this.mask), { loop: true });
+    this.guard(epoch);
+    this.clearing = null;
+    this.store.set({ clearing: null });
+    this.reopenBetting();
+  }
+
+  private emptyTable() {
     this.view.seats = { seat1: [], seat2: [], seat3: [] };
     this.view.dealer = [];
     this.view.dealerDrawAt = [];
     this.view.home = undefined;
+  }
+
+  /** Betting opens again, the stakes kept seat by seat as far as the balance still covers them. */
+  private reopenBetting() {
+    const seats = this.m.seats;
     const s = this.store.get();
     // re-bet: keep the stakes, seat by seat, as far as the balance still covers them all together
     let left = Math.max(0, s.balance);
