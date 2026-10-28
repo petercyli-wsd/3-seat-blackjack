@@ -323,13 +323,13 @@ function footageFaces(clip: ClipInfo, seat: SeatId, hand: Card[], f: number, out
   }
 }
 
-/** Where each slot's cards lie on a clip frame, by their place in the hand. */
+/** Where each slot's faces are drawn on a clip frame, by their place in the hand: where the clip
+ *  itself draws them (a dealer card she has moved since it landed lies on a later `rests`). */
 function lying(clip: ClipInfo, frame: number, slot: string): Map<number, Quad> {
   const out = new Map<number, Quad>();
   for (const c of clip.cards) {
-    if (c.slot !== slot || frame < c.in || frame >= c.out) continue;
-    if (c.slot === "hole" && (c.flip === null || frame < c.flip)) continue;
-    out.set(c.index, c.quad);
+    const quad = c.slot === slot ? faceQuadAt(c, frame) : null;
+    if (quad) out.set(c.index, quad);
   }
   return out;
 }
