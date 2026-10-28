@@ -19,6 +19,7 @@ Reads every clip in the manifest (a sample of frames from each) and writes to ga
                  G: the shoe and the discard holder, and a few pixels round them
                  B: the shoe and the discard holder, crisp (anti-aliased, a little inside their
                     soft edges in the footage): kept as filmed, whatever is around them
+                 A: their shadows on the felt as filmed (1 unshaded), which the new felt takes
   scene.json     the cloth's corners in the frame and the table plane they span, in cm
 
 The app keys her out against reference.png (wall above, felt below) inside those masks, so her
@@ -50,6 +51,8 @@ PROP_CLEAR = 10
 # and grown this much (px) there: a marker's bright edge would otherwise spread past the mask as the
 # app enlarges the footage (it is felt round it, which is replaced anyway)
 OPEN_GROW = 3
+# holes in the cloth smaller than this (px) are filled
+CLOTH_SPECK = 400
 CARD_CM = (6.35, 8.89)
 
 
@@ -154,6 +157,34 @@ def card_width_px(m: dict) -> float:
 PROP_SS = 8
 # and pulled in this far (source px), past the half-felt pixels of the footage's own soft edge
 PROP_CHOKE = 0.6
+# what the hull spans past a prop's outline is peeled off up to this deep (px), a pixel at a time
+# while it is within this much (0-255, any channel) of what is just outside it
+PEEL_STEPS = 6
+PEEL_LIKE = 14
+
+
+def behind_hull(c: np.ndarray, r: np.ndarray, share: np.ndarray, hull: np.ndarray) -> np.ndarray:
+    """The pixels of a prop's hull that are whatever is behind it, not the prop: peeled from outside
+    inward while each is less the prop than not and looks like a pixel just outside it (the nearest
+    alike of its eight: the rail along the cloth's back edge is a gradient across it). Never the
+    cards in it (far brighter than the set there, `r`): the discard holder's run past its hull."""
+    hull = hull.copy()
+    behind = np.zeros_like(hull)
+    card = c.mean(-1) > 1.15 * r.mean(-1)
+    steps = [(dy, dx) for dy in (-1, 0, 1) for dx in (-1, 0, 1) if dy or dx]
+    for _ in range(PEEL_STEPS):
+        # (the hull is well inside the box c is cut to: rolling never wraps it round)
+        nearest = np.full(hull.shape, np.inf, np.float32)
+        for dy, dx in steps:
+            out = np.roll(~hull, (dy, dx), (0, 1))
+            d = np.abs(c - np.roll(c, (dy, dx), (0, 1))).max(-1)
+            nearest = np.where(out, np.minimum(nearest, d), nearest)
+        like = hull & (share < 0.5) & ~card & (nearest < PEEL_LIKE)
+        if not like.any():
+            break
+        hull &= ~like
+        behind |= like
+    return behind
 
 
 def prop_mattes(median: np.ndarray, ref: np.ndarray, near: np.ndarray) -> np.ndarray:
@@ -162,7 +193,9 @@ def prop_mattes(median: np.ndarray, ref: np.ndarray, near: np.ndarray) -> np.nda
     Each stands still all take, so its outline is found once, in the median frame: where that frame
     is more like the prop (its darkest tenth) than like the set without it (`ref`), at sub-pixel
     accuracy (the share is interpolated 8x before it is cut at a half), and its convex hull taken
-    (a box seen from anywhere is convex; that also takes in its glossy sides, which mirror the felt).
+    (that takes in its glossy sides, which mirror the felt, and the cards in it). Where the outline
+    isn't convex after all (the discard holder's tray juts out past its side) the hull spans a
+    sliver of what is behind it: that is cut back to the outline.
     """
     H, W = median.shape[:2]
     out = np.zeros((H, W), np.float32)
@@ -186,12 +219,42 @@ def prop_mattes(median: np.ndarray, ref: np.ndarray, near: np.ndarray) -> np.nda
         hull = cv2.convexHull(max(cs, key=cv2.contourArea))
         fine = np.zeros_like(solid)
         cv2.fillConvexPoly(fine, hull, 1)
-        k = 2 * round(PROP_CHOKE * PROP_SS) + 1
-        fine = cv2.erode(fine, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k)))
         # the resize put pixel centres at (i + 0.5) * SS - 0.5: area-averaging back lands on them
+        hull_px = cv2.resize(fine.astype(np.float32), (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA) > 0.5
+        behind = behind_hull(c, r, share, hull_px)
+        behind = cv2.resize(behind.astype(np.float32), fine.shape[::-1], interpolation=cv2.INTER_LINEAR) > 0.5
+        k = 2 * round(PROP_CHOKE * PROP_SS) + 1
+        choke = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k))
+        # cut back to as far past the outline as the choke takes in, so it lands on the outline; and
+        # never nearer: the hull's sub-pixel overshoot along a straight edge stays, unstepped
+        fine[behind & (cv2.dilate(solid, choke) == 0)] = 0
+        fine = cv2.erode(fine, choke)
         small = cv2.resize(fine.astype(np.float32), (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
         out[y0:y1, x0:x1] = np.maximum(out[y0:y1, x0:x1], small)
     return out
+
+
+# the props' shadows are measured this far (px) out from their outlines, against the felt's own light
+# there: the felt past that, blurred this wide (px) into the gap
+SHADOW_REACH = 24
+SHADOW_LIGHT = 16
+
+
+def prop_shadows(bare: np.ndarray, crisp: np.ndarray, cloth: np.ndarray, clear: np.ndarray) -> np.ndarray:
+    """The shoe's and the discard holder's shadows on the felt, as filmed: 0-1, 1 where unshaded.
+
+    The bare felt (which has their shadows in it: shaded felt is still felt) over the light it would
+    have without them, fitted from the felt further off that nothing lies on (`clear`). Faded out
+    over the last 8 px of SHADOW_REACH, so it stops without a seam.
+    """
+    lum = cv2.cvtColor(bare, cv2.COLOR_BGR2GRAY).astype(np.float32)
+    dist = cv2.distanceTransform((crisp < 0.5).astype(np.uint8), cv2.DIST_L2, 5)
+    w = (cloth & clear & (dist > SHADOW_REACH)).astype(np.float32)
+    light = cv2.GaussianBlur(lum * w, (0, 0), SHADOW_LIGHT) / np.maximum(cv2.GaussianBlur(w, (0, 0), SHADOW_LIGHT), 1e-4)
+    # the felt's weave is no shadow: smoothed a little before it is cut at 1
+    shade = np.clip(cv2.GaussianBlur(lum / np.maximum(light, 1.0), (0, 0), 1.0), 0, 1)
+    fade = np.clip((SHADOW_REACH - dist) / 8, 0, 1)
+    return np.where(cloth, 1 - (1 - shade) * fade, 1.0)
 
 
 def main() -> None:
@@ -346,6 +409,11 @@ def main() -> None:
     cloth |= props & below
     # and the cloth stops at its back edge: past it is wall, keyed as wall
     cloth &= below
+    # and has no specks missing where a prop's outline and the felt round it don't quite meet (the
+    # shoe's back corner, in its own deep shadow, is neither felt nor in its outline)
+    holes = fill_holes(cloth) & ~cloth
+    n_lab, lab, stats, _ = cv2.connectedComponentsWithStats(holes.astype(np.uint8), 8)
+    cloth |= np.isin(lab, 1 + np.flatnonzero(stats[1:, cv2.CC_STAT_AREA] < CLOTH_SPECK))
     # never where she meets the table: her resting arms are in the median there, and would be
     # erased as clutter (a line through her where the table's edge shows)
     leaning = cv2.dilate(body.astype(np.uint8), np.ones((41, 25), np.uint8)).astype(bool)
@@ -394,6 +462,13 @@ def main() -> None:
     seen_wall = ~cv2.dilate((near_her | props).astype(np.uint8), np.ones((15, 15), np.uint8)).astype(bool)
     hole = hole.astype(bool) & ~seen_wall
     wall = np.where(hole[..., None], cv2.GaussianBlur(wall, (0, 0), 6), median)
+    # but by the props, clear of her, the wall and the rail along the cloth's back edge as they are
+    # right beside them, filled in from just round them: the fill from further off is lighter than
+    # the wall there, and runs it down over the rail (which then reads as part of the prop)
+    by_props = cv2.dilate(props.astype(np.uint8), np.ones((15, 15), np.uint8)).astype(bool)
+    by_props &= ~cv2.dilate(near_her.astype(np.uint8), np.ones((15, 15), np.uint8)).astype(bool)
+    beside = cv2.inpaint(median, props.astype(np.uint8) * 255, 3, cv2.INPAINT_TELEA)
+    wall = np.where(by_props[..., None], beside, wall)
     ref = np.where(cloth[..., None], ref, wall)
 
     out = root / "scene"
@@ -405,9 +480,11 @@ def main() -> None:
     reach_over = reach | (cv2.dilate(reach.astype(np.uint8), np.ones((9, 1), np.uint8)).astype(bool) & ~below)
     masks = np.round(np.dstack([reach_over, cloth, r]).astype(np.float32) * 255).astype(np.uint8)  # BGR
     cv2.imwrite(str(out / "masks.png"), masks)
-    crisp = np.round(prop_mattes(median, ref, props) * 255).astype(np.uint8)
+    crisp = prop_mattes(median, ref, props)
+    shade = prop_shadows(bare, crisp, cloth, seen & ~clutter)
     erase = np.where(open_felt, 255, np.where(clutter, 128, 0)).astype(np.uint8)
-    cv2.imwrite(str(out / "clutter.png"), np.dstack([crisp, props.astype(np.uint8) * 255, erase]))
+    cv2.imwrite(str(out / "clutter.png"), np.dstack([np.round(crisp * 255).astype(np.uint8), props.astype(np.uint8) * 255, erase,
+                                                    np.round(shade * 255).astype(np.uint8)]))
 
     cards = [np.array(m["dealer"]["up"]), np.array(m["dealer"]["hole"])]
     for seat in m["seats"]:

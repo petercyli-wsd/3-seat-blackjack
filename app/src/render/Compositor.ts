@@ -23,12 +23,16 @@ export interface PlateDraw {
   mode: "whole" | "extras" | "match" | "dealing";
   ref?: { tex: WebGLTexture; matte: WebGLTexture; rect: [number, number, number, number] };
   dealing?: Pt[] | null;
+  /** dealing: the take's own cards from the third on lying in the seat, kept as filmed like `dealing`. */
+  kept?: Quad[];
   alpha: number;
 }
 
 const PLATE_MODE = { whole: 0, extras: 1, match: 2, dealing: 3 } as const;
 /** Corners a dealt card's outline can have (the shader's uNew). */
 const NEW_MAX = 16;
+/** Cards from the third on the shader keeps as filmed at the seat being dealt to (its uKept). */
+const KEPT_MAX = 4;
 /** Cards drawn in a frame whose outlines the stage pass spares from erasing clutter (its uCards). */
 const STAGE_CARDS = 32;
 
@@ -237,9 +241,6 @@ export class Compositor {
     this.sceneRef = this.imageTexture(ref);
     this.sceneMasks = this.imageTexture(masks);
     this.sceneClutter = this.imageTexture(clutter);
-    // mipmapped: blurred, the props' outlines are their contact shadows
-    gl.generateMipmap(gl.TEXTURE_2D);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
     this.backLine = backLine;
     this.woodTex = this.imageTexture(wood);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
@@ -336,6 +337,11 @@ export class Compositor {
     outline.set(dealing.flat());
     gl.uniform2fv(u["uNew[0]"], outline);
     gl.uniform1i(u.uNewN, dealing.length);
+    const kept = f.plates.find((p) => p?.kept?.length)?.kept?.slice(0, KEPT_MAX) ?? [];
+    const corners = new Float32Array(KEPT_MAX * 8);
+    corners.set(kept.flat(2));
+    gl.uniform2fv(u["uKept[0]"], corners);
+    gl.uniform1i(u.uKeptN, kept.length);
     gl.uniform2f(u.uSize, w, h);
     gl.uniform1i(u.uShowMasks, f.showMasks ? 1 : 0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
