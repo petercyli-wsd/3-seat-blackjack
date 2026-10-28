@@ -710,3 +710,16 @@ kbd {
 @media (prefers-reduced-motion: reduce) {
   .stage-overlay:has(> .ending-fade.is-clearing) :is(.seat-result, .seat-pill-total, .dealer-marker) { opacity: 0; }
 }
+
+/* ---------- ending: collect (ending/collect.ts, ending/CollectOverlay.tsx) ----------
+ * The cards are gathered and slid into the discard holder in the composite; .ending-collect is
+ * there while it clears. The hands turn over from about 0.3 s (their totals go as they do, with
+ * the cards the HUD counts) and the piles leave from about 0.6 s: the results step back between. */
+.ending-collect { display: none; }
+.stage-overlay:has(> .ending-collect) :is(.seat-result, .dealer-marker) { animation: ending-collect-out 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.35s both; }
+@keyframes ending-collect-out { to { opacity: 0; transform: translate(0, 4px); filter: blur(2px); } }
+.stage-overlay:has(> .ending-collect) .dealer-marker { animation-name: ending-collect-out-centred; }
+@keyframes ending-collect-out-centred { to { opacity: 0; transform: translate(-50%, calc(-50% + 4px)); filter: blur(2px); } }
+@media (prefers-reduced-motion: reduce) {
+  .stage-overlay:has(> .ending-collect) :is(.seat-result, .dealer-marker) { opacity: 0; }
+}

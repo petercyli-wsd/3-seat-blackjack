@@ -1,9 +1,11 @@
 import type { Card } from "../engine/cards";
+import type { PlayingState } from "../media/ClipPlayer";
 import type { Manifest, SeatId } from "../media/manifest";
 import type { PlateSet } from "../media/plates";
 import type { ClipLoader } from "../media/preload";
 import type { Compositor } from "../render/Compositor";
 import type { PlateTextures, SceneResult } from "../render/scene";
+import type { TableEraser } from "./erasePass";
 
 /**
  * How a round ends. "discard" is the filmed one: she sweeps the cards up (the take's own discard
@@ -52,6 +54,10 @@ export interface EndingContext {
   compositor: Compositor;
   files: ClipLoader;
   host: HTMLElement;
+  /** The table eraser (eraser.ts, erasePass.ts): the bare plate, the seat masks and its pass. */
+  eraser: TableEraser;
+  /** The clip and frame on screen, as the scene is computed from (the deck a crossfade is still mostly on). */
+  footage: () => PlayingState | null;
 }
 
 /** A style's part in the composite: given the scene as the footage and game show it, what to draw. */

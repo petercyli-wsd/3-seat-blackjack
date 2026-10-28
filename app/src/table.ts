@@ -6,8 +6,10 @@ import { RoundPlates, grabPlates, maskRects } from "./media/plates";
 import { ClipLoader, loadImage } from "./media/preload";
 import { Compositor } from "./render/Compositor";
 import { buildFaceAtlas } from "./render/faceAtlas";
-import { type PlateTextures, Scene } from "./render/scene";
+import { type PlateTextures, Scene, dealerExtraQuad } from "./render/scene";
 import { applyEnding } from "./ending";
+import { TableEraser } from "./ending/erasePass";
+import { bareRect, grabBarePlate } from "./media/barePlate";
 import { ENDING_IDS, type Ending, type EndingContext } from "./ending/types";
 import {
   DEALER_CROP, DEALER_OUT, FELTS, ROOM_BEHIND, type TableArt, backLine, lightOf, loadMattes, loadSceneInfo, loadSets, loadSkirtWood,
@@ -128,7 +130,14 @@ export async function bootTable(canvas: HTMLCanvasElement, host: HTMLElement, st
   const scene = new Scene(m, plates, plateTex, new RoundPlates(m, files, rects, host, plates, (src) => compositor.imageTexture(src)));
   const player = new ClipPlayer(m, files, host);
   const director = new Director(m, player, store, bridges);
-  const endingCtx: EndingContext = { m, plates, plateTex, compositor, files, host };
+  // the no-discard eraser: its bare table is grabbed in the background, long done before a round ends
+  const eraser = new TableEraser(compositor.gl, m, mask, rects);
+  const extras = Array.from({ length: 6 }, (_, i) => dealerExtraQuad(m, i));
+  grabBarePlate(m, files, bareRect(m, rects, extras), host).then((p) => eraser.setBare(p), (e) => console.warn("bare plate:", e));
+  const endingCtx: EndingContext = {
+    m, plates, plateTex, compositor, files, host, eraser,
+    footage: () => player.state(player.fadingFrom && player.fadeT < 0.5 ? player.fadingFrom : player.active),
+  };
 
   let raf = 0;
   let lastDebug = 0;

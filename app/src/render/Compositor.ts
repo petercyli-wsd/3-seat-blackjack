@@ -53,6 +53,28 @@ export interface CardDraw {
   alpha: number;
   /** footage: face laid on a physical card; graphic: a rendered card with no physical counterpart. */
   mode: "footage" | "graphic";
+  /**
+   * Not a face: a pass run over the frame at this point in the card order (the no-discard eraser,
+   * ending/erasePass.ts). The cards before it are under it, the cards after it over it. Give it
+   * alpha 0, so the stage pass doesn't take its quad for a card's.
+   */
+  pass?: (env: CardPassEnv) => void;
+}
+
+/** What a pass in the card order (CardDraw.pass) draws with. */
+export interface CardPassEnv {
+  gl: WebGL2RenderingContext;
+  /** The composite so far, to read (texel = gl_FragCoord); the pass copies what it changes back into it. */
+  comp: WebGLTexture;
+  /** Bound, at the frame's size: where the pass draws. */
+  target: WebGLFramebuffer;
+  /** The footage as pass 1 read it (her, the table and the real cards; no plates, no faces). */
+  vidA: WebGLTexture;
+  vidB: WebGLTexture;
+  packA: boolean;
+  packB: boolean;
+  mix: number;
+  size: [number, number];
 }
 
 /** What the canvas shows of the composite: a crop of it, at an output size, and the studio set
@@ -128,6 +150,8 @@ export class Compositor {
   readonly h: number;
   /** Draw the set alone, without her: the input the pipeline's set generation restyles. */
   setOnly = false;
+  /** This frame's, for a pass in the card order (CardDraw.pass). */
+  private passEnv: CardPassEnv | null = null;
 
   constructor(canvas: HTMLCanvasElement, w: number, h: number, maskImg: TexImageSource, atlasImg: TexImageSource) {
     this.w = w;
@@ -283,6 +307,7 @@ export class Compositor {
     gl.uniform1i(u.uPackA, packA ? 1 : 0);
     gl.uniform1i(u.uPackB, packB ? 1 : 0);
     gl.uniform1f(u.uMix, f.b ? f.mix : 0);
+    this.passEnv = { gl, comp: this.fboTex, target: this.scr, vidA: this.vidA, vidB: mixing ? this.vidB : this.vidA, packA, packB, mix: f.b ? f.mix : 0, size: [w, h] };
     this.bind(2, this.mask, u.uMask);
     const uv = new Float32Array(27);
     const refUV = new Float32Array(27);
@@ -377,6 +402,13 @@ export class Compositor {
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.quadBuf);
     for (const c of cards) {
+      if (c.pass && this.passEnv) {
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.scr);
+        c.pass(this.passEnv);
+        gl.bindVertexArray(this.vao);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.quadBuf);
+        continue;
+      }
       if (c.alpha <= 0) continue;
       const invH = toColumnMajor(invert3(squareToQuad(c.quad)));
       gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(c.quad.flat()));
