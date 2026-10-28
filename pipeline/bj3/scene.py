@@ -19,6 +19,7 @@ Reads every clip in the manifest (a sample of frames from each) and writes to ga
                  G: the shoe and the discard holder, and a few pixels round them
                  B: the shoe and the discard holder, crisp (anti-aliased, a little inside their
                     soft edges in the footage): kept as filmed, whatever is around them
+                 A: their shadows on the felt as filmed (1 unshaded), which the new felt takes
   scene.json     the cloth's corners in the frame and the table plane they span, in cm
 
 The app keys her out against reference.png (wall above, felt below) inside those masks, so her
@@ -50,6 +51,8 @@ PROP_CLEAR = 10
 # and grown this much (px) there: a marker's bright edge would otherwise spread past the mask as the
 # app enlarges the footage (it is felt round it, which is replaced anyway)
 OPEN_GROW = 3
+# holes in the cloth smaller than this (px) are filled
+CLOTH_SPECK = 400
 CARD_CM = (6.35, 8.89)
 
 
@@ -192,6 +195,29 @@ def prop_mattes(median: np.ndarray, ref: np.ndarray, near: np.ndarray) -> np.nda
         small = cv2.resize(fine.astype(np.float32), (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
         out[y0:y1, x0:x1] = np.maximum(out[y0:y1, x0:x1], small)
     return out
+
+
+# the props' shadows are measured this far (px) out from their outlines, against the felt's own light
+# there: the felt past that, blurred this wide (px) into the gap
+SHADOW_REACH = 24
+SHADOW_LIGHT = 16
+
+
+def prop_shadows(bare: np.ndarray, crisp: np.ndarray, cloth: np.ndarray, clear: np.ndarray) -> np.ndarray:
+    """The shoe's and the discard holder's shadows on the felt, as filmed: 0-1, 1 where unshaded.
+
+    The bare felt (which has their shadows in it: shaded felt is still felt) over the light it would
+    have without them, fitted from the felt further off that nothing lies on (`clear`). Faded out
+    over the last 8 px of SHADOW_REACH, so it stops without a seam.
+    """
+    lum = cv2.cvtColor(bare, cv2.COLOR_BGR2GRAY).astype(np.float32)
+    dist = cv2.distanceTransform((crisp < 0.5).astype(np.uint8), cv2.DIST_L2, 5)
+    w = (cloth & clear & (dist > SHADOW_REACH)).astype(np.float32)
+    light = cv2.GaussianBlur(lum * w, (0, 0), SHADOW_LIGHT) / np.maximum(cv2.GaussianBlur(w, (0, 0), SHADOW_LIGHT), 1e-4)
+    # the felt's weave is no shadow: smoothed a little before it is cut at 1
+    shade = np.clip(cv2.GaussianBlur(lum / np.maximum(light, 1.0), (0, 0), 1.0), 0, 1)
+    fade = np.clip((SHADOW_REACH - dist) / 8, 0, 1)
+    return np.where(cloth, 1 - (1 - shade) * fade, 1.0)
 
 
 def main() -> None:
@@ -346,6 +372,11 @@ def main() -> None:
     cloth |= props & below
     # and the cloth stops at its back edge: past it is wall, keyed as wall
     cloth &= below
+    # and has no specks missing where a prop's outline and the felt round it don't quite meet (the
+    # shoe's back corner, in its own deep shadow, is neither felt nor in its outline)
+    holes = fill_holes(cloth) & ~cloth
+    n_lab, lab, stats, _ = cv2.connectedComponentsWithStats(holes.astype(np.uint8), 8)
+    cloth |= np.isin(lab, 1 + np.flatnonzero(stats[1:, cv2.CC_STAT_AREA] < CLOTH_SPECK))
     # never where she meets the table: her resting arms are in the median there, and would be
     # erased as clutter (a line through her where the table's edge shows)
     leaning = cv2.dilate(body.astype(np.uint8), np.ones((41, 25), np.uint8)).astype(bool)
@@ -405,9 +436,11 @@ def main() -> None:
     reach_over = reach | (cv2.dilate(reach.astype(np.uint8), np.ones((9, 1), np.uint8)).astype(bool) & ~below)
     masks = np.round(np.dstack([reach_over, cloth, r]).astype(np.float32) * 255).astype(np.uint8)  # BGR
     cv2.imwrite(str(out / "masks.png"), masks)
-    crisp = np.round(prop_mattes(median, ref, props) * 255).astype(np.uint8)
+    crisp = prop_mattes(median, ref, props)
+    shade = prop_shadows(bare, crisp, cloth, seen & ~clutter)
     erase = np.where(open_felt, 255, np.where(clutter, 128, 0)).astype(np.uint8)
-    cv2.imwrite(str(out / "clutter.png"), np.dstack([crisp, props.astype(np.uint8) * 255, erase]))
+    cv2.imwrite(str(out / "clutter.png"), np.dstack([np.round(crisp * 255).astype(np.uint8), props.astype(np.uint8) * 255, erase,
+                                                    np.round(shade * 255).astype(np.uint8)]))
 
     cards = [np.array(m["dealer"]["up"]), np.array(m["dealer"]["hole"])]
     for seat in m["seats"]:

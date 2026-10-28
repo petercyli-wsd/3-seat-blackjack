@@ -264,6 +264,8 @@ compositor's last pass (`STAGE_FS`).
     and discard holder.
   - The shoe and discard holder never move, so each also gets a crisp outline from the median
     frame: anti-aliased, a little inside the footage's own soft edge (`clutter.png`, blue).
+  - Their shadows on the felt are measured too (`clutter.png`, alpha). That is the bare felt round
+    them over its light without them, fitted from the felt further off.
 - **Keying, per pixel:** coverage `a` is computed, and her colour is unmixed from the reference,
   `F = (C − (1 − a)·ref) / a`, before being laid over the set.
   - Above the cloth, `a` is her matte, plus cards she carries (far brighter than the wall, and
@@ -272,7 +274,12 @@ compositor's last pass (`STAGE_FS`).
   - Without a matte, `a` is how unlike the wall she is.
   - Inside the props' crisp outlines the footage is kept as it is. Just outside them it keeps
     only her and a card coming out of the shoe (the rest is the props' own soft edge, which
-    would show as a blur), and the new felt gets a soft contact shadow round their feet.
+    would show as a blur).
+  - The new felt takes the props' filmed shadows. The light is behind them, so their shadows
+    fall toward the camera.
+  - Their glossy black mirrors the felt. The filmed felt's share, measured in linear light by
+    the blue it adds, is swapped for the same amount of light in the new felt's hue: navy-black
+    on the blue table, red-black on crimson.
   - On the cloth, `a` is the share of the bare felt's blue that is missing (cards, her hands,
     her shadows), plus her matte.
   - Her shadow, which is the felt darkened, becomes the new felt darkened alike.

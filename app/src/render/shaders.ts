@@ -356,7 +356,8 @@ void main() {
  *   and the discard holder wherever it looks as it always does. Past her reach the cloth is always
  *   replaced.
  * - The shoe and the discard holder never move: each has a crisp outline (the scene pass's), inside
- *   which the footage is kept as it is.
+ *   which the footage is kept as it is, but for the felt their glossy black mirrors, which becomes
+ *   the new felt's colour. The new felt takes their shadows as filmed (the scene pass's too).
  * - With the table kept as filmed, everything below the cloth's back edge stays.
  * The set's felt is generated blue; another table's felt is recoloured by its own blue, light kept.
  * The footage, enlarged about 1.5x, is sharpened back a little, tinted toward the set's light
@@ -401,8 +402,6 @@ const int SKIRT_TAPS = 12;
 // The footage is enlarged about 1.5x into the dealer framing: filtered Catmull-Rom (sharper than
 // bilinear) and sharpened back a little.
 const float SHARPEN = 0.3;
-// How dark the shoe and discard holder's contact shadow on the new felt is.
-const float PROP_SHADOW = 0.45;
 // Her matte's edge is drawn over the middle of its ramp (her colour is still unmixed by all of it),
 // once smoothed over a pixel or so: tightened as it comes, its compression blocks would show as steps.
 const vec2 MATTE_EDGE = vec2(0.15, 0.85);
@@ -462,6 +461,9 @@ float hash(vec2 p) {
 }
 float lum(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
 float blueness(vec3 c) { return c.b - max(c.r, c.g); }
+// light adds up linearly (a reflection on the props), not in the video's gamma
+vec3 toLinear(vec3 c) { return pow(c, vec3(2.2)); }
+vec3 fromLinear(vec3 c) { return pow(c, vec3(1.0 / 2.2)); }
 // How unlike the wall behind her a pixel is, 0 to 1, linear enough to read as coverage at edges.
 float aboveKey(vec3 c, vec3 r) {
   float ratio = lum(c) / (lum(r) + 1e-3);
@@ -559,7 +561,7 @@ void main() {
   vec2 st = s / uSize;
   vec3 ref = texture(uRef, st).rgb;
   vec3 mk = texture(uMasks, st).rgb;
-  vec3 cp = texture(uClutter, st).rgb;
+  vec4 cp = texture(uClutter, st);
   float env = clamp(mk.r / 0.6, 0.0, 1.0);
   float core = smoothstep(0.75, 0.95, mk.r);
   float cloth = mk.g;
@@ -626,17 +628,21 @@ void main() {
     vec3 felt = uFeltColor * lum(set) / max(lum(uFeltBase), 0.02);
     set = mix(set, clamp(felt, 0.0, 1.0), f);
   }
-  // the props stand on the new felt: a soft contact shadow round their feet (their outline, blurred
-  // over a few pixels and nudged a little away from the camera, as the key light in front throws it)
-  if (uSwapTable == 1) set *= 1.0 - PROP_SHADOW * textureLod(uClutter, st + vec2(0.0, 1.5) / uSize, 2.0).b * tableZone * (1.0 - props);
+  // the props stand on the new felt and shade it as they shade the filmed one (the light is behind
+  // them: their shadows fall toward the camera)
+  if (uSwapTable == 1) set *= mix(1.0, cp.a, tableZone);
   // the set's light wraps round her edges: the room behind her, blurred, over the rim of her matte
   float rim = uHasMatte == 1 ? pow(clamp(1.0 - ring.x, 0.0, 1.0), 2.0) * (1.0 - tableZone) : 0.0;
   vec3 glow = textureLod(uSet, vUV, 4.5).rgb;
   fg = 1.0 - (1.0 - fg) * (1.0 - WRAP * rim * glow);
   vec3 o = mix(set, fg, aOut);
-  // the props' glossy black mirrors the filmed felt's blue, worst along their edges: taken out
-  vec3 pc = vec3(cs.rg, mix(cs.b, min(cs.b, max(cs.r, cs.g) + 0.02), 0.75));
-  o = mix(o, grade(pc), props);
+  // the props' glossy black mirrors the felt, most along their edges: the filmed felt's share (the
+  // blue it adds, against that felt's own: the reference, filled in under them) is taken out, and
+  // as much of the new felt's light put back (only its hue counts: a recoloured felt's is its colour)
+  vec3 pl = toLinear(cs), was = toLinear(ref), now = toLinear(uRecolor == 1 ? uFeltColor : textureLod(uSet, vUV, 2.5).rgb);
+  float mirror = clamp(blueness(pl) / max(blueness(was), 0.02), 0.0, 1.0) * tableZone * float(uSwapTable);
+  vec3 pc = toLinear(grade(fromLinear(max(pl - mirror * was, 0.0)))) + mirror * lum(was) / max(lum(now), 1e-3) * now;
+  o = mix(o, fromLinear(pc), props);
   // one grain over the set and the footage alike (not on the set alone: the sets pass's input)
   if (uSetOnly == 0) o += (hash(gl_FragCoord.xy + uSeed) - 0.5) * GRAIN;
   outColor = vec4(o, 1.0);

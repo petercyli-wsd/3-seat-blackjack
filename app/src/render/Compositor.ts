@@ -217,9 +217,6 @@ export class Compositor {
     this.sceneRef = this.imageTexture(ref);
     this.sceneMasks = this.imageTexture(masks);
     this.sceneClutter = this.imageTexture(clutter);
-    // mipmapped: blurred, the props' outlines are their contact shadows
-    gl.generateMipmap(gl.TEXTURE_2D);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
     this.backLine = backLine;
     this.woodTex = this.imageTexture(wood);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
