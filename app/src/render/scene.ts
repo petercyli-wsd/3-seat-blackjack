@@ -67,13 +67,13 @@ export class Scene {
    * seat, holding `shown` cards) or the hand has a card and the frame shows table there, darkened
    * by her shadow; her hand and the card she is `dealing` stay as filmed. At the seat being `dealt`
    * to, the take holds the hand's cards from the third on just where the round has them, so only
-   * its first two are laid in.
+   * its first two are laid in, and the take's others (`kept`) stay as filmed to their own edges.
    */
-  private matched(h: Held, seat: SeatId, shown: number, dealing: Pt[] | null, dealt = false): PlateDraw {
+  private matched(h: Held, seat: SeatId, shown: number, dealing: Pt[] | null, dealt = false, kept: Quad[] = []): PlateDraw {
     const ref = this.plates[seat][shown];
     if (!ref) return plateDraw(h, 1, "whole");
     const tex = this.plateTex[seat][shown];
-    return { ...plateDraw(h, 1, dealt ? "dealing" : "match"), ref: { tex: tex.image, matte: tex.matte, rect: ref.rect }, dealing };
+    return { ...plateDraw(h, 1, dealt ? "dealing" : "match"), ref: { tex: tex.image, matte: tex.matte, rect: ref.rect }, dealing, kept };
   }
 
   /**
@@ -138,7 +138,11 @@ export class Scene {
           continue;
         }
         const outline = settling && land ? (land.outlines[f - land.from] ?? null) : null;
-        plates.push(this.matched(h, seat, settling ? dealt.index - 1 : footage, outline, true));
+        // the take's own cards from the third on, lying here (the new one once it has settled)
+        const kept = cardsAt(clip, seat, f)
+          .filter((c) => c.index >= 3 && !(settling && c === dealt))
+          .map((c) => faceQuadAt(c, f) ?? c.quad);
+        plates.push(this.matched(h, seat, settling ? dealt.index - 1 : footage, outline, true, kept));
         plateUse[seat] = h.plate.n;
         h.plate.cards.slice(0, 2).forEach((q, i) => cards.push({ quad: moveQuad(h.place, q), cell: faceIndex(hand[i]), alpha: 1, mode: "footage" }));
         footageFaces(clip, seat, hand, f, cards, 3);
