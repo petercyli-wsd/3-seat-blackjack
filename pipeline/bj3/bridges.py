@@ -287,8 +287,26 @@ TOOL_DIR = "bridges/tool"
 FLOW_DIR = "bridges/flow"
 
 
-def plan_rows() -> list[dict]:
-    return json.load(open(BRIDGE_DIR / "plan.json"))["rows"]
+# Extra rows planned on their own, outside the main plan (see bridges_nodiscard.py): the no-discard
+# ending's hold -> idle bridges. Each row says which set it belongs to ("set") and names its own
+# stubs ("exit_stub", "entry_stub", under bridges/stubs/). Ingest, verdict, review and resolve take
+# them with the main rows; `plan`, `csvs`, `local` and bridges_todo.csv stay with the main plan.
+EXTRA_PLANS = ("plan_nodiscard.json",)
+
+
+def plan_rows(extra: bool = True) -> list[dict]:
+    rows = json.load(open(BRIDGE_DIR / "plan.json"))["rows"]
+    for name in EXTRA_PLANS if extra else ():
+        if (BRIDGE_DIR / name).exists():
+            rows += json.loads((BRIDGE_DIR / name).read_text(encoding="utf-8"))["rows"]
+    return rows
+
+
+def stub_paths(r: dict) -> tuple[Path, Path]:
+    """A row's two 8-frame stubs: the main plan's by convention, an extra row's as it names them."""
+    stubs = BRIDGE_DIR / "stubs"
+    return (stubs / r.get("exit_stub", f"exit/{r['exit']}.mp4"),
+            stubs / r.get("entry_stub", f"entry/{r['dst']}.mp4"))
 
 
 def _load(path: Path, empty):
@@ -312,8 +330,9 @@ def flow_frames(r: dict) -> int:
 
 def local(video: str, work: str = "work", force: str = "") -> None:
     """Optical-flow stand-ins for every planned row that lacks one (all of them with `force`),
-    so every cut has a bridge before (and whenever) a generated one is missing or rejected."""
-    rows = plan_rows()
+    so every cut has a bridge before (and whenever) a generated one is missing or rejected.
+    Main plan only: the extra plans clean their frames their own way (bridges_nodiscard local)."""
+    rows = plan_rows(extra=False)
     fr = Frames(video)
     segs = {s["name"]: s for s in json.load(open(Path(work) / "edl.json"))["segments"]}
     clean = SeatCleaner(fr, segs)
@@ -393,7 +412,6 @@ def ingest(*paths: str) -> None:
     outputs = _outputs(list(paths))
     reports = _reports(list(paths))
     state = _load(STATE, {})
-    stubs = BRIDGE_DIR / "stubs"
     (ASSETS / TOOL_DIR).mkdir(parents=True, exist_ok=True)
     GENERATED.mkdir(parents=True, exist_ok=True)
     done, bad, unknown = [], [], []
@@ -403,8 +421,9 @@ def ingest(*paths: str) -> None:
             unknown.append(name)
             continue
         try:
-            A = read_all(stubs / "exit" / f"{r['exit']}.mp4")
-            B = read_all(stubs / "entry" / f"{r['dst']}.mp4")
+            exit_stub, entry_stub = stub_paths(r)
+            A = read_all(exit_stub)
+            B = read_all(entry_stub)
             bridge, ca, cb = cut_out(read_all(src), A, B)
             if not bridge or ca > 8 or cb > 8:
                 bad.append(f"{name}: stubs not found (exit {ca:.1f}, entry {cb:.1f})")
@@ -501,11 +520,16 @@ def resolve() -> None:
         print(f"  {len(dropped)} rejected exit(s) left out; their transitions use another exit's generated bridge")
     missing = [e["file"] for e in out if e["file"] and not (ASSETS / e["file"]).exists()]
     if missing:
-        raise SystemExit(f"{len(missing)} bridge files missing, e.g. {missing[0]} (run `bridges local` first)")
+        raise SystemExit(f"{len(missing)} bridge files missing, e.g. {missing[0]} "
+                         "(run `bridges local`, or `bridges_nodiscard local` for those, first)")
     _save(registry_path(), {"fps": FPS, "bridges": out})
-    # what is still to generate (never generated, rejected, or stale), ready to run as one job
+    # what is still to generate (never generated, rejected, or stale), ready to run as one job;
+    # the main plan's rows only (an extra set's rows are in its own CSV, e.g. bridges_nodiscard.csv)
     todo = {e["name"] for e in out if e["source"] != "tool" and e["file"]} | {e["name"] for e in dropped}
-    write_todo([r for r in rows if r["output"] in todo])
+    write_todo([r for r in rows if r["output"] in todo and "set" not in r])
+    extra = [e["name"] for e in out if e["name"] in todo and e["name"] in {r["output"] for r in rows if "set" in r}]
+    if extra:
+        print(f"  {len(extra)} row(s) of the extra plans still play a stand-in (see their own CSV)")
     print(f"bridges.json: {counts['tool']} generated, {counts['flow']} stand-ins, {counts['cut']} matched cuts "
           f"({counts['rejected']} rejected, {len(dropped)} of them left out)")
 

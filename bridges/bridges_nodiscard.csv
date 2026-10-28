@@ -1,0 +1,15 @@
+first_half,second_half,output,method,duration
+nodiscard/exit/001_hold@0007.mp4,nodiscard/entry/001_idle@0068.mp4,001_hold@0007__001_idle.mp4,film,0.33
+nodiscard/exit/001_hold@0019.mp4,nodiscard/entry/001_idle@0068.mp4,001_hold@0019__001_idle.mp4,film,0.33
+nodiscard/exit/010_hold@0000.mp4,nodiscard/entry/001_idle@0068_for_010_hold.mp4,010_hold@0000__001_idle.mp4,film,0.33
+nodiscard/exit/010_hold@0033.mp4,nodiscard/entry/001_idle@0068_for_010_hold.mp4,010_hold@0033__001_idle.mp4,film,0.33
+nodiscard/exit/011_hold@0012.mp4,nodiscard/entry/101_idle@0034_for_011_hold.mp4,011_hold@0012__101_idle.mp4,film,0.33
+nodiscard/exit/011_hold@0035.mp4,nodiscard/entry/101_idle@0034_for_011_hold.mp4,011_hold@0035__101_idle.mp4,film,0.33
+nodiscard/exit/100_hold@0020.mp4,nodiscard/entry/100_idle@0023.mp4,100_hold@0020__100_idle.mp4,film,0.33
+nodiscard/exit/100_hold@0039.mp4,nodiscard/entry/100_idle@0023.mp4,100_hold@0039__100_idle.mp4,film,0.33
+nodiscard/exit/101_hold@0009.mp4,nodiscard/entry/101_idle@0034.mp4,101_hold@0009__101_idle.mp4,film,0.33
+nodiscard/exit/101_hold@0042.mp4,nodiscard/entry/101_idle@0034.mp4,101_hold@0042__101_idle.mp4,film,0.67
+nodiscard/exit/110_hold@0000.mp4,nodiscard/entry/110_idle@0099.mp4,110_hold@0000__110_idle.mp4,film,0.67
+nodiscard/exit/110_hold@0017.mp4,nodiscard/entry/110_idle@0099.mp4,110_hold@0017__110_idle.mp4,film,0.33
+nodiscard/exit/111_hold@0001.mp4,nodiscard/entry/111_idle@0095.mp4,111_hold@0001__111_idle.mp4,film,0.67
+nodiscard/exit/111_hold@0019.mp4,nodiscard/entry/111_idle@0095.mp4,111_hold@0019__111_idle.mp4,film,0.67

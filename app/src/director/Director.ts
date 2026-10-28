@@ -499,11 +499,21 @@ export class Director {
     this.clearing = { ...this.clearing, done: true };
     this.emptyTable();
     this.store.set({ message: "" });
-    await this.cutTo(clipName.idle(this.mask), { loop: true });
+    await this.cutTo(this.bettingAfterHold(), { loop: true });
     this.guard(epoch);
     this.clearing = null;
     this.store.set({ clearing: null });
     this.reopenBetting();
+  }
+
+  /**
+   * The betting loop to go back to from this take's hold: the one its bridges lead to (a take whose
+   * own idle starts mid-reach is bridged to a calmer take's idle instead), else its own idle.
+   */
+  private bettingAfterHold() {
+    const own = clipName.idle(this.mask);
+    const to = (this.bridges.get(clipName.hold(this.mask)) ?? []).map((b) => b.to).filter((n) => this.m.clips[n]?.kind === "idle");
+    return to.includes(own) || !to.length ? own : to[0];
   }
 
   private emptyTable() {
