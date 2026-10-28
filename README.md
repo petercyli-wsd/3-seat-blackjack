@@ -264,6 +264,13 @@ compositor's last pass (`STAGE_FS`).
     and discard holder.
   - The shoe and discard holder never move, so each also gets a crisp outline from the median
     frame: anti-aliased, a little inside the footage's own soft edge (`clutter.png`, blue).
+  - The outline is their convex hull, which takes in their glossy sides and the cards in them.
+    Where a prop isn't convex (the discard holder's tray juts out past its side), the hull would
+    span a sliver of felt, rail and wall. It is cut back there, one pixel at a time from outside,
+    while each pixel looks like what lies just outside it.
+  - Beside the props, the reference's wall and the rail along the cloth's back edge are filled in
+    from right round them. Filled from further off, the wall is too light and has no rail, and
+    the rail would read as part of the prop.
   - Their shadows on the felt are measured too (`clutter.png`, alpha). That is the bare felt round
     them over its light without them, fitted from the felt further off.
 - **Keying, per pixel:** coverage `a` is computed, and her colour is unmixed from the reference,

@@ -157,6 +157,34 @@ def card_width_px(m: dict) -> float:
 PROP_SS = 8
 # and pulled in this far (source px), past the half-felt pixels of the footage's own soft edge
 PROP_CHOKE = 0.6
+# what the hull spans past a prop's outline is peeled off up to this deep (px), a pixel at a time
+# while it is within this much (0-255, any channel) of what is just outside it
+PEEL_STEPS = 6
+PEEL_LIKE = 14
+
+
+def behind_hull(c: np.ndarray, r: np.ndarray, share: np.ndarray, hull: np.ndarray) -> np.ndarray:
+    """The pixels of a prop's hull that are whatever is behind it, not the prop: peeled from outside
+    inward while each is less the prop than not and looks like a pixel just outside it (the nearest
+    alike of its eight: the rail along the cloth's back edge is a gradient across it). Never the
+    cards in it (far brighter than the set there, `r`): the discard holder's run past its hull."""
+    hull = hull.copy()
+    behind = np.zeros_like(hull)
+    card = c.mean(-1) > 1.15 * r.mean(-1)
+    steps = [(dy, dx) for dy in (-1, 0, 1) for dx in (-1, 0, 1) if dy or dx]
+    for _ in range(PEEL_STEPS):
+        # (the hull is well inside the box c is cut to: rolling never wraps it round)
+        nearest = np.full(hull.shape, np.inf, np.float32)
+        for dy, dx in steps:
+            out = np.roll(~hull, (dy, dx), (0, 1))
+            d = np.abs(c - np.roll(c, (dy, dx), (0, 1))).max(-1)
+            nearest = np.where(out, np.minimum(nearest, d), nearest)
+        like = hull & (share < 0.5) & ~card & (nearest < PEEL_LIKE)
+        if not like.any():
+            break
+        hull &= ~like
+        behind |= like
+    return behind
 
 
 def prop_mattes(median: np.ndarray, ref: np.ndarray, near: np.ndarray) -> np.ndarray:
@@ -165,7 +193,9 @@ def prop_mattes(median: np.ndarray, ref: np.ndarray, near: np.ndarray) -> np.nda
     Each stands still all take, so its outline is found once, in the median frame: where that frame
     is more like the prop (its darkest tenth) than like the set without it (`ref`), at sub-pixel
     accuracy (the share is interpolated 8x before it is cut at a half), and its convex hull taken
-    (a box seen from anywhere is convex; that also takes in its glossy sides, which mirror the felt).
+    (that takes in its glossy sides, which mirror the felt, and the cards in it). Where the outline
+    isn't convex after all (the discard holder's tray juts out past its side) the hull spans a
+    sliver of what is behind it: that is cut back to the outline.
     """
     H, W = median.shape[:2]
     out = np.zeros((H, W), np.float32)
@@ -189,9 +219,16 @@ def prop_mattes(median: np.ndarray, ref: np.ndarray, near: np.ndarray) -> np.nda
         hull = cv2.convexHull(max(cs, key=cv2.contourArea))
         fine = np.zeros_like(solid)
         cv2.fillConvexPoly(fine, hull, 1)
-        k = 2 * round(PROP_CHOKE * PROP_SS) + 1
-        fine = cv2.erode(fine, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k)))
         # the resize put pixel centres at (i + 0.5) * SS - 0.5: area-averaging back lands on them
+        hull_px = cv2.resize(fine.astype(np.float32), (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA) > 0.5
+        behind = behind_hull(c, r, share, hull_px)
+        behind = cv2.resize(behind.astype(np.float32), fine.shape[::-1], interpolation=cv2.INTER_LINEAR) > 0.5
+        k = 2 * round(PROP_CHOKE * PROP_SS) + 1
+        choke = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k))
+        # cut back to as far past the outline as the choke takes in, so it lands on the outline; and
+        # never nearer: the hull's sub-pixel overshoot along a straight edge stays, unstepped
+        fine[behind & (cv2.dilate(solid, choke) == 0)] = 0
+        fine = cv2.erode(fine, choke)
         small = cv2.resize(fine.astype(np.float32), (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
         out[y0:y1, x0:x1] = np.maximum(out[y0:y1, x0:x1], small)
     return out
@@ -425,6 +462,13 @@ def main() -> None:
     seen_wall = ~cv2.dilate((near_her | props).astype(np.uint8), np.ones((15, 15), np.uint8)).astype(bool)
     hole = hole.astype(bool) & ~seen_wall
     wall = np.where(hole[..., None], cv2.GaussianBlur(wall, (0, 0), 6), median)
+    # but by the props, clear of her, the wall and the rail along the cloth's back edge as they are
+    # right beside them, filled in from just round them: the fill from further off is lighter than
+    # the wall there, and runs it down over the rail (which then reads as part of the prop)
+    by_props = cv2.dilate(props.astype(np.uint8), np.ones((15, 15), np.uint8)).astype(bool)
+    by_props &= ~cv2.dilate(near_her.astype(np.uint8), np.ones((15, 15), np.uint8)).astype(bool)
+    beside = cv2.inpaint(median, props.astype(np.uint8) * 255, 3, cv2.INPAINT_TELEA)
+    wall = np.where(by_props[..., None], beside, wall)
     ref = np.where(cloth[..., None], ref, wall)
 
     out = root / "scene"
