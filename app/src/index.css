@@ -532,6 +532,9 @@ kbd {
 /* while it is up it says it all: the markers and the toast step back */
 .stage-overlay:has(> .ending-panel-root) :is(.seat-marker, .dealer-marker, .stage-toast) { transition: opacity 0.4s var(--ease); }
 .stage-overlay:has(> .ending-panel-root.is-up) :is(.seat-marker, .dealer-marker, .stage-toast) { opacity: 0; }
+/* the HUD's frosted backgrounds would blur at half opacity as it fades round the panel: plain
+   while it does (the same reason the panel has no backdrop-filter) */
+.stage-overlay:has(> .ending-panel-root:is(.is-up, .is-leaving, .is-after)) :is(.seat-marker *, .dealer-marker, .stage-toast) { backdrop-filter: none; }
 /* the handover: "Place your bets" and the seats come in as it goes, not under it */
 .stage-overlay:has(> .ending-panel-root:is(.is-leaving, .is-after)) .seat-marker { transition-delay: 0.22s; }
 /* (its own animation, held back: a new one here would replay it when the class goes) */
@@ -552,10 +555,12 @@ kbd {
   font-size: clamp(7px, 1.12cqw, 18px);
   padding: 0.95em 1.3em 0.85em;
   border-radius: 1em;
+  /* No backdrop-filter: the panel fades in and out, and a browser draws a backdrop blur at the
+     element's opacity, so mid-fade the table showed through it as a fuzzy ghost. Opaque enough
+     that the glass reads the same at rest. */
   background:
     radial-gradient(120% 70% at 50% 0%, rgba(212, 175, 55, 0.07), transparent 60%),
-    linear-gradient(180deg, rgba(24, 24, 24, 0.93), rgba(10, 10, 10, 0.95));
-  backdrop-filter: blur(18px) saturate(1.15);
+    linear-gradient(180deg, rgba(22, 22, 22, 0.96), rgba(10, 10, 10, 0.97));
   border: 1px solid rgba(212, 175, 55, 0.3);
   box-shadow: 0 1.8em 4.5em rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   display: flex; flex-direction: column; gap: 0.7em;
@@ -644,13 +649,16 @@ kbd {
 .ending-panel-net.is-down strong { color: var(--text-body); }
 .ending-panel-balance strong { font-weight: 700; font-size: 1.05em; font-variant-numeric: tabular-nums; color: var(--text-body); }
 
+/* The panel rises out of the table's front edge solid, revealed from its bottom up, and sinks back
+   the same way: never half transparent, where the table's cards and her hands would show through
+   it as a ghost. The clip ends well outside it, so its shadow isn't cut once it is up. */
 @keyframes ending-panel-in {
-  from { opacity: 0; transform: translate(-50%, 2.2em); }
-  to { opacity: 1; transform: translate(-50%, 0); }
+  from { clip-path: inset(100% -6em -6em -6em round 1em); transform: translate(-50%, 2.2em); }
+  to { clip-path: inset(-6em -6em -6em -6em round 1em); transform: translate(-50%, 0); }
 }
 @keyframes ending-panel-out {
-  from { opacity: 1; transform: translate(-50%, 0); }
-  to { opacity: 0; transform: translate(-50%, 1.4em); }
+  from { clip-path: inset(-6em -6em -6em -6em round 1em); transform: translate(-50%, 0); }
+  to { clip-path: inset(100% -6em -6em -6em round 1em); transform: translate(-50%, 1.4em); }
 }
 @keyframes ending-panel-item { from { opacity: 0; transform: translateY(0.6em); } }
 @keyframes ending-panel-fade { from { opacity: 0; } }
