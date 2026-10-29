@@ -36,7 +36,7 @@ export function TopBar({ store, director, onToggleDirector, directorOpen }: {
         <span className="topbar-eyebrow">Live Dealer</span>
         <h1>Blackjack <em>· Three Seat</em></h1>
       </div>
-      <div className="topbar-right">
+      <div className="topbar-switches">
         <div className="mode-switch ending-switch" role="radiogroup" aria-label="How a round ends (switching starts a new game)">
           {ENDING_IDS.map((e) => (
             <button
@@ -55,6 +55,8 @@ export function TopBar({ store, director, onToggleDirector, directorOpen }: {
             </button>
           ))}
         </div>
+      </div>
+      <div className="topbar-account">
         <div className="balance">
           <span className="balance-label">Balance</span>
           <span className="balance-value">{money(balance)}</span>
@@ -65,14 +67,14 @@ export function TopBar({ store, director, onToggleDirector, directorOpen }: {
             <path d="M3 12a9 9 0 1 0 3-6.7" />
             <path d="M3 4v5h5" />
           </svg>
-          <span>Reset</span>
+          <span className="icon-btn-label">Reset</span>
         </button>
         <button className={`icon-btn ${directorOpen ? "is-on" : ""}`} onClick={onToggleDirector} title="Director panel (footage, compositing, scenarios)">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
             <rect x="3" y="5" width="18" height="14" rx="2" />
             <path d="M3 9h18M8 5v4M16 5v4" />
           </svg>
-          <span>Director</span>
+          <span className="icon-btn-label">Director</span>
         </button>
       </div>
     </header>

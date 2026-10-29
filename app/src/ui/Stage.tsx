@@ -174,14 +174,16 @@ export function Stage({ store, canvasRef, hostRef }: {
         <canvas ref={canvasRef} className="stage-canvas" />
         <div ref={hostRef} className="stage-decks" aria-hidden />
         <div className="stage-overlay">
-          <div className="stage-live">
-            <span className="live-dot" /> LIVE
-            <span className="stage-live-sep" />
-            <span className="stage-live-table">Blackjack · 3 Seat</span>
-            {round > 0 && <span className="stage-live-round">Round {round}</span>}
-            <FootageStatus store={store} />
+          <div className="stage-top">
+            <div className="stage-live">
+              <span className="live-dot" /> LIVE
+              <span className="stage-live-sep" />
+              <span className="stage-live-table">Blackjack · 3 Seat</span>
+              {round > 0 && <span className="stage-live-round">Round {round}</span>}
+              <FootageStatus store={store} />
+            </div>
+            <SceneControls store={store} />
           </div>
-          <SceneControls store={store} />
           <DealerMarker store={store} />
           {(["seat1", "seat2", "seat3"] as SeatId[]).map((id) => (
             <SeatMarker key={id} store={store} id={id} />

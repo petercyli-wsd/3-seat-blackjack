@@ -59,28 +59,31 @@ kbd {
   height: 100%;
   display: grid;
   grid-template-rows: auto 1fr;
+  grid-template-columns: minmax(0, 1fr);
   background:
     radial-gradient(1200px 500px at 50% -10%, rgba(212, 175, 55, 0.07), transparent 60%),
     radial-gradient(900px 600px at 100% 100%, rgba(212, 175, 55, 0.04), transparent 60%),
     var(--base);
 }
 
-/* ---------- top bar ---------- */
+/* ---------- top bar ----------
+ * One row while it all fits. Narrower, the title gives way first (the stage's tag says it too),
+ * then the brand's tag and the buttons' labels; below that the switches take a row of their own. */
 .topbar {
   position: relative;
   z-index: 10;
-  height: 64px;
+  min-height: 64px;
   display: flex;
   align-items: center;
   gap: 24px;
-  padding: 0 clamp(16px, 2vw, 32px);
+  padding: 0 clamp(12px, 2vw, 32px);
   background: var(--nav);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-subtle);
 }
-.brand { display: flex; align-items: center; gap: 10px; color: white; text-decoration: none; }
+.brand { display: flex; align-items: center; gap: 10px; color: white; text-decoration: none; flex-shrink: 0; }
 .octane-mark { color: var(--gold); filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.35)); }
-.brand-name { font-weight: 650; font-size: 17px; letter-spacing: -0.4px; }
+.brand-name { font-weight: 650; font-size: 17px; letter-spacing: -0.4px; white-space: nowrap; }
 .brand-studios { font-weight: 400; color: var(--text-muted); margin-left: 2px; }
 .brand-tag {
   font-size: 10px;
@@ -92,15 +95,17 @@ kbd {
 }
 .topbar-title { display: flex; flex-direction: column; margin-left: 12px; padding-left: 24px; border-left: 1px solid var(--border); }
 .topbar-eyebrow { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-light); }
-.topbar-title h1 { margin: 0; font-family: var(--serif); font-weight: 600; font-size: 24px; line-height: 1.05; }
+.topbar-title h1 { margin: 0; font-family: var(--serif); font-weight: 600; font-size: 24px; line-height: 1.05; white-space: nowrap; }
 .topbar-title h1 em { font-style: normal; color: var(--text-muted); font-weight: 500; }
-.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
-.mode-switch { display: flex; padding: 3px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); }
+.topbar-switches { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.topbar-account { display: flex; align-items: center; gap: 14px; }
+.mode-switch { display: flex; flex-shrink: 0; padding: 3px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); }
 .mode-switch button {
   padding: 6px 12px;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
   color: var(--text-muted);
   transition: all 0.2s var(--ease);
 }
@@ -124,8 +129,9 @@ kbd {
 .icon-btn:hover:not(:disabled), .icon-btn.is-on { color: var(--gold-light); border-color: rgba(212, 175, 55, 0.4); background: rgba(212, 175, 55, 0.08); }
 
 /* ---------- layout ---------- */
-.main { min-height: 0; display: grid; grid-template-columns: 1fr; overflow: hidden; }
-.with-panel .main { grid-template-columns: 1fr 340px; }
+/* minmax(0, …): the dock's widest row mustn't widen the column past the screen */
+.main { position: relative; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); overflow: hidden; }
+.with-panel .main { grid-template-columns: minmax(0, 1fr) 340px; }
 .table-col {
   min-height: 0;
   display: flex;
@@ -134,14 +140,24 @@ kbd {
   gap: 14px;
   padding: 16px clamp(12px, 2vw, 32px) 18px;
   overflow: auto;
+  container-type: size;
 }
 
-/* ---------- stage ---------- */
-.stage { width: 100%; display: flex; justify-content: center; }
+/* ---------- stage ----------
+ * The picture takes the height the dock leaves, as wide as the column allows at 16:9 (and 900px
+ * tall at most). Where that's under 320px (or under the whole column, if that's less) it keeps that
+ * and the column scrolls to the dock. */
+.stage {
+  flex: 1 1 0;
+  width: 100%;
+  min-height: min(320px, 100cqh, 100cqw * 9 / 16);
+  max-height: min(100cqw * 9 / 16, 900px);
+  container-type: size;
+  display: flex; justify-content: center;
+}
 .stage-frame {
   position: relative;
-  width: min(100%, calc((100vh - 64px - 330px) * 16 / 9));
-  min-width: 560px;
+  width: min(100cqw, 100cqh * 16 / 9);
   aspect-ratio: 16 / 9;
   border-radius: 10px;
   overflow: hidden;
@@ -151,8 +167,13 @@ kbd {
 .stage-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .stage-decks { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .stage-overlay { position: absolute; inset: 0; pointer-events: none; container-type: inline-size; }
+/* the live tag and the scene controls share the top of the picture: on a small one they shed what
+   they can (below), and if they still meet, the controls drop under the tag */
+.stage-top {
+  position: absolute; left: 14px; right: 14px; top: 12px;
+  display: flex; flex-wrap: wrap; align-items: flex-start; gap: 6px;
+}
 .stage-live {
-  position: absolute; left: 14px; top: 12px;
   display: flex; align-items: center; gap: 8px;
   padding: 6px 12px; border-radius: 999px;
   background: rgba(10, 10, 10, 0.62); backdrop-filter: blur(10px);
@@ -166,7 +187,7 @@ kbd {
 .stage-live-load { font-weight: 500; letter-spacing: 0.4px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
 .stage-live-load.is-error { color: var(--lose); }
 .stage-scene {
-  position: absolute; right: 14px; top: 12px;
+  margin-left: auto;
   display: flex; align-items: center; gap: 2px;
   padding: 3px; border-radius: 999px;
   background: rgba(10, 10, 10, 0.62); backdrop-filter: blur(10px);
@@ -263,6 +284,7 @@ kbd {
 
 /* ---------- dock ---------- */
 .dock {
+  flex: none;
   width: min(100%, 1180px);
   display: grid;
   grid-template-columns: minmax(260px, 1fr) 2fr;
@@ -282,7 +304,9 @@ kbd {
 .dealer-strip-empty { color: var(--text-faint); font-size: 12px; }
 
 .seat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+/* a container: a narrow panel (three across a phone) packs itself tighter, see the end of the layout */
 .seat-panel {
+  container: seat / inline-size;
   position: relative;
   display: flex; flex-direction: column;
   border-radius: 10px;
@@ -513,13 +537,133 @@ kbd {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
-@media (max-width: 900px) {
-  .topbar-title, .mode-switch { display: none; }
-  .seat-row { grid-template-columns: 1fr; }
-  .dock { grid-template-columns: 1fr; }
-  .stage-frame { min-width: 0; }
-  .with-panel .main { grid-template-columns: 1fr; }
-  .director { display: none; }
+
+/* ---------- smaller screens ---------- */
+/* a touch screen has no keys to hint at */
+@media (hover: none) {
+  kbd { display: none; }
+}
+@media (max-width: 1599px) {
+  /* (still read out) */
+  .topbar-title { position: absolute; width: 1px; height: 1px; margin: 0; padding: 0; border: 0; overflow: hidden; clip-path: inset(50%); }
+}
+@media (max-width: 1339px) {
+  .brand-tag { display: none; }
+  .balance { min-width: 0; }
+  .icon-btn { padding: 0 9px; }
+  .icon-btn-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+@media (max-width: 1079px) {
+  .topbar { flex-wrap: wrap; gap: 8px 16px; padding-top: 8px; padding-bottom: 8px; }
+  .topbar-account { margin-left: auto; }
+  /* the switches take a row of their own, centred, and scroll sideways if even that's too narrow
+     (auto margins rather than centring, which would push the first out of reach) */
+  .topbar-switches { order: 1; width: 100%; margin: 0; overflow-x: auto; scrollbar-width: none; }
+  .topbar-switches > :first-child { margin-left: auto; }
+  .topbar-switches > :last-child { margin-right: auto; }
+  /* the bet bar keeps beside the dealer's strip a while longer */
+  .chip-btn { padding: 0; }
+  .chip-rack { gap: 6px; }
+  .chip-rack .chip { width: 40px; height: 40px; }
+  .btn-deal { min-width: 120px; }
+  .betbar-blocker { white-space: normal; text-align: right; max-width: 130px; }
+  /* the director panel slides over the table rather than squeezing it */
+  .with-panel .main { grid-template-columns: minmax(0, 1fr); }
+  .director {
+    position: absolute; inset: 0 0 0 auto; z-index: 5;
+    width: min(340px, 100%);
+    background: rgba(10, 10, 10, 0.94); backdrop-filter: blur(16px);
+    box-shadow: -24px 0 60px rgba(0, 0, 0, 0.6);
+  }
+}
+@media (max-width: 1000px) {
+  .dock { grid-template-columns: minmax(0, 1fr); }
+}
+/* a short screen: the dock packs tighter, so the picture keeps more of the height */
+@media (max-height: 820px) {
+  .topbar { min-height: 56px; }
+  .table-col { gap: 10px; padding-top: 10px; padding-bottom: 12px; }
+  .dock, .seat-row { gap: 8px; }
+  .seat-panel-head { padding-top: 8px; }
+  .seat-panel-title { flex-direction: row; align-items: baseline; gap: 10px; }
+  .seat-panel-turn { margin-top: 0; }
+  .seat-panel-body { min-height: 56px; padding-block: 2px; }
+  .seat-panel-foot { min-height: 50px; padding-block: 2px 8px; }
+  .bet-spot, .decision .btn { height: 40px; }
+  /* (the dealer's cards just fit: the row is as tall dealt as at the bets, and so is the picture) */
+  .dealer-strip, .betbar, .round-status { min-height: 56px; padding-block: 2px; }
+  .chip-rack .chip { width: 40px; height: 40px; }
+  .btn-deal { height: 42px; }
+}
+@media (max-width: 600px) {
+  .topbar { gap: 8px 12px; }
+  .topbar-account { gap: 8px; }
+  /* each switch a line of its own if need be */
+  .topbar-switches { flex-wrap: wrap; justify-content: safe center; row-gap: 6px; }
+  .topbar-switches > :first-child, .topbar-switches > :last-child { margin: 0; }
+  .mode-switch button { padding: 5px 10px; }
+  .table-col { padding-inline: 10px; }
+  /* the picture runs edge to edge */
+  .stage { margin-inline: -10px; width: calc(100% + 20px); max-height: calc((100cqw + 20px) * 9 / 16); }
+  .stage-frame { border-radius: 0; }
+  .seat-row { gap: 6px; }
+  .betbar { flex-wrap: wrap; gap: 8px; padding: 8px 10px; }
+  .chip-rack { width: 100%; justify-content: space-between; gap: 0; }
+  .chip-btn { padding: 0; }
+  .betbar-actions { width: 100%; margin-left: 0; }
+  .betbar-total { margin-right: auto; }
+  .round-status { flex-wrap: wrap; justify-content: center; gap: 8px; padding: 8px 10px; }
+  .round-steps { width: 100%; justify-content: space-between; gap: 4px; }
+  .round-steps li { padding: 5px 8px; font-size: 10px; letter-spacing: 0.6px; }
+  .round-status-note { margin: 0; text-align: center; font-size: 11px; }
+}
+@media (max-width: 400px) {
+  .brand-studios { display: none; }
+  .mode-switch button { padding: 5px 7px; font-size: 11px; }
+}
+/* a smaller picture: the live tag drops the table's name, then the scene controls their labels */
+@container (max-width: 820px) {
+  .stage-live-table, .stage-live-sep:has(+ .stage-live-table) { display: none; }
+}
+@container (max-width: 560px) {
+  .stage-top { left: 8px; right: 8px; top: 8px; gap: 4px; }
+  .stage-live { padding: 4px 9px; gap: 6px; font-size: 10px; }
+  .stage-live-round, .stage-live-sep:has(+ .stage-live-round) { display: none; }
+  .stage-scene { font-size: 10px; }
+  .stage-scene-label { display: none; }
+  .stage-scene-field { padding-left: 0; }
+  .stage-scene-select { height: 22px; padding: 0 18px 0 8px; background-position: calc(100% - 10px) 9px, calc(100% - 6px) 9px; }
+  .stage-scene-frame { height: 22px; padding: 0 8px; }
+  .stage-toast { font-size: 15px; }
+  .framing-dealer .stage-toast { top: 38px; }
+}
+/* a phone's picture: while the footage loads, its progress puts the controls on a second line */
+@container (max-width: 460px) {
+  .framing-dealer .stage-top:has(.stage-live-load) ~ .stage-toast { top: 64px; }
+}
+/* a narrow seat panel (three across a phone): the toggle keeps its knob, the cards overlap more */
+@container seat (max-width: 240px) {
+  .seat-panel-head { padding: 8px 8px 0; align-items: flex-start; }
+  .seat-panel-title { flex-direction: column; gap: 0; }
+  .seat-panel-no { font-size: 18px; }
+  .seat-panel-turn { margin-top: 3px; font-size: 9px; letter-spacing: 0.6px; }
+  .seat-toggle { gap: 0; height: 24px; padding: 0 2px; }
+  .seat-toggle-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .seat-panel-body { padding: 2px 8px; gap: 4px; flex-wrap: wrap; }
+  .seat-cards { gap: 0; }
+  .seat-cards .pc + .pc { margin-left: -18px; }
+  .seat-cards:has(.pc:nth-child(4)) .pc + .pc { margin-left: -22px; }
+  .seat-cards:has(.pc:nth-child(6)) .pc + .pc { margin-left: -24px; }
+  .seat-total { font-size: 12px; padding: 1px 6px; }
+  .seat-panel-foot { padding: 2px 8px 8px; }
+  .bet-spot { gap: 6px; padding: 0 6px; }
+  .bet-hint, .seat-panel kbd { display: none; }
+  .decision { gap: 4px; }
+  .decision .btn { padding: 0 4px; font-size: 13px; }
+  .seat-take { gap: 6px; font-size: 13px; }
+}
+@container seat (max-width: 112px) {
+  .seat-take-plus { display: none; }
 }
 
 /* ---------- ending: results panel (ending/panel.ts, ending/PanelOverlay.tsx) ----------
@@ -554,6 +698,7 @@ kbd {
   /* left/top: the table's card area (PanelOverlay), centred on it; at least as wide as it, and as
      its content */
   width: max(var(--cover-w), 46cqw);
+  translate: -50% 0;
   font-size: clamp(7px, 1.12cqw, 18px);
   padding: 0.95em 1.3em 0.85em;
   border-radius: 1em;
@@ -576,7 +721,6 @@ kbd {
   opacity: 0.75;
 }
 .ending-panel-root.is-leaving .ending-panel { animation: ending-panel-out var(--exit, 0.44s) cubic-bezier(0.5, 0, 0.75, 0) both; }
-  translate: -50% 0;
 .ending-panel > :not(.ending-panel-seats), .ending-panel-seat { animation: ending-panel-item 0.5s var(--ease) calc(0.14s + var(--i, 0) * 0.07s) both; }
 
 .ending-panel-label {
