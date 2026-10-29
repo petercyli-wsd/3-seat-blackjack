@@ -9,10 +9,13 @@ import type { TableEraser } from "./erasePass";
 
 /**
  * How a round ends. "discard" is the filmed one: she sweeps the cards up (the take's own discard
- * clip). The others never play discard footage: she stays at rest, the table is cleared by the
- * game, and the footage goes from her rest after the reveal straight back to the betting loop.
+ * clip). "board" is that same discard played behind the results board (PanelOverlay.tsx), which
+ * hides the laid-in cards fading as her hand comes for them. The others never play discard
+ * footage: she stays at rest, the table is cleared by the game, and the footage goes from her rest
+ * after the reveal straight back to the betting loop.
  */
-export type Ending = "discard" | "fade" | "panel" | "collect";
+export type Ending = "discard" | "fade" | "panel" | "collect" | "board";
+/** The endings with a style (ending/): a game-run clear, or the board's (which draws nothing). */
 export type Clear = Exclude<Ending, "discard">;
 
 export const ENDINGS: Record<Ending, { label: string; hint: string }> = {
@@ -20,11 +23,12 @@ export const ENDINGS: Record<Ending, { label: string; hint: string }> = {
   fade: { label: "Fade", hint: "No discard: the cards fade from the table" },
   panel: { label: "Results", hint: "No discard: a results panel covers the table while it clears" },
   collect: { label: "Collect", hint: "No discard: the cards gather and slide into the discard holder" },
+  board: { label: "Results & discard", hint: "She clears the table for real, behind the results board" },
 };
 
 export const ENDING_IDS = Object.keys(ENDINGS) as Ending[];
 
-/** What the render hook (and the overlays) see while a no-discard ending runs. */
+/** What the render hook (and the overlays) see while a no-discard ending runs ("board" never sets it). */
 export interface Clearing {
   style: Clear;
   /** performance.now() when the clear started (after the results have been read). */

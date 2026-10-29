@@ -524,8 +524,9 @@ kbd {
 
 /* ---------- ending: results panel (ending/panel.ts, ending/PanelOverlay.tsx) ----------
  * A glass panel rises over the table's cards, the table is cleared under it, and it leaves once
- * betting reopens. Its root (.ending-panel-root, there for as long as the ending is "panel")
- * marks the stage: .is-up while it covers the table, .is-leaving / .is-after as it hands over. */
+ * betting reopens; as the results board (.is-board), the same over the filmed discard. Its root
+ * (.ending-panel-root, there for as long as the ending is "panel" or "board") marks the stage:
+ * .is-up while it covers the table, .is-leaving / .is-after as it hands over. */
 .ending-panel-root { display: contents; }
 /* the seats' result badges would repeat the panel: the toast has the result until it rises */
 .stage-overlay:has(> .ending-panel-root) .seat-result { display: none; }
@@ -550,7 +551,8 @@ kbd {
 
 .ending-panel {
   position: absolute;
-  /* left/top: the table's card area (PanelOverlay); at least as wide as it, and as its content */
+  /* left/top: the table's card area (PanelOverlay), centred on it; at least as wide as it, and as
+     its content */
   width: max(var(--cover-w), 46cqw);
   font-size: clamp(7px, 1.12cqw, 18px);
   padding: 0.95em 1.3em 0.85em;
@@ -565,7 +567,6 @@ kbd {
   box-shadow: 0 1.8em 4.5em rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   display: flex; flex-direction: column; gap: 0.7em;
   color: var(--text);
-  transform: translateX(-50%);
   animation: ending-panel-in var(--rise, 0.6s) var(--ease) both;
 }
 /* a gold hairline along the top edge, fading out at the ends */
@@ -575,6 +576,7 @@ kbd {
   opacity: 0.75;
 }
 .ending-panel-root.is-leaving .ending-panel { animation: ending-panel-out var(--exit, 0.44s) cubic-bezier(0.5, 0, 0.75, 0) both; }
+  translate: -50% 0;
 .ending-panel > :not(.ending-panel-seats), .ending-panel-seat { animation: ending-panel-item 0.5s var(--ease) calc(0.14s + var(--i, 0) * 0.07s) both; }
 
 .ending-panel-label {
@@ -653,13 +655,25 @@ kbd {
    the same way: never half transparent, where the table's cards and her hands would show through
    it as a ghost. The clip ends well outside it, so its shadow isn't cut once it is up. */
 @keyframes ending-panel-in {
-  from { clip-path: inset(100% -6em -6em -6em round 1em); transform: translate(-50%, 2.2em); }
-  to { clip-path: inset(-6em -6em -6em -6em round 1em); transform: translate(-50%, 0); }
+  from { clip-path: inset(100% -6em -6em -6em round 1em); transform: translateY(2.2em); }
+  to { clip-path: inset(-6em -6em -6em -6em round 1em); transform: translateY(0); }
 }
 @keyframes ending-panel-out {
-  from { clip-path: inset(-6em -6em -6em -6em round 1em); transform: translate(-50%, 0); }
-  to { clip-path: inset(100% -6em -6em -6em round 1em); transform: translate(-50%, 1.4em); }
+  from { clip-path: inset(-6em -6em -6em -6em round 1em); transform: translateY(0); }
+  to { clip-path: inset(100% -6em -6em -6em round 1em); transform: translateY(1.4em); }
 }
+/* The results board, over the filmed discard: as narrow as the cards that fade under it allow, so
+   her arms reaching over the table and the discard holder to its left stay in view. It grows from
+   its left edge (clear of the holder), and is set a little smaller to keep three seats in. The
+   table isn't darkened as far back as the holder, where she drops the cards. */
+.ending-panel-root.is-board .ending-panel {
+  translate: none;
+  width: max(var(--cover-w), 31.25cqw);
+  font-size: clamp(7px, 1cqw, 16px);
+  padding: 0.85em 1em 0.75em;
+}
+.ending-panel-root.is-board .ending-panel-scrim { background: linear-gradient(to bottom, transparent 68%, rgba(0, 0, 0, 0.3) 86%, rgba(0, 0, 0, 0.42)); }
+
 @keyframes ending-panel-item { from { opacity: 0; transform: translateY(0.6em); } }
 @keyframes ending-panel-fade { from { opacity: 0; } }
 @keyframes ending-panel-fade-out { to { opacity: 0; } }

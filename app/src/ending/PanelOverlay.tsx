@@ -6,13 +6,26 @@ import { DEALER_CROP, type Rect } from "../render/stageArt";
 import { OUTCOME_LABEL, money, seatNo, signedMoney } from "../ui/format";
 import { PANEL } from "./panel";
 
+type Variant = "panel" | "board";
+
 /**
- * Where the panel goes, in source pixels of the 1440x810 take: over every card on the table
- * (the dealer's two and her graphic draws to their right, the seats' hands in front), its top at
- * the cloth's back edge so that the dealer is seen from the waist up the whole time. It is at
- * least this big in either framing, and sized to its content past that (see the CSS).
+ * Where it goes, in source pixels of the 1440x810 take. It is at least this big in either framing,
+ * and sized to its content past that (see the CSS), centred on it or growing from its left edge.
+ *
+ * panel: over every card on the table (the dealer's two and her graphic draws in front of them,
+ * the seats' hands), its top at the cloth's back edge so that the dealer is seen from the waist up.
+ *
+ * board: over the filmed discard, as tight as covers everything that fades in it (from the
+ * manifest's discard clips): the dealer's two cards and her draws' row (y 373-411), the seats'
+ * hands with their hit fans (x 641-914, y 427-537), and the faces riding on the cards she gathers
+ * between them (her pile carries the up card's face out to seat 1, x 613). Its left edge stays
+ * well right of the discard holder (x 483-526, y 333-404), so her hand is seen coming out from
+ * behind it to drop the cards in, and her arms above it as she reaches over the table.
  */
-const COVER: Rect = [598, 346, 368, 208];
+const PLACE: Record<Variant, { cover: Rect; from: "centre" | "left" }> = {
+  panel: { cover: [598, 346, 368, 208], from: "centre" },
+  board: { cover: [590, 364, 340, 186], from: "left" },
+};
 const FULL: Rect = [0, 0, 1440, 810];
 
 type Stage = "up" | "leaving" | "after";
@@ -25,10 +38,11 @@ interface Shown {
 /**
  * The "Results" ending: the round's results on a panel that rises over the table's cards while
  * the table is cleared under it (panel.ts) and the footage cuts back to the betting loop; it
- * leaves once betting reopens. Its root also tells the stage (index.css, "ending: results panel")
- * to keep the seats' own result badges and the toast out of the way while it says it all.
+ * leaves once betting reopens. "Results & discard" (variant "board"): the same, over the filmed
+ * discard. Its root also tells the stage (index.css, "ending: results panel") to keep the seats'
+ * own result badges and the toast out of the way while it says it all.
  */
-export function PanelOverlay({ store }: { store: Store }) {
+export function PanelOverlay({ store, variant }: { store: Store; variant: Variant }) {
   const clearing = useGame(store, (s) => s.clearing);
   const framing = useGame(store, (s) => s.framing);
   const [shown, setShown] = useState<Shown | null>(null);
@@ -39,7 +53,7 @@ export function PanelOverlay({ store }: { store: Store }) {
     setSeen(clearing);
     const s = store.get();
     const record = s.history[0];
-    if (clearing?.style === "panel" && record?.no === s.round) setShown({ record, balance: s.balance, stage: "up" });
+    if (clearing?.style === variant && record?.no === s.round) setShown({ record, balance: s.balance, stage: "up" });
     else if (!clearing && shown?.stage === "up") setShown({ ...shown, stage: "leaving" });
   }
   const stage = shown?.stage;
@@ -53,9 +67,9 @@ export function PanelOverlay({ store }: { store: Store }) {
   }, [stage]);
 
   const [cx, cy, cw, ch] = framing === "dealer" ? DEALER_CROP : FULL;
-  const [x, y, w, h] = COVER;
+  const { cover: [x, y, w, h], from } = PLACE[variant];
   const place = {
-    left: `${((x + w / 2 - cx) / cw) * 100}%`,
+    left: `${((x + (from === "centre" ? w / 2 : 0) - cx) / cw) * 100}%`,
     top: `${((y - cy) / ch) * 100}%`,
     "--cover-w": `${(w / cw) * 100}%`,
     minHeight: `${(h / ch) * 100}%`,
@@ -63,7 +77,7 @@ export function PanelOverlay({ store }: { store: Store }) {
   const clock = { "--rise": `${PANEL.riseMs}ms`, "--exit": `${PANEL.exitMs}ms` } as CSSProperties;
 
   return (
-    <div className={`ending-panel-root ${stage ? `is-${stage}` : ""}`} style={clock}>
+    <div className={`ending-panel-root is-${variant} ${stage ? `is-${stage}` : ""}`} style={clock}>
       {shown && shown.stage !== "after" && (
         <>
           <div className="ending-panel-scrim" />

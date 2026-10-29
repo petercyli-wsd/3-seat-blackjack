@@ -1,11 +1,13 @@
 // The results panel held still over the table, for a look at its layout without playing rounds:
 // it fakes a settled round in the store and puts the panel up (the composite is left as it is).
 // Usage: node scripts/ending-panel-still.mjs [views]   e.g. "1600x1000,1280x800"
-// Saves shots/still-<case>-<framing>-<view>.png (the stage) for each case below in both framings.
+// ENDING=board for the results board (the panel over the filmed discard).
+// Saves shots/still-<ending>-<case>-<framing>-<view>.png (the stage) for each case below in both framings.
 import { chromium } from "playwright";
 import { mkdirSync } from "node:fs";
 
 const views = (process.argv[2] ?? "1600x1000").split(",");
+const ending = process.env.ENDING ?? "panel";
 const base = process.env.BASE_URL ?? "http://localhost:5191/";
 const dir = new URL("../shots/", import.meta.url);
 mkdirSync(dir, { recursive: true });
@@ -30,19 +32,19 @@ try {
   for (const view of views) {
     const [w, h] = view.split("x").map(Number);
     const page = await browser.newPage({ viewport: { width: w, height: h } });
-    await page.goto(`${base}?ending=panel`);
+    await page.goto(`${base}?ending=${ending}`);
     await page.waitForFunction(() => window.__table?.store.get().phase === "betting", null, { timeout: 150_000 });
     for (const framing of ["dealer", "studio"]) {
       for (const [name, c] of Object.entries(CASES)) {
-        await page.evaluate(({ c, framing }) => {
+        await page.evaluate(({ c, framing, ending }) => {
           const { store } = window.__table;
           const net = c.seats.reduce((a, [, , bet, res]) => a + res.payout - bet, 0);
           const record = { no: 7, mask: "111", dealer: c.dealer, net, seats: c.seats.map(([seat, cards, bet, result]) => ({ seat, cards, bet, result })) };
           store.set({ clearing: null, framing });
-          store.set({ round: 7, balance: 1000 + net, history: [record], phase: "clearing", clearing: { style: "panel", startedAt: performance.now(), duration: 3000 } });
-        }, { c, framing });
+          store.set({ round: 7, balance: 1000 + net, history: [record], phase: "clearing", clearing: { style: ending, startedAt: performance.now(), duration: 3000 } });
+        }, { c, framing, ending });
         await page.waitForTimeout(1600);
-        await (await page.$(".stage-frame")).screenshot({ path: file(`still-${name}-${framing}-${view}.png`) });
+        await (await page.$(".stage-frame")).screenshot({ path: file(`still-${ending}-${name}-${framing}-${view}.png`) });
       }
     }
     await page.evaluate(() => window.__table.store.set({ clearing: null, phase: "betting" }));

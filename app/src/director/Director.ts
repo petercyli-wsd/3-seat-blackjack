@@ -462,14 +462,27 @@ export class Director {
     }));
     this.log(`settled: net ${record.net >= 0 ? "+" : ""}${record.net}`);
     const ending = this.store.get().ending;
-    if (ending !== "discard") return this.clearWithoutDiscard(ending, epoch);
-    // The discard can only start where the hold loop comes round to the take's own next frame
-    // (up to a loop's length away), so ask for it after a short read of the results, not after a
-    // fixed pause plus that wait. The results stay up while she clears.
-    await sleep(1500);
-    this.guard(epoch);
+    if (ending !== "discard" && ending !== "board") return this.clearWithoutDiscard(ending, epoch);
     const discard = clipName.discard(this.mask);
-    await Promise.all([this.cutTo(discard), sleep(1300)]);
+    if (ending === "board") {
+      // The results board rises over the table after a short read, and the discard is asked for
+      // only once it covers the cards: the laid-in ones (hits, the dealer's draws) fade as her hand
+      // comes for them, under it. It stays up while she clears, and leaves as betting reopens.
+      const { readMs, duration } = timing(ending);
+      await sleep(readMs);
+      this.guard(epoch);
+      this.store.set({ clearing: { style: ending, startedAt: performance.now(), duration } });
+      await sleep(duration);
+      this.guard(epoch);
+      await this.cutTo(discard);
+    } else {
+      // The discard can only start where the hold loop comes round to the take's own next frame
+      // (up to a loop's length away), so ask for it after a short read of the results, not after a
+      // fixed pause plus that wait. The results stay up while she clears.
+      await sleep(1500);
+      this.guard(epoch);
+      await Promise.all([this.cutTo(discard), sleep(1300)]);
+    }
     this.guard(epoch);
     // clear the table, back to betting over the idle that follows this discard in the take
     this.store.set({ phase: "clearing", message: "" });
@@ -480,6 +493,7 @@ export class Director {
     await this.player.whenFrame(discard, Math.min(dc.frames - 1, Math.max(0, ...dc.cards.map((c) => c.out)) + CLEARED_FRAMES));
     this.guard(epoch);
     this.emptyTable();
+    if (ending === "board") this.store.set({ clearing: null });
     this.reopenBetting();
   }
 

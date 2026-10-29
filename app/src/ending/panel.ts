@@ -38,3 +38,14 @@ export const panel: RenderStyle = {
     return eraseTable(res, k >= 1 ? ERASE_ALL : { seat1: k, seat2: k, seat3: k, dealer: k }, ctx);
   },
 };
+
+/**
+ * Results & discard: the same panel as a results board over the table, with the take's real
+ * discard played under it (Director.clearByDiscard). The board needs only to have risen before
+ * the discard starts (`duration`: it covers the cards from then on); she sweeps the real cards up
+ * herself, so nothing is erased, and the game never hands this style a clear to draw.
+ */
+export const board: RenderStyle = {
+  timing: { readMs: 700, duration: PANEL.riseMs + 180 },
+  apply: (res) => res,
+};

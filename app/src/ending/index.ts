@@ -1,10 +1,10 @@
 import type { SceneResult } from "../render/scene";
 import { collect } from "./collect";
 import { fade } from "./fade";
-import { panel } from "./panel";
+import { board, panel } from "./panel";
 import type { Clear, Clearing, EndingContext, RenderStyle, Timing } from "./types";
 
-const STYLES: Record<Clear, RenderStyle> = { fade, panel, collect };
+const STYLES: Record<Clear, RenderStyle> = { fade, panel, collect, board };
 
 export const timing = (style: Clear): Timing => STYLES[style].timing;
 
